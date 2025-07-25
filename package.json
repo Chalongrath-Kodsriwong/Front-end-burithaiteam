@@ -9,10 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "bite": "^0.1.0-4",
     "flow": "^0.2.3",
     "next": "15.4.3",
-    "react": "19.1.0",
     "react-dom": "19.1.0"
   },
   "devDependencies": {
@@ -28,5 +28,18 @@
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.3",
     "typescript": "^5"
-  }
+  },
+  "description": "This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).",
+  "main": "postcss.config.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Chalongrath-Kodsriwong/Front-end-burithaiteam.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Chalongrath-Kodsriwong/Front-end-burithaiteam/issues"
+  },
+  "homepage": "https://github.com/Chalongrath-Kodsriwong/Front-end-burithaiteam#readme"
 }
