@@ -2,28 +2,26 @@
 import "flowbite";
 import { useEffect, useState } from "react";
 
-// For Section Brand Support
-// 🔸 Mock data แบรนด์ 6 แบรนด์
 const brandList = [
-  { name: "Novastar", img: "/image/logo_black.jpg" },
-  { name: "Linsn", img: "/image/logo_white.jpeg" },
-  { name: "Colorlight", img: "/image/logo_black.jpg" },
-  { name: "Kystar", img: "/image/logo_white.jpeg" },
+  { name: "งานเฉลิมพระเกียรตื 70 พรรษา", img: "/image/logo_black.jpg" },
+  { name: "งานติดจอ LED บนรถโปรโมท", img: "/image/logo_white.jpeg" },
+  { name: "งานยอยศยิ่งฟ้าอยุธยา มรดกโลก", img: "/image/logo_black.jpg" },
+  { name: "งานติดตั้งร้าน Hastach รังสิต", img: "/image/logo_white.jpeg" },
   // { name: "Panasonic", img: "/image/logo_black.jpg" },
   // { name: "Sharp", img: "/image/logo_white.jpeg" },
 ];
 
-export default function BrandSupport() {
+export default function Achievement() {
   return (
-    <div className="container mx-auto px-4 py-6 bg-gray-100 rounded-lg shadow-md">
+    <div className="container mx-auto px-4 py-6 bg-gray-100 rounded-lg shadow-md mb-6">
       <h2 className="text-2xl font-bold flex items-center justify-center gap-2 ">
         <div className="">
-            Brandsupport
+            Achievement
         </div>
       </h2>
       <h2 className="text-xl font-bold flex items-center justify-center gap-2">
         <div className="">
-          (แบรนด์ที่เราสนับสนุน)
+          (ผลงานของเรา)
         </div>
       </h2>
 

@@ -10,54 +10,55 @@ export default function Promote() {
   const images = [
     { src: "/image/logo_black.jpg", alt: "Logo Black" },
     { src: "/image/logo_white.jpeg", alt: "Logo White" },
+    { src: "/image/logo_black.jpg", alt: "Logo Black" },
+    { src: "/image/logo_white.jpeg", alt: "Logo White" },
   ];
 
   return (
     <div className="w-full flex flex-col items-center">
       {/* Carousel & Arrows */}
       <div className="relative w-full max-w-[90%] lg:max-w-full mx-auto">
-  {/* ปุ่ม Prev */}
-  <button
-    onClick={() => carouselRef.current?.decrement()}
-    className="absolute left-0 lg:-left-10 top-1/2 transform -translate-y-1/2 bg-black/40 hover:bg-black/70 text-white p-2 lg:p-3 rounded-full z-10"
-  >
-    ❮
-  </button>
+        {/* ปุ่ม Prev */}
+        <button
+          onClick={() => carouselRef.current?.decrement()}
+          className="absolute left-2 2xl:-left-10 top-1/2 transform -translate-y-1/2 bg-black/40 hover:bg-black/70 text-white p-2 2xl:p-3 rounded-full z-10 w-10 h-10 flex items-center justify-center"
+        >
+          ❮
+        </button>
 
-  {/* ปุ่ม Next */}
-  <button
-    onClick={() => carouselRef.current?.increment()}
-    className="absolute right-0 lg:-right-10 top-1/2 transform -translate-y-1/2 bg-black/40 hover:bg-black/70 text-white p-2 lg:p-3 rounded-full z-10"
-  >
-    ❯
-  </button>
+        {/* ปุ่ม Next */}
+        <button
+          onClick={() => carouselRef.current?.increment()}
+          className="absolute right-2 2xl:-right-10 top-1/2 transform -translate-y-1/2 bg-black/40 hover:bg-black/70 text-white p-2 2xl:p-3 rounded-full z-10 w-10 h-10 flex items-center justify-center"
+        >
+          ❯
+        </button>
 
-  {/* Carousel */}
-  <Carousel
-    ref={carouselRef}
-    selectedItem={selectedIndex}
-    onChange={(index) => setSelectedIndex(index)}
-    showThumbs={false}
-    showStatus={false}
-    showIndicators={false}
-    showArrows={false}
-    autoPlay
-    infiniteLoop
-    interval={4000}
-    transitionTime={700}
-  >
-    {images.map((img, index) => (
-      <div key={index}>
-        <img
-          src={img.src}
-          alt={img.alt}
-          className="object-cover w-full max-h-[60vh] lg:max-h-[55vh] rounded-lg"
-        />
+        {/* Carousel */}
+        <Carousel
+          ref={carouselRef}
+          selectedItem={selectedIndex}
+          onChange={(index) => setSelectedIndex(index)}
+          showThumbs={false}
+          showStatus={false}
+          showIndicators={false}
+          showArrows={false}
+          autoPlay
+          infiniteLoop
+          interval={4000}
+          transitionTime={700}
+        >
+          {images.map((img, index) => (
+            <div key={index}>
+              <img
+                src={img.src}
+                alt={img.alt}
+                className="object-cover w-full max-h-[60vh] lg:max-h-[55vh] rounded-lg"
+              />
+            </div>
+          ))}
+        </Carousel>
       </div>
-    ))}
-  </Carousel>
-</div>
-
 
       {/* External Indicators */}
       <div className="mt-4 flex gap-2">

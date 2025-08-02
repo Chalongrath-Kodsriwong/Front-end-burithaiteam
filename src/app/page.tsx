@@ -7,7 +7,9 @@ import Promote from "./components/section_page/Promote";
 import Newproducts from "./components/section_page/Newproduct";
 import IntroWeb from "./components/section_page/Introweb";
 import BrandSupport from "./components/section_page/Brandsupport";
-
+import Achievement from "./components/section_page/Achievement";
+import Mostsell from "./components/section_page/Mostsell";
+import Normalproducts from "./components/section_page/Normalproducts";
 
 export default function Home() {
   const [isClient, setIsClient] = useState(false);
@@ -38,13 +40,17 @@ export default function Home() {
               <BrandSupport />
             </section>
 
-            <section className="Archivement">
-              
+            <section className="Achievement">
+              <Achievement />
             </section>
 
             <div>
-              <section className="MostSeller"></section>
-              <section className="Normalproducts"></section>
+              <section className="MostSeller">
+                <Mostsell />
+              </section>
+              <section className="Normalproducts">
+                <Normalproducts />
+              </section>
             </div>
           </div>
         )}
