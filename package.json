@@ -13,7 +13,8 @@
     "bite": "^0.1.0-4",
     "flow": "^0.2.3",
     "next": "15.4.3",
-    "react-dom": "19.1.0"
+    "react-dom": "19.1.0",
+    "react-responsive-carousel": "^3.2.23"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
