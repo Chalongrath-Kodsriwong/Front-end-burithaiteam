@@ -21,7 +21,7 @@ export default function Normalproducts() {
   return (
     <div className="container mx-auto px-4 py-6 bg-gray-100 rounded-lg shadow-md">
       <h2 className="text-2xl font-bold flex items-center justify-center gap-2 ">
-        <div className="">Normal Products</div>
+        <div className="">Products</div>
       </h2>
       <div>
         <ul className="flex flex-wrap text-sm font-medium text-center justify-center text-gray-500 dark:text-gray-400 my-4">
