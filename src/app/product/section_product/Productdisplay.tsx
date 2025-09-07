@@ -24,7 +24,7 @@ export default function Productdisplay() {
   return (
     <div className="container mx-auto px-4 py-6 bg-gray-100 rounded-lg shadow-md">
       <h2 className="text-2xl font-bold flex items-center justify-center gap-2 ">
-        <div className="">Products</div>
+        {/* <div className="">Products</div> */}
       </h2>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 mx-12 mt-4">
