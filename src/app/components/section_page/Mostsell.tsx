@@ -1,44 +1,64 @@
 "use client";
 import "flowbite";
 import { useEffect, useState } from "react";
-
-const products = new Array(20).fill(0).map((_, i) => ({
-  id: i + 1,
-  name: `สินค้า ${i + 1}`,
-  price: (i + 1) * 100,
-  brand: "Nova",
-  img: i % 2 === 0 ? "/image/logo_white.jpeg" : "/image/logo_black.jpg",
-}));
+import { BookmarkIcon } from "@heroicons/react/24/solid";
 
 // 🔸 กำหนดจำนวนสินค้าต่อหน้า
 const ITEMS_PER_PAGE = 4;
 
-export default function Mostsell() {
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  branch: string;
+  avatar: string;
+}
+
+export default function Newproducts() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [page, setPage] = useState(0);
   const [isClient, setIsClient] = useState(false);
 
-  // 🔸 page = index ของหน้า (0-based), เช่น หน้าแรก = 0
-  const [page, setPage] = useState(0);
-  const totalPages = Math.ceil(products.length / ITEMS_PER_PAGE); // คำนวณจำนวนหน้าทั้งหมด
+  // 🔹 ดึงข้อมูลสินค้าแบบสุ่ม
+  useEffect(() => {
+    setIsClient(true);
+    async function fetchProducts() {
+      try {
+        const res = await fetch("http://localhost:3000/products");
+        const data = await res.json();
 
-  // ✅ เพิ่ม: ฟังก์ชันกด Next โดยวนกลับหน้าแรกถ้าถึงหน้าสุดท้าย
+        // สุ่มเรียงลำดับ (shuffle)
+        const shuffled = data.sort(() => 0.5 - Math.random());
+
+        // เลือก N รายการ (สมมุติ 8)
+        const selected = shuffled.slice(0, 20);
+        setProducts(selected);
+      } catch (err) {
+        console.error("Error fetching products:", err);
+      }
+    }
+
+    fetchProducts();
+  }, []);
+
+  const totalPages = Math.ceil(products.length / ITEMS_PER_PAGE);
+
   const handleNext = () => {
     setPage((prev) => (prev + 1) % totalPages);
   };
 
-  // ✅ เพิ่ม: ฟังก์ชันกด Previous โดยวนกลับหน้าสุดท้ายถ้าอยู่หน้าแรก
   const handlePrev = () => {
     setPage((prev) => (prev - 1 + totalPages) % totalPages);
   };
 
-  // 🔸 slice ข้อมูลสินค้าเฉพาะหน้าปัจจุบัน
   const paginatedItems = products.slice(
     page * ITEMS_PER_PAGE,
     (page + 1) * ITEMS_PER_PAGE
   );
 
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+  if (!isClient || products.length === 0) {
+    return <div className="p-4">กำลังโหลดสินค้า...</div>;
+  }
 
   return (
     <div className="container mx-auto px-4 py-6 bg-gray-100 rounded-lg shadow-md my-6">
@@ -60,7 +80,7 @@ export default function Mostsell() {
           {paginatedItems.map((product) => (
             <div key={product.id} className="p-4 border rounded bg-white">
               <img
-                src={product.img}
+                src={product.avatar}
                 alt={product.name}
                 className="w-full h-[250px] object-cover"
               />
@@ -68,7 +88,7 @@ export default function Mostsell() {
                 ฿ {product.price.toLocaleString()}
               </h3>
               <p>{product.name}</p>
-              <p className="text-sm text-gray-600">Brand: {product.brand}</p>
+              <p className="text-sm text-gray-600">Branch: {product.branch}</p>
             </div>
           ))}
         </div>
