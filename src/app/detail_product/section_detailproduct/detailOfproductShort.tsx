@@ -1,6 +1,7 @@
 "use client";
 import "flowbite";
 import { useState } from "react";
+import { useCart } from "@/app/context/CartContext"; // ✅ import
 
 interface Props {
   product: {
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export default function DetailOfProduct({ product }: Props) {
+  const { addToCart } = useCart(); // ✅ ใช้ context
   const [quantity, setQuantity] = useState(1);
 
   return (
@@ -37,10 +39,17 @@ export default function DetailOfProduct({ product }: Props) {
           +
         </button>
       </div>
-
-      <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-        Add to Cart
-      </button>
+      <div className="flex space-x-4">
+        <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+          Buy Now
+        </button>
+        <button
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          onClick={() => addToCart(product.id, quantity)} // ✅ เพิ่มตรงนี้
+        >
+          Add to Cart
+        </button>
+      </div>
     </div>
   );
 }
