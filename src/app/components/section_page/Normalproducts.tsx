@@ -1,6 +1,7 @@
 "use client";
 import "flowbite";
 import { useEffect, useState } from "react";
+import Link from "next/link"; // ✅ เพิ่ม
 
 interface Product {
   id: string;
@@ -25,28 +26,27 @@ export default function Productdisplay() {
 
     // ดึงข้อมูลจาก API
     const fetchProducts = async () => {
-  try {
-    const res = await fetch(
-      "https://68be95bc9c70953d96eccd35.mockapi.io/api/product/E-commerse"
-    );
-    const data = await res.json();
+      try {
+        const res = await fetch(
+          "https://68be95bc9c70953d96eccd35.mockapi.io/api/product/E-commerse"
+        );
+        const data = await res.json();
 
-    // 👉 วนซ้ำข้อมูลให้ครบ 200 ชิ้น
-    const repeatCount = Math.ceil(TOTAL_PRODUCTS / data.length);
-    const multiplied = Array.from({ length: repeatCount }, (_, i) =>
-      data.map((p: Product, idx: number) => ({
-        ...p,
-        id: `${p.id}-${i}-${idx}`, // 🔁 ป้องกัน id ซ้ำ
-      }))
-    ).flat();
+        // 👉 วนซ้ำข้อมูลให้ครบ 200 ชิ้น
+        const repeatCount = Math.ceil(TOTAL_PRODUCTS / data.length);
+        const multiplied = Array.from({ length: repeatCount }, (_, i) =>
+          data.map((p: Product, idx: number) => ({
+            ...p,
+            id: `${p.id}-${i}-${idx}`, // 🔁 ป้องกัน id ซ้ำ
+          }))
+        ).flat();
 
-    const trimmed = multiplied.slice(0, TOTAL_PRODUCTS); // ✂️ ตัดให้เหลือพอดี
-    setProducts(trimmed);
-  } catch (error) {
-    console.error("Error fetching products:", error);
-  }
-};
-
+        const trimmed = multiplied.slice(0, TOTAL_PRODUCTS); // ✂️ ตัดให้เหลือพอดี
+        setProducts(trimmed);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
 
     fetchProducts();
   }, []);
@@ -74,22 +74,21 @@ export default function Productdisplay() {
       {/* Grid สินค้า */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 mx-12 mt-4">
         {visibleProducts.map((product) => (
-          <div
-            key={product.id}
-            className="border p-4 rounded-lg bg-white shadow-sm"
-          >
-            <img
-              src={product.avatar}
-              alt={product.name}
-              className="w-full h-32 object-cover mb-2 rounded"
-              onError={(e) =>
-                (e.currentTarget.src = "/image/logo_white.jpeg")
-              } // fallback ถ้ารูปเสีย
-            />
-            <h3 className="text-lg font-semibold">{product.name}</h3>
-            <p className="text-gray-600">ราคา: {product.price} บาท</p>
-            <p className="text-sm text-gray-500">Branch: {product.branch}</p>
-          </div>
+          <Link key={product.id} href={`/detail_product/${product.id}`}>
+            <div className="border p-4 rounded-lg bg-white shadow-sm cursor-pointer hover:shadow-md transition">
+              <img
+                src={product.avatar}
+                alt={product.name}
+                onError={(e) =>
+                  (e.currentTarget.src = "/image/logo_white.jpeg")
+                }
+                className="w-full h-32 object-cover mb-2 rounded"
+              />
+              <h3 className="text-lg font-semibold">{product.name}</h3>
+              <p className="text-gray-600">ราคา: {product.price} บาท</p>
+              <p className="text-sm text-gray-500">Branch: {product.branch}</p>
+            </div>
+          </Link>
         ))}
       </div>
 

@@ -2,6 +2,7 @@
 import "flowbite";
 import { useEffect, useState } from "react";
 import { BookmarkIcon } from "@heroicons/react/24/solid";
+import Link from "next/link"; // ✅ เพิ่ม
 
 // 🔸 กำหนดจำนวนสินค้าต่อหน้า
 const ITEMS_PER_PAGE = 4;
@@ -82,18 +83,25 @@ export default function Newproducts() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mx-12">
           {paginatedItems.map((product) => (
-            <div key={product.id} className="p-4 border rounded bg-white">
-              <img
-                src={product.avatar}
-                alt={product.name}
-                className="w-full h-[250px] object-cover"
-              />
-              <h3 className="font-semibold mt-2">
-                ฿ {Number(product.price).toLocaleString()}
-              </h3>
-              <p>{product.name}</p>
-              <p className="text-sm text-gray-600">Branch: {product.branch}</p>
-            </div>
+            <Link key={product.id} href={`/detail_product/${product.id}`}>
+              <div className="p-4 border rounded bg-white cursor-pointer hover:shadow-lg transition">
+                <img
+                  src={product.avatar}
+                  alt={product.name}
+                  onError={(e) =>
+                    (e.currentTarget.src = "/image/logo_white.jpeg")
+                  }
+                  className="w-full h-[250px] object-cover rounded"
+                />
+                <h3 className="font-semibold mt-2">
+                  ฿ {Number(product.price).toLocaleString()}
+                </h3>
+                <p>{product.name}</p>
+                <p className="text-sm text-gray-600">
+                  Branch: {product.branch}
+                </p>
+              </div>
+            </Link>
           ))}
         </div>
 

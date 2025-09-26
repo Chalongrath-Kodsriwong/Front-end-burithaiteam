@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+
 import TopNavbar from "./components/Topnarbar";
 import Footer from "./components/Footer";
-// import TopNavbar2 from "./components/Topnarbar2";
+import { CartProvider } from "./context/CartContext"; // ✅ เพิ่มตรงนี้
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,15 +31,18 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <header className="sticky top-0 z-50 bg-white border-b border-gray-200 dark:bg-gray-900 dark:border-gray-700">
-          <TopNavbar />
-        </header>
-        <main>
-          {children}
-        </main>
-        <footer>
-          <Footer />
-        </footer>
+        {/* ✅ ห่อด้วย CartProvider ครอบทั้ง app */}
+        <CartProvider>
+          <header className="sticky top-0 z-50 bg-white border-b border-gray-200 dark:bg-gray-900 dark:border-gray-700">
+            <TopNavbar />
+          </header>
+          <main>
+            {children}
+          </main>
+          <footer>
+            <Footer />
+          </footer>
+        </CartProvider>
       </body>
     </html>
   );
