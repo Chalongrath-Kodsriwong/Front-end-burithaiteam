@@ -44,8 +44,6 @@ export default function DetailProduct() {
         {/* สินค้าที่เกี่ยวข้อง */}
       </div>
       <SimilarProduct productId={productId} />
-
-      
     </div>
   );
 }

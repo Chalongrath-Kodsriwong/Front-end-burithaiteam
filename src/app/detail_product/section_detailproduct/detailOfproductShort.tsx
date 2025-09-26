@@ -45,7 +45,7 @@ export default function DetailOfProduct({ product }: Props) {
         </button>
         <button
           className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          onClick={() => addToCart(product.id, quantity)} // ✅ เพิ่มตรงนี้
+          onClick={() => addToCart(product.id, quantity)} // ✅ ส่ง quantity ไปด้วย
         >
           Add to Cart
         </button>
