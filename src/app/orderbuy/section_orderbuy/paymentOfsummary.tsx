@@ -12,6 +12,7 @@ export default function PaymentSummary() {
 
   return (
     <div>
+      {/* ยังไม่ได้ทำช่องทางการจ่ายเงิน */}
       <div className="mb-4 flex justify-between border-b border-gray-300 pb-4">
         <h2 className="text-xl font-semibold mb-4">ยอดรวมทั้งหมด</h2>
         <div className="flex flex-col items-center">
