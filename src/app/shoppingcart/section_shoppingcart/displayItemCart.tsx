@@ -157,7 +157,18 @@ export default function DisplayItemCart() {
             {/* Order Button */}
             <div className="col-span-2 flex justify-end">
               <Link
-                href={`/orderbuy`}
+                href={{
+                  pathname: "/orderbuy",
+                  query: {
+                    items: JSON.stringify(
+                      cartItems
+                        .filter((c) => selectedIds.includes(c.id))
+                        .map((c) => ({ id: c.id, quantity: c.quantity }))
+                    ),
+                    total: selectedSummary,
+                    totalQuantity: totalSelectedQuantity,
+                  },
+                }}
                 className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
               >
                 Order Selected
