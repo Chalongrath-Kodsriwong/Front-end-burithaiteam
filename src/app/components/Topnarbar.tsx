@@ -87,9 +87,11 @@ export default function TopNavbar() {
             ))}
 
             <li>
-              <button className="block bg-blue-700 py-2 px-3 text-white rounded-md hover:bg-blue-700 md:pl-2 md:pr-2 dark:text-white dark:hover:bg-blue-800">
-                Login
-              </button>
+              <Link href="/login" className="text-white">
+                <button className="block bg-blue-700 py-2 px-3 text-white rounded-md hover:bg-blue-700 md:pl-2 md:pr-2 dark:text-white dark:hover:bg-blue-800">
+                  Login
+                </button>
+              </Link>
             </li>
           </ul>
         </div>
