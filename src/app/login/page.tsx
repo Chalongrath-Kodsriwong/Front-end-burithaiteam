@@ -40,14 +40,14 @@ export default function LoginPage() {
       console.log("Logged in user:", data.user);
 
       // Set Session Cookie (e.g., user data or token) after login success
-      const safeUserData = {
-        username: data.user.username,
-        // roles: data.user.roles,
-      };
+      // const safeUserData = {
+      //   username: data.user.username,
+      //   // roles: data.user.roles,
+      // };
 
-      document.cookie = `user_data=${JSON.stringify(
-        safeUserData
-      )}; path=/; max-age=3600;`;
+      // document.cookie = `user_data=${JSON.stringify(
+      //   safeUserData
+      // )}; path=/; max-age=3600;`;
 
       // 1 hour expiration
 
