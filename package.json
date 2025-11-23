@@ -12,6 +12,7 @@
     "@heroicons/react": "^2.2.0",
     "bite": "^0.1.0-4",
     "flow": "^0.2.3",
+    "lucide-react": "^0.554.0",
     "next": "^15.5.2",
     "react-dom": "19.1.0",
     "react-icons": "^5.5.0",

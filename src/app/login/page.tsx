@@ -1,60 +1,71 @@
 "use client";
-import "flowbite";
-import Link from "next/link";
+
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation"; // Next.js 13 App Router
+import Link from "next/link";
 
-export default function LogIn() {
-  const [isClient, setIsClient] = useState(false);
+export default function LoginPage() {
+  const [identifier, setIdentifier] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [submitted, setSubmitted] = useState(false); // Track if form is submitted
+  const router = useRouter();
+  const [redirectUrl, setRedirectUrl] = useState("/");
 
-  // 🧩 เก็บค่าฟอร์ม
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-    remember: false,
-  });
-
-  // ⚠️ เก็บ error รายช่อง
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [submitted, setSubmitted] = useState(false);
-
-  useEffect(() => setIsClient(true), []);
-
-  // 🧩 ตรวจสอบฟอร์ม
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
-    if (!formData.email.trim()) newErrors.email = "Please enter your email.";
-    if (!formData.password.trim()) newErrors.password = "Please enter your password.";
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  // 🧩 อัปเดตค่า input + ล้าง error เมื่อกรอก
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, type, value, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [id]: type === "checkbox" ? checked : value,
-    }));
-
-    // ลบ error ทันทีเมื่อกรอกข้อมูล
-    setErrors((prev) => {
-      const updated = { ...prev };
-      if (updated[id]) delete updated[id];
-      return updated;
-    });
-  };
-
-  // 🧩 เมื่อกด Sign In
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    if (validateForm()) {
-      alert("✅ Login successful!");
-      window.location.href = "/";
+    setSubmitted(true); // Set form as submitted
+
+    setError(""); // Clear previous error
+
+    try {
+      const res = await fetch("http://localhost:8080/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ identifier, password }),
+        credentials: "include", // Send cookies with the request
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        // Handle error message
+        setError(data.message || "Login failed");
+        return;
+      }
+
+      console.log("Logged in user:", data.user);
+
+      // Set Session Cookie (e.g., user data or token) after login success
+      const safeUserData = {
+        username: data.user.username,
+        // roles: data.user.roles,
+      };
+
+      document.cookie = `user_data=${JSON.stringify(
+        safeUserData
+      )}; path=/; max-age=3600;`;
+
+      // 1 hour expiration
+
+      // Redirect to detail_product after login
+      const params = new URLSearchParams(window.location.search);
+      const redirectUrl = params.get("redirect") || "/";
+      router.push(redirectUrl);
+    } catch (err) {
+      console.error("Login error:", err);
+      setError("Something went wrong. Please try again.");
     }
   };
-
-  if (!isClient) return null;
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      setRedirectUrl(params.get("redirect") || "/");
+    }
+  }, []);
 
   return (
     <div className="container px-0 mx-auto p-2">
@@ -77,15 +88,15 @@ export default function LogIn() {
           <input
             type="email"
             id="email"
-            value={formData.email}
-            onChange={handleChange}
+            value={identifier}
+            onChange={(e) => setIdentifier(e.target.value)}
             className={`shadow-xs bg-gray-50 border ${
-              errors.email && submitted ? "border-red-600" : "border-gray-300"
-            } text-gray-900 text-sm rounded-lg block w-full p-2.5 placeholder-gray-400`}
+              error && submitted ? "border-red-600" : "border-gray-300"
+            } text-gray-900 text-sm rounded-lg block w-full p-2.5`}
             placeholder="Please enter your email"
           />
-          {errors.email && submitted && (
-            <p className="text-red-600 text-sm mt-1">{errors.email}</p>
+          {error && submitted && (
+            <p className="text-red-600 text-sm mt-1">{error}</p>
           )}
         </div>
 
@@ -97,18 +108,27 @@ export default function LogIn() {
           >
             Password
           </label>
-          <input
-            type="password"
-            id="password"
-            value={formData.password}
-            onChange={handleChange}
-            className={`shadow-xs bg-gray-50 border ${
-              errors.password && submitted ? "border-red-600" : "border-gray-300"
-            } text-gray-900 text-sm rounded-lg block w-full p-2.5 placeholder-gray-400`}
-            placeholder="Please enter your password"
-          />
-          {errors.password && submitted && (
-            <p className="text-red-600 text-sm mt-1">{errors.password}</p>
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className={`shadow-xs bg-gray-50 border ${
+                error && submitted ? "border-red-600" : "border-gray-300"
+              } text-gray-900 text-sm rounded-lg block w-full p-2.5`}
+              placeholder="Please enter your password"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500"
+            >
+              {showPassword ? "Hide" : "Show"}
+            </button>
+          </div>
+          {error && submitted && (
+            <p className="text-red-600 text-sm mt-1">{error}</p>
           )}
         </div>
 
@@ -117,11 +137,12 @@ export default function LogIn() {
           <input
             id="remember"
             type="checkbox"
-            checked={formData.remember}
-            onChange={handleChange}
             className="w-4 h-4 border border-gray-300 rounded-sm bg-gray-50 focus:ring-1"
           />
-          <label htmlFor="remember" className="ml-2 text-sm font-medium text-gray-900">
+          <label
+            htmlFor="remember"
+            className="ml-2 text-sm font-medium text-gray-900"
+          >
             Remember me?
           </label>
         </div>
@@ -142,7 +163,8 @@ export default function LogIn() {
           <span className="px-3">Don't have an account?</span>
           <span className="flex-grow h-px bg-gray-500"></span>
         </div>
-        <Link href="/register">
+
+        <Link href={`/register?redirect=${redirectUrl}`}>
           <button
             type="button"
             className="w-full mt-3 py-2 text-white bg-black hover:bg-gray-800 font-medium rounded-lg text-sm cursor-pointer"

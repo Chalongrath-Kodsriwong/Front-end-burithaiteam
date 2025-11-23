@@ -3,16 +3,24 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useCart } from "@/app/context/CartContext"; // ✅ import ใหม่
+import { usePathname, useRouter } from "next/navigation";
+import { useCart } from "@/app/context/CartContext";
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function TopNavbar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const router = useRouter();
+
+  const [searchProductName, setSearchProductName] = useState("");
+  const [searchCategories, setSearchCategories] = useState("");
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+
   const pathname = usePathname();
-  const { cartItems } = useCart(); // ✅ ใช้งาน useCart
+  const { cartItems } = useCart();
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
-  // เมนูหลัก
   const navItems = [
     { label: "Home", href: "/" },
     { label: "About", href: "/about" },
@@ -20,15 +28,75 @@ export default function TopNavbar() {
     { label: "Product", href: "/product" },
   ];
 
-  // class ร่วม
   const base = "block py-2 px-3 rounded-sm md:p-0";
   const inactive =
     "text-gray-900 hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent";
   const active =
-    "text-white bg-blue-700 md:bg-transparent md:text-blue-700 dark:text-white md:dark:text-blue-500";
+    "text-white bg-blue-700 md:bg-transparent md:text-blue-700 dark:text-white md:dark:hover:text-blue-500";
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
+
+  // ⭐ ยิง 3 API: productName + categoryName + brandName
+  const handleSearchChange = async (e: any) => {
+    const value = e.target.value;
+    setSearchProductName(value);
+
+    if (!value.trim()) {
+      setSuggestions([]);
+      return;
+    }
+
+    try {
+      setIsSearching(true);
+
+      const queries = [
+        `${API_BASE_URL}/api/products/search?productName=${encodeURIComponent(value)}`,
+        `${API_BASE_URL}/api/products/search?categoryName=${encodeURIComponent(value)}`,
+        `${API_BASE_URL}/api/products/search?brandName=${encodeURIComponent(value)}`,
+      ];
+
+      const responses = await Promise.all(
+        queries.map((url) => fetch(url).catch(() => null))
+      );
+
+      const jsonResponses = await Promise.all(
+        responses.map((res) => (res && res.ok ? res.json() : null))
+      );
+
+      const allProducts = jsonResponses
+        .filter((j) => j && j.data && j.data.products)
+        .flatMap((j) => j.data.products);
+
+      const uniqueProducts = Array.from(
+        new Map(allProducts.map((p) => [p.id_products, p])).values()
+      );
+
+      setSuggestions(uniqueProducts);
+    } catch (error) {
+      console.error("Search error:", error);
+      setSuggestions([]);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  // ⭐ คลิก dropdown → ส่งชื่อสินค้าไป search
+  const handleSelectProduct = (name: string) => {
+    setSuggestions([]);
+    setSearchProductName("");
+
+    router.push(`/product?search=${encodeURIComponent(name)}`);
+  };
+
+  // ⭐ กด Enter search ตามชื่อ
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!searchProductName.trim()) return;
+
+    router.push(`/product?search=${encodeURIComponent(searchProductName)}`);
+  };
 
   return (
     <nav className="bg-white border-gray-200 dark:bg-gray-900">
@@ -97,8 +165,11 @@ export default function TopNavbar() {
         </div>
       </div>
 
-      {/* Search Form (คงเดิม แค่สั้นลงเล็กน้อย) */}
-      <form className="relative z-40 p-2 border-t border-solid">
+      {/* Search Form */}
+      <form
+        className="relative z-40 p-2 border-t border-solid"
+        onSubmit={handleSubmit}
+      >
         <div className="flex items-center justify-between max-w-screen-md mx-auto">
           <button
             type="button"
@@ -122,7 +193,6 @@ export default function TopNavbar() {
             </svg>
           </button>
 
-          {/* dropdown list */}
           {isDropdownOpen && (
             <div className="absolute top-14 z-50 bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-[200px] dark:bg-gray-700">
               <ul className="py-2 text-sm text-gray-700 dark:text-gray-200">
@@ -144,11 +214,13 @@ export default function TopNavbar() {
             <input
               type="search"
               className="block p-2.5 w-full z-10 text-sm text-gray-900 bg-gray-50 rounded-e-lg border-s-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
-              placeholder="Search Mockups, Logos, Design Templates..."
+              placeholder="Search products..."
+              value={searchProductName}
+              onChange={handleSearchChange}
             />
             <button
               type="submit"
-              className="absolute top-0 right-0 p-2.5 text-sm font-medium h-full text-white bg-blue-700 rounded-e-lg border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+              className="absolute top-0 right-0 p-2.5 text-sm font-medium h-full text-white bg-blue-700 rounded-e-lg border border-blue-700 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 20 20">
                 <path
@@ -161,13 +233,40 @@ export default function TopNavbar() {
               </svg>
               <span className="sr-only">Search</span>
             </button>
+
+            {/* Dropdown suggestions */}
+            {suggestions.length > 0 && (
+              <ul className="absolute left-0 right-0 mt-1 max-h-64 overflow-y-auto bg-white border border-gray-200 rounded-md shadow-md text-sm z-50">
+                {suggestions.map((item: any) => (
+                  <li
+                    key={item.id_products}
+                    className="px-3 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
+                    onClick={() => handleSelectProduct(item.name)}
+                  >
+                    {item.images && item.images.length > 0 && (
+                      <img
+                        src={item.images[0].url}
+                        alt={item.name}
+                        className="w-8 h-8 object-cover rounded"
+                      />
+                    )}
+                    <span>{item.name}</span>
+                  </li>
+                ))}
+
+                {isSearching && (
+                  <li className="px-3 py-2 text-gray-400 text-xs">
+                    Searching...
+                  </li>
+                )}
+              </ul>
+            )}
           </div>
 
-          {/* Basket Icon with gap */}
+          {/* Basket Icon */}
           <div className="relative ml-4">
             <Link href="/shoppingcart">
               <button className="relative p-2.5 text-blue-900 bg-blue-100 rounded-lg hover:bg-blue-200">
-                {/* Basket Icon */}
                 <svg
                   className="w-6 h-6"
                   fill="none"
@@ -187,7 +286,7 @@ export default function TopNavbar() {
                     d="M16 17a2 2 0 11-4 0 2 2 0 014 0zM8 17a2 2 0 114 0 2 2 0 01-4 0z"
                   />
                 </svg>
-                {/* ตัวเลขจำนวนสินค้า */}
+
                 {totalItems > 0 && (
                   <span className="absolute top-0 right-0 -mt-1 -mr-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
                     {totalItems}

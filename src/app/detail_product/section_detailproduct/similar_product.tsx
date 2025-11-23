@@ -1,54 +1,112 @@
 "use client";
+import "flowbite";
 import { useEffect, useState } from "react";
-import Link from "next/link"; // ✅ เพิ่ม
+import Link from "next/link";
 
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  branch: string;
-  avatar: string;
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+
+function normalizeProducts(json: any) {
+  if (!json) return [];
+
+  // Backend ส่งแบบนี้:
+  // data: { products: [...] }
+  if (Array.isArray(json?.data?.products)) return json.data.products;
+
+  // สำรอง
+  if (Array.isArray(json?.data)) return json.data;
+  if (Array.isArray(json)) return json;
+
+  return [];
 }
 
-interface Props {
-  productId: string;
-  limit: number; // prop limit เพื่อกำหนดจำนวนสินค้าที่จะแสดง
-}
-
-export default function SimilarProduct({ productId, limit }: Props) {
-  const [similarProducts, setSimilarProducts] = useState<Product[]>([]);
+export default function SimilarProduct({ currentProductId, currentCategory }: any) {
+  const [similarProducts, setSimilarProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchSimilarProducts = async () => {
-      const res = await fetch(`http://localhost:3000/products?exclude=${productId}`);
-      const data = await res.json();
-      const shuffled = data.sort(() => Math.random() - 0.5); // ✅ สุ่มรายการ
-      setSimilarProducts(shuffled);
-    };
+    async function fetchSimilarProducts() {
+      try {
+        const res = await fetch(`${API_URL}/api/products`, { cache: "no-store" });
+        const json = await res.json();
 
-    fetchSimilarProducts();
-  }, [productId]);
+        const products = normalizeProducts(json);
 
-  const displayedProducts = similarProducts.slice(0, 12); // ✅ ลิมิตตาม prop
+        // ฟิลเตอร์ตามหมวดหมู่
+        const filtered = products.filter((p: any) => {
+          const pid = String(p.id_products ?? p.id);
+          const categoryName = p.category?.name ?? "";
+          return (
+            pid !== String(currentProductId) &&
+            categoryName === currentCategory
+          );
+        });
+
+        setSimilarProducts(filtered.slice(0, 4));
+      } catch (err) {
+        console.error("Error fetching similar products:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (currentProductId && currentCategory !== undefined) {
+      fetchSimilarProducts();
+    }
+  }, [String(currentProductId), String(currentCategory)]);
+
+  if (loading) return <div>กำลังโหลดสินค้าที่ใกล้เคียง...</div>;
+
+  // ดึงราคาแบบ Productdisplay
+  const extractPriceFromBackendFormat = (p: any) => {
+    let price = "0";
+
+    if (Array.isArray(p.prices) && p.prices.length > 0) {
+      const prices = p.prices
+        .map((x: any) => Number(x))
+        .filter((n: number) => !isNaN(n));
+
+      if (prices.length === 1) price = prices[0].toLocaleString();
+      else if (prices.length > 1) {
+        const min = Math.min(...prices);
+        const max = Math.max(...prices);
+        price = `${min.toLocaleString()} - ${max.toLocaleString()}`;
+      }
+    }
+
+    return price;
+  };
 
   return (
-    <div>
-      <h2 className="text-2xl font-bold mb-4">Similar Products</h2>
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        {displayedProducts.map((product) => (
-          <Link key={product.id} href={`/detail_product/${product.id}`}>
-            <div className="p-4 border rounded hover:shadow cursor-pointer transition duration-200 hover:bg-gray-50">
-              <img
-                src={product.avatar}
-                alt={product.name}
-                className="w-full h-40 object-cover rounded"
-              />
-              <h3 className="font-semibold mt-2">{product.name}</h3>
-              <p className="text-gray-600">Branch: {product.branch}</p>
-              <p className="text-gray-600">{product.price} THB</p>
-            </div>
-          </Link>
-        ))}
+    <div className="p-4 bg-gray-50 rounded-lg shadow">
+      <h3 className="text-xl font-bold mb-3">สินค้าที่ใกล้เคียง</h3>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {similarProducts.map((p) => {
+          const image =
+            p.images?.length > 0 ? p.images[0].url : "/image/logo_white.jpeg";
+
+          const priceText = extractPriceFromBackendFormat(p);
+
+          return (
+            <Link
+              key={p.id_products ?? p.id}
+              href={`/detail_product/${p.id_products ?? p.id}`}
+            >
+              <div className="p-3 bg-white rounded hover:shadow-md cursor-pointer transition">
+                <img
+                  src={image}
+                  alt={p.name}
+                  className="w-full h-[150px] object-cover rounded"
+                />
+                <h4 className="font-semibold mt-2 text-sm">{p.name}</h4>
+                <p className="text-black-100 text-sm">
+                  ฿ {priceText}
+                </p>
+                <p className="text-gray-500 text-sm">{p.brand}</p>
+              </div>
+            </Link>
+          );
+        })}
       </div>
     </div>
   );

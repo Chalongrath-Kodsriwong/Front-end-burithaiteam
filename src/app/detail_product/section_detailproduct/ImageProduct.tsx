@@ -1,87 +1,37 @@
 "use client";
 import "flowbite";
-import { useState } from "react";
+import React, { useState } from "react";
 
-interface Props {
-  product: {
-    id: string;
-    name: string;
-    avatar: string;
-  };
-}
+export default function ImageProduct({ product }: any) {
+  if (!product) return <div>กำลังโหลดรูปสินค้า...</div>;
 
-export default function ImageProduct({ product }: Props) {
-  const [selectedImage, setSelectedImage] = useState(product.avatar);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const images =
+    product.images?.length > 0
+      ? product.images.map((img: any) => img.url)
+      : [product.avatar ?? "/image/logo_white.jpeg"];
 
-  const images = [
-    product.avatar,
-    "/image/logo_white.jpeg",
-    "/image/logo_black.jpg",
-    "/image/logo_black.jpg",
-    product.avatar,
-    "/image/logo_white.jpeg",
-  ];
-
-  const handleImageClick = (imageSrc: string) => {
-    setSelectedImage(imageSrc);
-  };
-
-  const handleNext = () => {
-    if (currentIndex + 3 < images.length) {
-      setCurrentIndex(currentIndex + 3);
-    } else {
-      setCurrentIndex(0);
-    }
-  };
-
-  const handlePrev = () => {
-    if (currentIndex - 3 >= 0) {
-      setCurrentIndex(currentIndex - 3);
-    } else {
-      setCurrentIndex(images.length - (images.length % 3 || 3));
-    }
-  };
+  const [selectedImage, setSelectedImage] = useState(images[0]);
 
   return (
-    <div>
-      {/* แสดงภาพขนาดใหญ่ */}
-      <div className="Show_selected mb-4">
-        <img
-          src={selectedImage}
-          alt="Product Image"
-          className="w-full max-w-md h-auto object-cover mx-auto rounded-lg shadow"
-        />
-      </div>
-
-      {/* ปุ่มเปลี่ยนภาพ */}
-      <div className="flex items-center justify-center space-x-4">
-        <button
-          className="p-2 bg-gray-200 rounded-full hover:bg-gray-300 disabled:opacity-50"
-          onClick={handlePrev}
-        >
-          <span>&larr;</span>
-        </button>
-
-        {/* แสดงภาพย่อย */}
-        <div className="flex space-x-2 overflow-x-auto md:overflow-hidden">
-          {images.slice(currentIndex, currentIndex + 3).map((image, index) => (
-            <img
-              key={index}
-              src={image}
-              alt={`Thumbnail ${index + 1}`}
-              className="w-16 h-16 md:w-24 md:h-24 object-cover rounded-lg cursor-pointer border hover:ring-2 ring-blue-400"
-              onClick={() => handleImageClick(image)}
-            />
-          ))}
-        </div>
-
-        <button
-          className="p-2 bg-gray-200 rounded-full hover:bg-gray-300 disabled:opacity-50"
-          onClick={handleNext}
-        >
-          <span>&rarr;</span>
-        </button>
+    <div className="flex flex-col items-center">
+      <img
+        src={selectedImage}
+        alt={product.name}
+        onError={(e) => (e.currentTarget.src = "/image/logo_white.jpeg")}
+        className="w-full h-[350px] object-cover rounded-lg shadow mb-4"
+      />
+      <div className="flex gap-2 justify-center">
+        {images.map((img: string, idx: number) => (
+          <img
+            key={idx}
+            src={img}
+            alt={`thumb-${idx}`}
+            onClick={() => setSelectedImage(img)}
+            className={`w-20 h-20 object-cover rounded cursor-pointer border ${
+              selectedImage === img ? "border-blue-500" : "border-gray-300"
+            }`}
+          />
+        ))}
       </div>
     </div>
   );

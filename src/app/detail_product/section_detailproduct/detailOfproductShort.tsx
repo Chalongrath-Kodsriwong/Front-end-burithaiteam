@@ -1,53 +1,93 @@
 "use client";
-import "flowbite";
-import { useState } from "react";
-import { useCart } from "@/app/context/CartContext"; // ✅ import
+import React, { useState } from "react";
+import { Heart } from "lucide-react";
 
-interface Props {
-  product: {
-    id: string;
-    name: string;
-    price: number;
-    branch: string;
+
+export default function DetailOfProductShort({ product }: any) {
+  if (!product) return <div>กำลังโหลดสินค้า...</div>;
+
+  // ฟังก์ชันเพื่อดึงช่วงราคาจาก variants และ inventories ราคาสินค้า
+  const extractPriceRange = (product: any) => {
+    if (!product?.variants) return "0";
+
+    const allPrices = product.variants.flatMap((variant: any) =>
+      variant.inventories.map((inv: any) => Number(inv.price))
+    );
+
+    const prices = allPrices.filter((x: number) => !isNaN(x));
+
+    if (prices.length === 0) return "0";
+    if (prices.length === 1) return prices[0].toLocaleString();
+
+    const min = Math.min(...prices);
+    const max = Math.max(...prices);
+    return `${min.toLocaleString()} - ${max.toLocaleString()}`;
   };
-}
 
-export default function DetailOfProduct({ product }: Props) {
-  const { addToCart } = useCart(); // ✅ ใช้ context
+  const priceText = extractPriceRange(product);
+
+  // ⭐ State สำหรับเก็บจำนวนสินค้า
   const [quantity, setQuantity] = useState(1);
+  // ⭐ ฟังก์ชันเพิ่ม & ลดจำนวนสินค้า
+  const increaseQty = () => setQuantity((prev) => prev + 1);
+  const decreaseQty = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
 
   return (
-    <div>
-      <h2 className="text-2xl font-bold mb-2">{product.name}</h2>
-      <p className="text-gray-700 mb-4">Branch: {product.branch}</p>
-      <p className="text-xl font-semibold mb-4">Price: {product.price} THB</p>
+    <div className="p-4 bg-white rounded shadow">
+      <h2 className="text-2xl font-bold mb-1">{product.name}</h2>
 
-      <div className="flex items-center mb-4">
+      {/* <span className="text-base text-gray-600 mb-2 block">
+        brand: {product.brand ?? "-"}
+      </span> */}
+
+      <p className="text-xl font-semibold mb-4">ราคา: ฿ {priceText}</p>
+
+      {/* ⭐ Quantity Selector */}
+      <div className="flex items-center gap-4 mb-6">
         <button
-          className="px-3 py-1 bg-gray-200 text-gray-700 rounded-l hover:bg-gray-300"
-          onClick={() => setQuantity((prev) => Math.max(prev - 1, 1))}
+          onClick={decreaseQty}
+          className="px-3 py-1.5 bg-gray-300 hover:bg-gray-400 rounded-l text-lg font-bold transition duration-300 ease-in-out"
         >
           -
         </button>
-        <span className="px-4 py-1 border-t border-b border-gray-200">
-          {quantity}
-        </span>
+
+        <input
+          type="text"
+          value={quantity}
+          readOnly
+          className="w-14 text-center border border-gray-300 py-1.5 text-lg"
+        />
+
         <button
-          className="px-3 py-1 bg-gray-200 text-gray-700 rounded-r hover:bg-gray-300"
-          onClick={() => setQuantity((prev) => prev + 1)}
+          onClick={increaseQty}
+          className="px-3 py-1.5 bg-gray-300 hover:bg-gray-400 rounded-r text-lg font-bold transition duration-300 ease-in-out"
         >
           +
         </button>
       </div>
-      <div className="flex space-x-4">
-        <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-          Buy Now
+      <div className="flex items-center gap-4 mb-5">
+        <button className="px-6 py-2 bg-black text-white rounded hover:bg-gray-800 transition duration-300 ease-in-out">
+          ซื้อสินค้า
         </button>
-        <button
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          onClick={() => addToCart(product.id, quantity)} // ✅ ส่ง quantity ไปด้วย
-        >
-          Add to Cart
+        <button className="px-6 py-2 bg-black text-white rounded hover:bg-gray-800 transition duration-300 ease-in-out">
+          เพิ่มลงตะกร้า ({quantity})
+        </button>
+      </div>
+
+      <div className="flex mb-2 gap-6 text-sm">
+        <span className="text-gray-600">
+          หมวดหมู่: {product.category?.name ?? "-"}
+        </span>
+        <span className="text-gray-600">BRAND: {product.brand ?? "-"}</span>
+      </div>
+      <div>
+        <p className="text-gray-700 mb-3">
+          {product.short_description ?? "ไม่มีรายละเอียดสินค้า"}
+        </p>
+      </div>
+      <div>
+        <button className="px-6 py-2 bg-black text-white rounded hover:bg-gray-800 transition duration-300 ease-in-out flex items-center gap-2">
+          <Heart className="w-4 h-4" /> Add Wishlist
         </button>
       </div>
     </div>

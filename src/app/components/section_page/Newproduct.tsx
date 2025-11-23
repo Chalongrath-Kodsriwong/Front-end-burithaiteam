@@ -2,16 +2,16 @@
 import "flowbite";
 import { useEffect, useState } from "react";
 import { BookmarkIcon } from "@heroicons/react/24/solid";
-import Link from "next/link"; // ✅ เพิ่ม
+import Link from "next/link";
 
-// 🔸 กำหนดจำนวนสินค้าต่อหน้า
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 const ITEMS_PER_PAGE = 4;
 
 interface Product {
-  id: string;
+  id: number;
   name: string;
-  price: number;
-  branch: string;
+  price: string; // เปลี่ยนเป็น string เพื่อรองรับช่วงราคา เช่น "300 - 310"
+  brand: string;
   avatar: string;
 }
 
@@ -19,23 +19,52 @@ export default function Newproducts() {
   const [products, setProducts] = useState<Product[]>([]);
   const [page, setPage] = useState(0);
   const [isClient, setIsClient] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // 🔹 ดึงข้อมูลสินค้าแบบสุ่ม
   useEffect(() => {
     setIsClient(true);
     async function fetchProducts() {
       try {
-        const res = await fetch("http://localhost:3000/products");
-        const data = await res.json();
+        const res = await fetch(`${API_URL}/api/products`, { cache: "no-store" });
+        const json = await res.json();
+        console.log("Fetched products:", json);
 
-        // สุ่มเรียงลำดับ (shuffle)
-        const shuffled = data.sort(() => 0.5 - Math.random());
+        const productData = Array.isArray(json.data) ? json.data : [];
 
-        // เลือก N รายการ (สมมุติ 8)
+        // ✅ map ข้อมูลให้ตรงกับ UI
+        const mapped = productData.map((p: any) => {
+          let price = "0";
+          if (Array.isArray(p.prices) && p.prices.length > 0) {
+            const prices = p.prices.map((x: any) => Number(x)).filter((n:any) => !isNaN(n));
+            if (prices.length === 1) {
+              price = prices[0].toLocaleString();
+            } else {
+              const min = Math.min(...prices);
+              const max = Math.max(...prices);
+              price = `${min.toLocaleString()} - ${max.toLocaleString()}`;
+            }
+          }
+
+          return {
+            id: p.id_products ?? p.id ?? 0,
+            name: p.name ?? "No name",
+            price, // ใช้ string
+            brand: p.brand ?? "-", // ดึงชื่อแบรนด์จาก p.brand
+            avatar:
+              p.avatar ??
+              (p.images && p.images.length > 0
+                ? p.images[0].url
+                : "/image/logo_white.jpeg"),
+          };
+        });
+
+        const shuffled = mapped.sort(() => 0.5 - Math.random());
         const selected = shuffled.slice(0, 20);
         setProducts(selected);
       } catch (err) {
         console.error("Error fetching products:", err);
+      } finally {
+        setLoading(false);
       }
     }
 
@@ -43,23 +72,17 @@ export default function Newproducts() {
   }, []);
 
   const totalPages = Math.ceil(products.length / ITEMS_PER_PAGE);
-
-  const handleNext = () => {
-    setPage((prev) => (prev + 1) % totalPages);
-  };
-
-  const handlePrev = () => {
-    setPage((prev) => (prev - 1 + totalPages) % totalPages);
-  };
+  const handleNext = () => setPage((prev) => (prev + 1) % totalPages);
+  const handlePrev = () => setPage((prev) => (prev - 1 + totalPages) % totalPages);
 
   const paginatedItems = products.slice(
     page * ITEMS_PER_PAGE,
     (page + 1) * ITEMS_PER_PAGE
   );
 
-  if (!isClient || products.length === 0) {
-    return <div className="p-4">กำลังโหลดสินค้า...</div>;
-  }
+  if (loading) return <div className="p-4">กำลังโหลดสินค้า...</div>;
+  if (!isClient || products.length === 0)
+    return <div className="p-4">ไม่มีข้อมูลสินค้า</div>;
 
   return (
     <div>
@@ -93,13 +116,9 @@ export default function Newproducts() {
                   }
                   className="w-full h-[250px] object-cover rounded"
                 />
-                <h3 className="font-semibold mt-2">
-                  ฿ {Number(product.price).toLocaleString()}
-                </h3>
-                <p>{product.name}</p>
-                <p className="text-sm text-gray-600">
-                  Branch: {product.branch}
-                </p>
+                <h3 className="font-semibold mt-2">{product.name}</h3>
+                <p>฿ {product.price}</p>
+                <p className="text-sm text-gray-600">Brand: {product.brand}</p>
               </div>
             </Link>
           ))}
