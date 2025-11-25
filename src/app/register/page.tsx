@@ -12,6 +12,7 @@ export default function RegisterPage() {
     confirmpassword: "",
     birthday: "",
     gender: "",
+    phone: "",
     terms: false,
   });
 
@@ -27,11 +28,9 @@ export default function RegisterPage() {
     if (!formData.firstname.trim())
       newErrors.firstname = "First name is required";
 
-    if (!formData.lastname.trim())
-      newErrors.lastname = "Last name is required";
+    if (!formData.lastname.trim()) newErrors.lastname = "Last name is required";
 
-    if (!formData.email.includes("@"))
-      newErrors.email = "Email is invalid";
+    if (!formData.email.includes("@")) newErrors.email = "Email is invalid";
 
     if (formData.password.length < 6)
       newErrors.password = "Password must be at least 6 characters";
@@ -39,14 +38,15 @@ export default function RegisterPage() {
     if (formData.password !== formData.confirmpassword)
       newErrors.confirmpassword = "Password does not match";
 
-    if (!formData.birthday)
-      newErrors.birthday = "Birthday is required";
+    if (!formData.phone.trim()) newErrors.phone = "Phone number is required";
+    else if (formData.phone.trim().length < 10)
+      newErrors.phone = "Phone number must be at least 10 digits";
 
-    if (!formData.gender)
-      newErrors.gender = "Please select a gender";
+    if (!formData.birthday) newErrors.birthday = "Birthday is required";
 
-    if (!formData.terms)
-      newErrors.terms = "You must accept the terms";
+    if (!formData.gender) newErrors.gender = "Please select a gender";
+
+    if (!formData.terms) newErrors.terms = "You must accept the terms";
 
     setErrors(newErrors);
 
@@ -80,7 +80,7 @@ export default function RegisterPage() {
         password: formData.password,
         first_name: formData.firstname,
         last_name: formData.lastname,
-        phone: "", // ไม่มีในฟอร์ม ให้ใส่ค่าว่าง
+        phone: formData.phone,
         gender: formData.gender,
         birthday: formData.birthday,
         is_active: true,
@@ -177,9 +177,7 @@ export default function RegisterPage() {
             value={formData.email}
             onChange={handleChange}
             className={`shadow-xs bg-gray-50 border ${
-              errors.email && submitted
-                ? "border-red-600"
-                : "border-gray-300"
+              errors.email && submitted ? "border-red-600" : "border-gray-300"
             } text-gray-900 text-sm rounded-lg block w-full p-2.5`}
             placeholder="Please enter your email"
           />
@@ -255,6 +253,26 @@ export default function RegisterPage() {
           )}
         </div>
 
+        {/* Phone */}
+        <div className="mb-5">
+          <label className="block mb-2 text-sm font-medium text-gray-900">
+            Phone
+          </label>
+          <input
+            type="tel"
+            name="phone"
+            value={formData.phone}
+            onChange={handleChange}
+            className={`shadow-xs bg-gray-50 border ${
+              errors.phone && submitted ? "border-red-600" : "border-gray-300"
+            } text-gray-900 text-sm rounded-lg block w-full p-2.5`}
+            placeholder="Please enter your phone number"
+          />
+          {errors.phone && submitted && (
+            <p className="text-red-600 text-sm mt-1">{errors.phone}</p>
+          )}
+        </div>
+
         {/* Gender */}
         <div className="mb-5">
           <label className="block mb-2 text-sm font-medium text-gray-900">
@@ -289,12 +307,13 @@ export default function RegisterPage() {
             checked={formData.terms}
             onChange={handleChange}
             className={`w-4 h-4 border rounded-sm bg-gray-50 ${
-              errors.terms && submitted
-                ? "border-red-600"
-                : "border-gray-300"
+              errors.terms && submitted ? "border-red-600" : "border-gray-300"
             }`}
           />
-          <label htmlFor="terms" className="ml-2 text-sm font-medium text-gray-900">
+          <label
+            htmlFor="terms"
+            className="ml-2 text-sm font-medium text-gray-900"
+          >
             I agree with the{" "}
             <a href="#" className="text-blue-600 hover:underline">
               terms and conditions
@@ -321,7 +340,11 @@ export default function RegisterPage() {
         </div>
 
         <div className="flex flex-col gap-3 text-center mt-3">
-          <Link href={`/login?redirect=${new URLSearchParams(window.location.search).get("redirect") || "/"}`}>
+          <Link
+            href={`/login?redirect=${
+              new URLSearchParams(window.location.search).get("redirect") || "/"
+            }`}
+          >
             <button
               type="button"
               className="w-full py-2 text-white bg-black hover:bg-gray-800 font-medium rounded-lg text-sm cursor-pointer"

@@ -9,63 +9,137 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
-  const [submitted, setSubmitted] = useState(false); // Track if form is submitted
-  const router = useRouter();
+  const [submitted, setSubmitted] = useState(false);
   const [redirectUrl, setRedirectUrl] = useState("/");
+  const [isLoading, setIsLoading] = useState(false);
+
+  // ⭐ ใช้สำหรับกัน brute-force แบบฝั่ง client
+  const [loginAttempts, setLoginAttempts] = useState(0);
+  const [lockedUntil, setLockedUntil] = useState<number | null>(null);
+
+  const router = useRouter();
+
+  // อ่าน redirect จาก URL
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      setRedirectUrl(params.get("redirect") || "/");
+
+      // ⭐ โหลดสถานะ lock จาก localStorage (กันรีเฟรชแล้วหาย)
+      const lockData = window.localStorage.getItem("login_lock");
+      if (lockData) {
+        try {
+          const parsed = JSON.parse(lockData);
+          if (parsed.lockedUntil && parsed.lockedUntil > Date.now()) {
+            setLockedUntil(parsed.lockedUntil);
+          } else {
+            window.localStorage.removeItem("login_lock");
+          }
+        } catch {
+          window.localStorage.removeItem("login_lock");
+        }
+      }
+    }
+  }, []);
+
+  // ถ้า lockedUntil เปลี่ยน → sync ไป localStorage
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (lockedUntil && lockedUntil > Date.now()) {
+      window.localStorage.setItem(
+        "login_lock",
+        JSON.stringify({ lockedUntil })
+      );
+    } else {
+      window.localStorage.removeItem("login_lock");
+    }
+  }, [lockedUntil]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true); // Set form as submitted
+    setSubmitted(true);
+    setError("");
 
-    setError(""); // Clear previous error
+    // ⭐ เช็คว่าโดนล็อกชั่วคราวไหม
+    if (lockedUntil && lockedUntil > Date.now()) {
+      const remainSec = Math.ceil((lockedUntil - Date.now()) / 1000);
+      setError(
+        `คุณพยายามเข้าสู่ระบบผิดหลายครั้ง โปรดลองใหม่ในอีก ${remainSec} วินาที`
+      );
+      return;
+    }
+
+    // validate เบื้องต้น
+    if (!identifier || !password) {
+      setError("กรุณากรอกอีเมลและรหัสผ่าน");
+      return;
+    }
 
     try {
+      setIsLoading(true);
+
       const res = await fetch("http://localhost:8080/api/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ identifier, password }),
-        credentials: "include", // Send cookies with the request
+        credentials: "include", // ส่ง cookies พร้อม request
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        // Handle error message
-        setError(data.message || "Login failed");
+        // ⭐ เพิ่มการนับจำนวนครั้งที่ login ผิด
+        setLoginAttempts((prev) => {
+          const next = prev + 1;
+
+          // ถ้าผิดเกิน 5 ครั้ง → ล็อก 60 วินาที
+          if (next >= 5) {
+            const lockTime = Date.now() + 60 * 1000;
+            setLockedUntil(lockTime);
+            setError(
+              "คุณพยายามเข้าสู่ระบบผิดหลายครั้ง ระบบขอล็อกชั่วคราว 1 นาที"
+            );
+          } else {
+            // ข้อความ error แบบควบคุมเอง
+            const msg =
+              data?.message && typeof data.message === "string"
+                ? data.message
+                : "อีเมลหรือรหัสผ่านไม่ถูกต้อง";
+            setError(msg);
+          }
+
+          return next;
+        });
+
         return;
       }
 
       console.log("Logged in user:", data.user);
 
-      // Set Session Cookie (e.g., user data or token) after login success
-      // const safeUserData = {
-      //   username: data.user.username,
-      //   // roles: data.user.roles,
-      // };
+      // ⭐ login สำเร็จ → reset ตัวนับ / ลบ lock
+      setLoginAttempts(0);
+      setLockedUntil(null);
 
-      // document.cookie = `user_data=${JSON.stringify(
-      //   safeUserData
-      // )}; path=/; max-age=3600;`;
-
-      // 1 hour expiration
-
-      // Redirect to detail_product after login
+      // redirect กลับหน้าที่มาก่อน
       const params = new URLSearchParams(window.location.search);
-      const redirectUrl = params.get("redirect") || "/";
-      router.push(redirectUrl);
+      const redirect = params.get("redirect") || "/";
+      router.push(redirect);
     } catch (err) {
       console.error("Login error:", err);
-      setError("Something went wrong. Please try again.");
+      setError("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง");
+    } finally {
+      setIsLoading(false);
     }
   };
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      setRedirectUrl(params.get("redirect") || "/");
-    }
-  }, []);
+
+  // helper: ปุ่มควรถูก disable เมื่อ?
+  const isSubmitDisabled =
+    isLoading ||
+    !identifier ||
+    !password ||
+    (lockedUntil && lockedUntil > Date.now());
 
   return (
     <div className="container px-0 mx-auto p-2">
@@ -95,9 +169,6 @@ export default function LoginPage() {
             } text-gray-900 text-sm rounded-lg block w-full p-2.5`}
             placeholder="Please enter your email"
           />
-          {error && submitted && (
-            <p className="text-red-600 text-sm mt-1">{error}</p>
-          )}
         </div>
 
         {/* Password */}
@@ -127,10 +198,12 @@ export default function LoginPage() {
               {showPassword ? "Hide" : "Show"}
             </button>
           </div>
-          {error && submitted && (
-            <p className="text-red-600 text-sm mt-1">{error}</p>
-          )}
         </div>
+
+        {/* Error Message (รวมทุกกรณี) */}
+        {error && (
+          <p className="text-red-600 text-sm mt-1 mb-3 text-center">{error}</p>
+        )}
 
         {/* Remember Me */}
         <div className="flex items-start mb-5">
@@ -151,9 +224,14 @@ export default function LoginPage() {
         <div className="flex flex-col gap-3 text-center">
           <button
             type="submit"
-            className="w-full py-2 text-white bg-black hover:bg-gray-800 font-medium rounded-lg text-sm cursor-pointer"
+            disabled={!!isSubmitDisabled}
+            className={`w-full py-2 text-white font-medium rounded-lg text-sm cursor-pointer ${
+              isSubmitDisabled
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-black hover:bg-gray-800"
+            }`}
           >
-            Sign In
+            {isLoading ? "Signing in..." : "Sign In"}
           </button>
         </div>
 
