@@ -10,7 +10,9 @@ import { useCart } from "@/app/context/CartContext";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function TopNavbar() {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);  // Dropdown ของสินค้า
+  const [isDropdownOpenCategories, setIsDropdownOpenCategories] =
+    useState(false); // Dropdown ของ Categories
   const router = useRouter();
 
   const [searchProductName, setSearchProductName] = useState("");
@@ -47,7 +49,8 @@ export default function TopNavbar() {
     setSearchProductName(value);
 
     if (!value.trim()) {
-      setSuggestions([]);
+      setSuggestions([]); // เมื่อช่องค้นหาว่าง, ลบ suggestions
+      setIsDropdownOpen(false); // ซ่อน dropdown
       return;
     }
 
@@ -82,7 +85,8 @@ export default function TopNavbar() {
         new Map(allProducts.map((p) => [p.id_products, p])).values()
       );
 
-      setSuggestions(uniqueProducts);
+      setSuggestions(uniqueProducts); // ตั้งค่าผลลัพธ์สินค้าที่เกี่ยวข้อง
+      setIsDropdownOpen(true); // แสดง dropdown ของสินค้าที่เกี่ยวข้อง
     } catch (error) {
       console.error("Search error:", error);
       setSuggestions([]);
@@ -100,23 +104,55 @@ export default function TopNavbar() {
   };
 
   // ⭐ กด Enter search ตามชื่อ
-  // ⭐ กด Enter search ตามชื่อ
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault(); // ป้องกันการ submit แบบปกติ
 
     const trimmed = searchProductName.trim();
 
-    // ⭐ ถ้าช่องค้นหาว่าง → ไปหน้า Product ดึงสินค้าทั้งหมด
+    // เมื่อกด Enter หรือปุ่ม Search หากช่องค้นหาว่างให้ไปที่หน้าสินค้าทั้งหมด
     if (!trimmed) {
       router.push("/product");
-      setSuggestions([]);
+      setSuggestions([]); // ลบ suggestions ที่แสดงอยู่
+      setIsDropdownOpen(false); // ซ่อน dropdown ของสินค้าที่เกี่ยวข้อง
       return;
     }
 
-    // ⭐ ถ้าไม่ว่าง → ค้นหาปกติ
+    // ถ้าช่องค้นหามีข้อมูล ค้นหาตามที่พิมพ์
     router.push(`/product?search=${encodeURIComponent(trimmed)}`);
+    setSuggestions([]); // ลบ suggestions ที่แสดงอยู่
+    setIsDropdownOpen(false); // ซ่อน dropdown ของสินค้าที่เกี่ยวข้อง
   };
 
+  const handleClick = () => {
+    if (searchProductName.trim()) {
+      handleSearchChange({ target: { value: searchProductName } }); // เรียกฟังก์ชันค้นหาทันทีจาก input ที่มีอยู่
+    }
+  };
+
+  // ฟังก์ชันที่ตรวจสอบการคลิก
+  useEffect(() => {
+  // ฟังก์ชันที่ตรวจสอบการคลิก
+  const handleClickOutside = (event: MouseEvent) => {
+    // เช็คว่า event.target เป็น DOM element และไม่ใช่ null
+    if (
+      event.target instanceof HTMLElement &&
+      !event.target.closest(".search-bar") &&
+      !event.target.closest(".dropdown-suggestions")
+    ) {
+      setIsDropdownOpen(false);  // ปิด dropdown เมื่อคลิกที่อื่น
+    }
+  };
+
+  // เพิ่ม event listener เมื่อ component ถูก mount
+  document.addEventListener("mousedown", handleClickOutside);
+
+  // ลบ event listener เมื่อ component ถูก unmount
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, []);
+
+  // ⭐ ดึงหมวดหมู่สินค้าจาก API
   useEffect(() => {
     async function fetchCategories() {
       try {
@@ -142,6 +178,8 @@ export default function TopNavbar() {
 
     fetchCategories();
   }, []);
+
+  
 
   return (
     <nav className="bg-white border-gray-200 dark:bg-gray-900">
@@ -218,7 +256,9 @@ export default function TopNavbar() {
         <div className="flex items-center justify-between max-w-screen-md mx-auto">
           <button
             type="button"
-            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            onClick={() =>
+              setIsDropdownOpenCategories(!isDropdownOpenCategories)
+            } // เปิด/ปิด dropdown ของ categories
             className="shrink-0 z-10 inline-flex items-center py-2.5 px-4 text-sm font-medium text-gray-900 bg-gray-100 border border-gray-300 rounded-s-lg hover:bg-gray-200 focus:outline-none dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white dark:border-gray-600"
           >
             All categories
@@ -238,7 +278,8 @@ export default function TopNavbar() {
             </svg>
           </button>
 
-          {isDropdownOpen && (
+          {/* Dropdown ของ All Categories */}
+          {isDropdownOpenCategories && (
             <div className="absolute top-14 z-50 bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-[200px] dark:bg-gray-700">
               <ul className="py-2 text-sm text-gray-700 dark:text-gray-200">
                 {/* ⭐ NEW: ปุ่ม All แสดงสินค้าทั้งหมด */}
@@ -248,7 +289,7 @@ export default function TopNavbar() {
                     className="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white font-semibold"
                     onClick={() => {
                       router.push(`/product`);
-                      setIsDropdownOpen(false);
+                      setIsDropdownOpenCategories(false);
                     }}
                   >
                     All
@@ -265,7 +306,7 @@ export default function TopNavbar() {
                         router.push(
                           `/product?category=${encodeURIComponent(cat)}`
                         );
-                        setIsDropdownOpen(false);
+                        setIsDropdownOpenCategories(false);
                       }}
                     >
                       {cat}
@@ -278,12 +319,15 @@ export default function TopNavbar() {
 
           <div className="relative w-full">
             <input
-              type="search"
-              className="block p-2.5 w-full z-10 text-sm text-gray-900 bg-gray-50 rounded-e-lg border-s-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
-              placeholder="Search products..."
-              value={searchProductName}
-              onChange={handleSearchChange}
-            />
+  type="search"
+  className="search-bar block p-2.5 w-full z-10 text-sm text-gray-900 bg-gray-50 rounded-e-lg border-s-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+  placeholder="Search products..."
+  value={searchProductName}
+  onChange={handleSearchChange}
+  onClick={handleClick}  // เมื่อคลิกที่ช่อง input จะทำให้ dropdown แสดง
+/>
+
+
             <button
               type="submit"
               className="absolute top-0 right-0 p-2.5 text-sm font-medium h-full text-white bg-blue-700 rounded-e-lg border border-blue-700 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
@@ -300,33 +344,35 @@ export default function TopNavbar() {
               <span className="sr-only">Search</span>
             </button>
 
-            {/* Dropdown suggestions */}
-            {suggestions.length > 0 && (
-              <ul className="absolute left-0 right-0 mt-1 max-h-64 overflow-y-auto bg-white border border-gray-200 rounded-md shadow-md text-sm z-50">
-                {suggestions.map((item: any) => (
-                  <li
-                    key={item.id_products}
-                    className="px-3 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
-                    onClick={() => handleSelectProduct(item.name)}
-                  >
-                    {item.images && item.images.length > 0 && (
-                      <img
-                        src={item.images[0].url}
-                        alt={item.name}
-                        className="w-8 h-8 object-cover rounded"
-                      />
-                    )}
-                    <span>{item.name}</span>
-                  </li>
-                ))}
+            {/* Dropdown suggestions ของสินค้าที่เกี่ยวข้อง */}
+            {/* Dropdown suggestions ของสินค้าที่เกี่ยวข้อง */}
+{isDropdownOpen && suggestions.length > 0 && (
+  <ul className="dropdown-suggestions absolute left-0 right-0 mt-1 max-h-64 overflow-y-auto bg-white border border-gray-200 rounded-md shadow-md text-sm z-50">
+    {suggestions.map((item: any) => (
+      <li
+        key={item.id_products}
+        className="px-3 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
+        onClick={() => handleSelectProduct(item.name)}
+      >
+        {item.images && item.images.length > 0 && (
+          <img
+            src={item.images[0].url}
+            alt={item.name}
+            className="w-8 h-8 object-cover rounded"
+          />
+        )}
+        <span>{item.name}</span>
+      </li>
+    ))}
 
-                {isSearching && (
-                  <li className="px-3 py-2 text-gray-400 text-xs">
-                    Searching...
-                  </li>
-                )}
-              </ul>
-            )}
+    {isSearching && (
+      <li className="px-3 py-2 text-gray-400 text-xs">
+        Searching...
+      </li>
+    )}
+  </ul>
+)}
+
           </div>
 
           {/* Basket Icon */}
