@@ -17,7 +17,7 @@ export default function Product() {
 
   return (
     <div className="container mx-auto px-0 py-2 my-2 rounded-lg">
-      <h1 className="text-3xl font-bold text-center mb-6">Product</h1>
+      {/* <h1 className="text-3xl font-bold text-center mb-6">Product</h1> */}
       {isClient && (
         <>
           <div className="grid grid-cols-8 gap-1">

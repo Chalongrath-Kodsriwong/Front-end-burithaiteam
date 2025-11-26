@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+// เพิ่ม import
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -20,6 +21,9 @@ export default function TopNavbar() {
   const pathname = usePathname();
   const { cartItems } = useCart();
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+
+  // ⭐ เพิ่ม state categories
+  const [categories, setCategories] = useState<string[]>([]);
 
   const navItems = [
     { label: "Home", href: "/" },
@@ -51,9 +55,15 @@ export default function TopNavbar() {
       setIsSearching(true);
 
       const queries = [
-        `${API_BASE_URL}/api/products/search?productName=${encodeURIComponent(value)}`,
-        `${API_BASE_URL}/api/products/search?categoryName=${encodeURIComponent(value)}`,
-        `${API_BASE_URL}/api/products/search?brandName=${encodeURIComponent(value)}`,
+        `${API_BASE_URL}/api/products/search?productName=${encodeURIComponent(
+          value
+        )}`,
+        `${API_BASE_URL}/api/products/search?categoryName=${encodeURIComponent(
+          value
+        )}`,
+        `${API_BASE_URL}/api/products/search?brandName=${encodeURIComponent(
+          value
+        )}`,
       ];
 
       const responses = await Promise.all(
@@ -90,13 +100,48 @@ export default function TopNavbar() {
   };
 
   // ⭐ กด Enter search ตามชื่อ
+  // ⭐ กด Enter search ตามชื่อ
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!searchProductName.trim()) return;
+    const trimmed = searchProductName.trim();
 
-    router.push(`/product?search=${encodeURIComponent(searchProductName)}`);
+    // ⭐ ถ้าช่องค้นหาว่าง → ไปหน้า Product ดึงสินค้าทั้งหมด
+    if (!trimmed) {
+      router.push("/product");
+      setSuggestions([]);
+      return;
+    }
+
+    // ⭐ ถ้าไม่ว่าง → ค้นหาปกติ
+    router.push(`/product?search=${encodeURIComponent(trimmed)}`);
   };
+
+  useEffect(() => {
+    async function fetchCategories() {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/products`);
+        const json = await res.json();
+        const data = Array.isArray(json.data) ? json.data : [];
+
+        // ⭐ ประกาศ uniqueCategories ให้เป็น array จริง ๆ
+        const uniqueCategories: string[] = Array.from(
+          new Set(
+            data
+              .filter((p: any) => p.category?.name)
+              .map((p: any) => String(p.category.name))
+          )
+        );
+
+        // ⭐ ไม่ Error แน่นอนเพราะ uniqueCategories เป็น array แล้ว
+        setCategories(uniqueCategories);
+      } catch (err) {
+        console.error("Cannot load categories:", err);
+      }
+    }
+
+    fetchCategories();
+  }, []);
 
   return (
     <nav className="bg-white border-gray-200 dark:bg-gray-900">
@@ -196,13 +241,34 @@ export default function TopNavbar() {
           {isDropdownOpen && (
             <div className="absolute top-14 z-50 bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-[200px] dark:bg-gray-700">
               <ul className="py-2 text-sm text-gray-700 dark:text-gray-200">
-                {["Mockups", "Templates", "Design", "Logos"].map((item) => (
-                  <li key={item}>
+                {/* ⭐ NEW: ปุ่ม All แสดงสินค้าทั้งหมด */}
+                <li>
+                  <button
+                    type="button"
+                    className="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white font-semibold"
+                    onClick={() => {
+                      router.push(`/product`);
+                      setIsDropdownOpen(false);
+                    }}
+                  >
+                    All
+                  </button>
+                </li>
+
+                {/* ⭐ Category จากฐานข้อมูล */}
+                {categories.map((cat) => (
+                  <li key={cat}>
                     <button
                       type="button"
                       className="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                      onClick={() => {
+                        router.push(
+                          `/product?category=${encodeURIComponent(cat)}`
+                        );
+                        setIsDropdownOpen(false);
+                      }}
                     >
-                      {item}
+                      {cat}
                     </button>
                   </li>
                 ))}
