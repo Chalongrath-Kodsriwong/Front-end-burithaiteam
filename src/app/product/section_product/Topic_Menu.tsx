@@ -16,6 +16,10 @@ export default function TopicMenu({ setSelectedCategory }: TopicMenuProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  // ⭐ state สำหรับกรอกราคา
+  const [minInput, setMinInput] = useState("");
+  const [maxInput, setMaxInput] = useState("");
+
   useEffect(() => {
     setIsClient(true);
 
@@ -42,22 +46,20 @@ export default function TopicMenu({ setSelectedCategory }: TopicMenuProps) {
     fetchCategories();
   }, []);
 
-  // ฟังก์ชันเลือก Category
+  // ⭐ เลือก Category
   const handleCategoryClick = (category: string) => {
     const quality = searchParams.get("quality") || "";
 
-    // update URL
     router.push(
       `/product?category=${encodeURIComponent(category)}${
         quality ? `&quality=${quality}` : ""
       }`
     );
 
-    // ถ้ามีฟังก์ชันส่งขึ้นไปข้างบน ก็เรียก (แต่ถ้าไม่ส่งมาก็ไม่เป็นไร)
     setSelectedCategory?.(category);
   };
 
-  // Filter quality
+  // ⭐ เลือกคุณภาพสินค้า
   const handleQualityChange = (quality: string, checked: boolean) => {
     const category = searchParams.get("category") || "All";
 
@@ -127,6 +129,7 @@ export default function TopicMenu({ setSelectedCategory }: TopicMenuProps) {
                 />
                 มือ 1
               </div>
+
               <div>
                 <input
                   type="checkbox"
@@ -140,33 +143,78 @@ export default function TopicMenu({ setSelectedCategory }: TopicMenuProps) {
               </div>
             </div>
 
-            {/* ส่วนราคาที่มีอยู่แล้ว – ไม่แตะต้อง */}
+            {/* ⭐ Filter ราคา */}
             <div className="space-y-2 mt-5 py-3">
               <div>
                 <h2>ต่ำที่สุด</h2>
                 <input
                   type="text"
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-1"
+                  value={minInput}
+                  onChange={(e) => setMinInput(e.target.value)}
                   placeholder="lower price"
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-1"
                 />
               </div>
+
               <div className="border-b-2 border-gray-500 pb-2"></div>
+
               <div>
                 <h2>สูงสุด</h2>
                 <input
                   type="text"
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-1"
+                  value={maxInput}
+                  onChange={(e) => setMaxInput(e.target.value)}
                   placeholder="upper price"
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-1"
                 />
               </div>
+
               <div className="pt-2 text-center">
-                <button
-                  type="submit"
-                  className="text-white bg-blue-700 hover:bg-blue-800 rounded-lg text-sm w-full px-5 py-2.5"
-                >
-                  Submit
-                </button>
-              </div>
+  {/* ⭐ Submit filter */}
+  <button
+    type="button"
+    onClick={() => {
+      const category = searchParams.get("category") || "All";
+      const quality = searchParams.get("quality") || "";
+
+      const params = new URLSearchParams();
+      params.set("category", category);
+
+      if (quality) params.set("quality", quality);
+      if (minInput) params.set("min", minInput);
+      if (maxInput) params.set("max", maxInput);
+
+      router.push(`/product?${params.toString()}`);
+    }}
+    className="text-white bg-blue-700 hover:bg-blue-800 rounded-lg text-sm w-full px-5 py-2.5"
+  >
+    Submit
+  </button>
+
+  {/* ⭐ CLEAR FILTER → แสดงเฉพาะเมื่อมีค่าในช่องใดช่องหนึ่ง */}
+  {(minInput !== "" || maxInput !== "") && (
+    <button
+      type="button"
+      onClick={() => {
+        setMinInput("");
+        setMaxInput("");
+
+        const category = searchParams.get("category") || "All";
+        const quality = searchParams.get("quality") || "";
+
+        const params = new URLSearchParams();
+        params.set("category", category);
+        if (quality) params.set("quality", quality);
+
+        router.push(`/product?${params.toString()}`);
+      }}
+      className="text-white bg-red-600 hover:bg-red-700 rounded-lg text-sm w-full px-5 py-2.5 mt-2"
+    >
+      Clear
+    </button>
+  )}
+</div>
+
             </div>
           </div>
         </div>

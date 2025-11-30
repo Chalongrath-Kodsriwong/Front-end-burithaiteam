@@ -15,6 +15,7 @@ interface Product {
   avatar: string;
   category?: string;
   quality?: string; // ⭐ เพิ่มตรงนี้
+  numericPrices?: number[];
 }
 
 // ฟังก์ชันเช็คความใกล้เคียงแบบง่าย ๆ จากตัวอักษรที่ซ้ำกัน
@@ -45,6 +46,10 @@ export default function Productdisplay() {
   const categoryFilter = searchParams.get("category");
   const keywordSearch = searchParams.get("search");
   const qualityFilter = searchParams.get("quality");
+
+  const minPrice = Number(searchParams.get("min"));
+const maxPrice = Number(searchParams.get("max"));
+
 
   useEffect(() => {
     setIsClient(true);
@@ -78,18 +83,20 @@ export default function Productdisplay() {
           }
 
           return {
-            id: p.id_products ?? p.id ?? 0,
-            name: p.name ?? "No name",
-            price,
-            brand: p.brand ?? "-",
-            avatar:
-              p.avatar ??
-              (p.images && p.images.length > 0
-                ? p.images[0].url
-                : "/image/logo_white.jpeg"),
-            category: p.category?.name || "",
-            quality: p.quality ?? "", // ⭐⭐ เพิ่มบรรทัดนี้เท่านั้น!
-          };
+  id: p.id_products ?? p.id ?? 0,
+  name: p.name ?? "No name",
+  price,
+  brand: p.brand ?? "-",
+  avatar:
+    p.avatar ??
+    (p.images && p.images.length > 0
+      ? p.images[0].url
+      : "/image/logo_white.jpeg"),
+  category: p.category?.name || "",
+  quality: p.quality ?? "",
+  numericPrices: prices,   // ⭐⭐ ต้องมีบรรทัดนี้!!
+};
+
         });
 
         // ลบซ้ำ
@@ -116,6 +123,25 @@ export default function Productdisplay() {
               (p.quality ?? "").toLowerCase() === qualityFilter.toLowerCase()
           );
         }
+
+        // ⭐ Filter by Min Price
+if (searchParams.has("min")) {
+  filtered = filtered.filter(
+    (p: any) => p.numericPrices?.some((n: number) => n >= minPrice)
+  );
+}
+
+// ⭐ Filter by Max Price
+if (searchParams.has("max")) {
+  filtered = filtered.filter(
+    (p: any) => p.numericPrices?.some((n: number) => n <= maxPrice)
+  );
+}
+
+
+
+
+        
 
         // ⭐ Filter by Search Keyword
         if (keywordSearch) {
@@ -165,7 +191,8 @@ export default function Productdisplay() {
     }
 
     fetchProducts();
-  }, [categoryFilter, keywordSearch, qualityFilter]);
+ }, [searchParams, categoryFilter, keywordSearch, qualityFilter, minPrice, maxPrice]);
+
 
   const totalPages = Math.ceil(products.length / ITEMS_PER_PAGE);
 
