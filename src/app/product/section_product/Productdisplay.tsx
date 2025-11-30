@@ -14,6 +14,7 @@ interface Product {
   brand: string;
   avatar: string;
   category?: string;
+  quality?: string; // ⭐ เพิ่มตรงนี้
 }
 
 // ฟังก์ชันเช็คความใกล้เคียงแบบง่าย ๆ จากตัวอักษรที่ซ้ำกัน
@@ -43,6 +44,7 @@ export default function Productdisplay() {
   const searchParams = useSearchParams();
   const categoryFilter = searchParams.get("category");
   const keywordSearch = searchParams.get("search");
+  const qualityFilter = searchParams.get("quality");
 
   useEffect(() => {
     setIsClient(true);
@@ -58,6 +60,7 @@ export default function Productdisplay() {
 
         const mapped: Product[] = productData.map((p: any) => {
           let price = "0";
+          
 
           // ป้องกัน p.prices ไม่ใช่ array
           const prices = Array.isArray(p.prices)
@@ -85,6 +88,7 @@ export default function Productdisplay() {
                 ? p.images[0].url
                 : "/image/logo_white.jpeg"),
             category: p.category?.name || "",
+            quality: p.quality ?? "", // ⭐⭐ เพิ่มบรรทัดนี้เท่านั้น!
           };
         });
 
@@ -99,10 +103,17 @@ export default function Productdisplay() {
         let filtered = [...unique];
 
         // ⭐ Filter by Category
-        if (categoryFilter) {
+        if (categoryFilter && categoryFilter !== "All") {
+          filtered = filtered.filter(
+            (p) => p.category?.toLowerCase() === categoryFilter.toLowerCase()
+          );
+        }
+
+        // ⭐ Filter by Quality
+        if (qualityFilter) {
           filtered = filtered.filter(
             (p) =>
-              p.category?.toLowerCase() === categoryFilter.toLowerCase()
+              (p.quality ?? "").toLowerCase() === qualityFilter.toLowerCase()
           );
         }
 
@@ -154,7 +165,7 @@ export default function Productdisplay() {
     }
 
     fetchProducts();
-  }, [categoryFilter, keywordSearch]);
+  }, [categoryFilter, keywordSearch, qualityFilter]);
 
   const totalPages = Math.ceil(products.length / ITEMS_PER_PAGE);
 
@@ -211,9 +222,7 @@ export default function Productdisplay() {
             </div>
           </>
         ) : (
-          <p className="text-gray-600">
-            ไม่มีสินค้าใกล้เคียงกับคำค้นนี้เลย
-          </p>
+          <p className="text-gray-600">ไม่มีสินค้าใกล้เคียงกับคำค้นนี้เลย</p>
         )}
       </div>
     );

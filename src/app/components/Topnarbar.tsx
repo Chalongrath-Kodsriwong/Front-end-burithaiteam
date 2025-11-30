@@ -10,7 +10,7 @@ import { useCart } from "@/app/context/CartContext";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function TopNavbar() {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);  // Dropdown ของสินค้า
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false); // Dropdown ของสินค้า
   const [isDropdownOpenCategories, setIsDropdownOpenCategories] =
     useState(false); // Dropdown ของ Categories
   const router = useRouter();
@@ -131,26 +131,26 @@ export default function TopNavbar() {
 
   // ฟังก์ชันที่ตรวจสอบการคลิก
   useEffect(() => {
-  // ฟังก์ชันที่ตรวจสอบการคลิก
-  const handleClickOutside = (event: MouseEvent) => {
-    // เช็คว่า event.target เป็น DOM element และไม่ใช่ null
-    if (
-      event.target instanceof HTMLElement &&
-      !event.target.closest(".search-bar") &&
-      !event.target.closest(".dropdown-suggestions")
-    ) {
-      setIsDropdownOpen(false);  // ปิด dropdown เมื่อคลิกที่อื่น
-    }
-  };
+    // ฟังก์ชันที่ตรวจสอบการคลิก
+    const handleClickOutside = (event: MouseEvent) => {
+      // เช็คว่า event.target เป็น DOM element และไม่ใช่ null
+      if (
+        event.target instanceof HTMLElement &&
+        !event.target.closest(".search-bar") &&
+        !event.target.closest(".dropdown-suggestions")
+      ) {
+        setIsDropdownOpen(false); // ปิด dropdown เมื่อคลิกที่อื่น
+      }
+    };
 
-  // เพิ่ม event listener เมื่อ component ถูก mount
-  document.addEventListener("mousedown", handleClickOutside);
+    // เพิ่ม event listener เมื่อ component ถูก mount
+    document.addEventListener("mousedown", handleClickOutside);
 
-  // ลบ event listener เมื่อ component ถูก unmount
-  return () => {
-    document.removeEventListener("mousedown", handleClickOutside);
-  };
-}, []);
+    // ลบ event listener เมื่อ component ถูก unmount
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   // ⭐ ดึงหมวดหมู่สินค้าจาก API
   useEffect(() => {
@@ -178,8 +178,6 @@ export default function TopNavbar() {
 
     fetchCategories();
   }, []);
-
-  
 
   return (
     <nav className="bg-white border-gray-200 dark:bg-gray-900">
@@ -306,7 +304,7 @@ export default function TopNavbar() {
                         router.push(
                           `/product?category=${encodeURIComponent(cat)}`
                         );
-                        setIsDropdownOpenCategories(false);
+                        setIsDropdownOpenCategories(false); // ปิด dropdown หลังจากเลือก
                       }}
                     >
                       {cat}
@@ -319,14 +317,13 @@ export default function TopNavbar() {
 
           <div className="relative w-full">
             <input
-  type="search"
-  className="search-bar block p-2.5 w-full z-10 text-sm text-gray-900 bg-gray-50 rounded-e-lg border-s-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
-  placeholder="Search products..."
-  value={searchProductName}
-  onChange={handleSearchChange}
-  onClick={handleClick}  // เมื่อคลิกที่ช่อง input จะทำให้ dropdown แสดง
-/>
-
+              type="search"
+              className="search-bar block p-2.5 w-full z-10 text-sm text-gray-900 bg-gray-50 rounded-e-lg border-s-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+              placeholder="Search products..."
+              value={searchProductName}
+              onChange={handleSearchChange}
+              onClick={handleClick} // เมื่อคลิกที่ช่อง input จะทำให้ dropdown แสดง
+            />
 
             <button
               type="submit"
@@ -346,33 +343,32 @@ export default function TopNavbar() {
 
             {/* Dropdown suggestions ของสินค้าที่เกี่ยวข้อง */}
             {/* Dropdown suggestions ของสินค้าที่เกี่ยวข้อง */}
-{isDropdownOpen && suggestions.length > 0 && (
-  <ul className="dropdown-suggestions absolute left-0 right-0 mt-1 max-h-64 overflow-y-auto bg-white border border-gray-200 rounded-md shadow-md text-sm z-50">
-    {suggestions.map((item: any) => (
-      <li
-        key={item.id_products}
-        className="px-3 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
-        onClick={() => handleSelectProduct(item.name)}
-      >
-        {item.images && item.images.length > 0 && (
-          <img
-            src={item.images[0].url}
-            alt={item.name}
-            className="w-8 h-8 object-cover rounded"
-          />
-        )}
-        <span>{item.name}</span>
-      </li>
-    ))}
+            {isDropdownOpen && suggestions.length > 0 && (
+              <ul className="dropdown-suggestions absolute left-0 right-0 mt-1 max-h-64 overflow-y-auto bg-white border border-gray-200 rounded-md shadow-md text-sm z-50">
+                {suggestions.map((item: any) => (
+                  <li
+                    key={item.id_products}
+                    className="px-3 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
+                    onClick={() => handleSelectProduct(item.name)}
+                  >
+                    {item.images && item.images.length > 0 && (
+                      <img
+                        src={item.images[0].url}
+                        alt={item.name}
+                        className="w-8 h-8 object-cover rounded"
+                      />
+                    )}
+                    <span>{item.name}</span>
+                  </li>
+                ))}
 
-    {isSearching && (
-      <li className="px-3 py-2 text-gray-400 text-xs">
-        Searching...
-      </li>
-    )}
-  </ul>
-)}
-
+                {isSearching && (
+                  <li className="px-3 py-2 text-gray-400 text-xs">
+                    Searching...
+                  </li>
+                )}
+              </ul>
+            )}
           </div>
 
           {/* Basket Icon */}

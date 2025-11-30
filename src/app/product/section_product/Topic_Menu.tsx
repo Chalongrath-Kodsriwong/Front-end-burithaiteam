@@ -1,13 +1,83 @@
 "use client";
-import "flowbite";
-import { useEffect, useState } from "react";
 
-export default function TopicMenu() {
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
+interface TopicMenuProps {
+  setSelectedCategory?: (category: string) => void;
+}
+
+export default function TopicMenu({ setSelectedCategory }: TopicMenuProps) {
   const [isClient, setIsClient] = useState(false);
+  const [categories, setCategories] = useState<string[]>([]);
+
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     setIsClient(true);
+
+    async function fetchCategories() {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/products`);
+        const json = await res.json();
+        const data = Array.isArray(json.data) ? json.data : [];
+
+        const unique: string[] = Array.from(
+          new Set(
+            data
+              .filter((p: any) => p.category?.name)
+              .map((p: any) => String(p.category.name))
+          )
+        );
+
+        setCategories(unique);
+      } catch (err) {
+        console.error("Error loading categories:", err);
+      }
+    }
+
+    fetchCategories();
   }, []);
+
+  // ฟังก์ชันเลือก Category
+  const handleCategoryClick = (category: string) => {
+    const quality = searchParams.get("quality") || "";
+
+    // update URL
+    router.push(
+      `/product?category=${encodeURIComponent(category)}${
+        quality ? `&quality=${quality}` : ""
+      }`
+    );
+
+    // ถ้ามีฟังก์ชันส่งขึ้นไปข้างบน ก็เรียก (แต่ถ้าไม่ส่งมาก็ไม่เป็นไร)
+    setSelectedCategory?.(category);
+  };
+
+  // Filter quality
+  const handleQualityChange = (quality: string, checked: boolean) => {
+    const category = searchParams.get("category") || "All";
+
+    if (checked) {
+      router.push(
+        `/product?category=${encodeURIComponent(
+          category
+        )}&quality=${quality.toLowerCase()}`
+      );
+    } else {
+      router.push(`/product?category=${encodeURIComponent(category)}`);
+    }
+  };
+
+  const isActive = (cat: string) => {
+    const current = searchParams.get("category") || "All";
+    return current === cat ? "font-bold text-blue-600" : "";
+  };
+
+  const qualitySelected = searchParams.get("quality");
 
   return (
     <>
@@ -15,52 +85,87 @@ export default function TopicMenu() {
         <div className="col-span-1 grid grid-cols-1 gap-1">
           <div className="outline outline-1 outline-gray-500 rounded p-1 h-full p-3">
             <div className="text-center font-bold text-lg mb-3 border-b-2 border-gray-500 pb-2">
-            <h1>Topic</h1>
+              <h1>Topic</h1>
             </div>
-            <div className="space-y-2 mt-2">
-              <div>All</div>
-              <div>Switching</div>
-              <div>Magnet</div>
-              <div>Card Sender</div>
-              <div>Card Receiver</div>
-              <div>Module LED</div>
 
-              <div className="space-y-2 py-3 ">
-                <div>
-                  <input type="checkbox" className="mr-2"/>
-                  มือ 1
-                </div>
-                <div>
-                  <input type="checkbox" className="mr-2"/>
-                  มือ 2
-                </div>
+            <div className="space-y-2 mt-2">
+              {/* All */}
+              <div
+                className={`cursor-pointer ${isActive("All")}`}
+                onClick={() => {
+                  const quality = searchParams.get("quality") || "";
+                  router.push(
+                    `/product?category=All${
+                      quality ? `&quality=${quality}` : ""
+                    }`
+                  );
+                }}
+              >
+                All
               </div>
 
-              <div className="space-y-2 mt-5 py-3">
-                <div>
-                  <h2>ต่ำที่สุด</h2>
-                  <input
-                    type="text"
-                    id="Phonenumber"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-1"
-                    placeholder="lower price"
-                    required
-                  />
+              {/* Categories from DB */}
+              {categories.map((cat) => (
+                <div
+                  key={cat}
+                  className={`cursor-pointer ${isActive(cat)}`}
+                  onClick={() => handleCategoryClick(cat)}
+                >
+                  {cat}
                 </div>
-                <div className="border-b-2 border-gray-500 pb-2"></div>
-                <div>
-                  <h2>สูงสุด</h2>
-                  <input
-                    type="text"
-                    id="Phonenumber"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-1"
-                    placeholder="upper price"
-                    required
-                  />
-                </div>
-                <div className="pt-2 text-center">
-                <button type="submit" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center">Submit</button>
-                </div>
+              ))}
+            </div>
+
+            {/* Quality Filter */}
+            <div className="space-y-2 py-3 ">
+              <div>
+                <input
+                  type="checkbox"
+                  className="mr-2"
+                  checked={qualitySelected === "new"}
+                  onChange={(e) => handleQualityChange("new", e.target.checked)}
+                />
+                มือ 1
+              </div>
+              <div>
+                <input
+                  type="checkbox"
+                  className="mr-2"
+                  checked={qualitySelected === "used"}
+                  onChange={(e) =>
+                    handleQualityChange("used", e.target.checked)
+                  }
+                />
+                มือ 2
+              </div>
+            </div>
+
+            {/* ส่วนราคาที่มีอยู่แล้ว – ไม่แตะต้อง */}
+            <div className="space-y-2 mt-5 py-3">
+              <div>
+                <h2>ต่ำที่สุด</h2>
+                <input
+                  type="text"
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-1"
+                  placeholder="lower price"
+                />
+              </div>
+              <div className="border-b-2 border-gray-500 pb-2"></div>
+              <div>
+                <h2>สูงสุด</h2>
+                <input
+                  type="text"
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-1"
+                  placeholder="upper price"
+                />
+              </div>
+              <div className="pt-2 text-center">
+                <button
+                  type="submit"
+                  className="text-white bg-blue-700 hover:bg-blue-800 rounded-lg text-sm w-full px-5 py-2.5"
+                >
+                  Submit
+                </button>
               </div>
             </div>
           </div>
