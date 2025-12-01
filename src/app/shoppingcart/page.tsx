@@ -2,6 +2,7 @@
 
 import DisplayItemCart from "./section_shoppingcart/displayItemCart";
 import SimilarProduct from "../detail_product/section_detailproduct/similar_product";
+import Normalproducts from "../components/section_page/Normalproducts";
 
 export default function ShoppingCartPage() {
   return (
@@ -11,7 +12,8 @@ export default function ShoppingCartPage() {
         <DisplayItemCart />
         </div>
         <div className="max-w-7xl mx-auto px-4 py-10">
-            <SimilarProduct productId="" limit={0} />
+            {/* <SimilarProduct productId="" limit={0} /> */}
+            <Normalproducts />
         </div>
     </>
   );

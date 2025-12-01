@@ -48,8 +48,10 @@ export default function Productdisplay() {
   const qualityFilter = searchParams.get("quality");
 
   const minPrice = Number(searchParams.get("min"));
-const maxPrice = Number(searchParams.get("max"));
+  const maxPrice = Number(searchParams.get("max"));
 
+  const sortPrice = searchParams.get("sortPrice");
+  const sortName = searchParams.get("sortName");
 
   useEffect(() => {
     setIsClient(true);
@@ -65,7 +67,6 @@ const maxPrice = Number(searchParams.get("max"));
 
         const mapped: Product[] = productData.map((p: any) => {
           let price = "0";
-          
 
           // ป้องกัน p.prices ไม่ใช่ array
           const prices = Array.isArray(p.prices)
@@ -83,20 +84,19 @@ const maxPrice = Number(searchParams.get("max"));
           }
 
           return {
-  id: p.id_products ?? p.id ?? 0,
-  name: p.name ?? "No name",
-  price,
-  brand: p.brand ?? "-",
-  avatar:
-    p.avatar ??
-    (p.images && p.images.length > 0
-      ? p.images[0].url
-      : "/image/logo_white.jpeg"),
-  category: p.category?.name || "",
-  quality: p.quality ?? "",
-  numericPrices: prices,   // ⭐⭐ ต้องมีบรรทัดนี้!!
-};
-
+            id: p.id_products ?? p.id ?? 0,
+            name: p.name ?? "No name",
+            price,
+            brand: p.brand ?? "-",
+            avatar:
+              p.avatar ??
+              (p.images && p.images.length > 0
+                ? p.images[0].url
+                : "/image/logo_white.jpeg"),
+            category: p.category?.name || "",
+            quality: p.quality ?? "",
+            numericPrices: prices, // ⭐⭐ ต้องมีบรรทัดนี้!!
+          };
         });
 
         // ลบซ้ำ
@@ -125,23 +125,44 @@ const maxPrice = Number(searchParams.get("max"));
         }
 
         // ⭐ Filter by Min Price
-if (searchParams.has("min")) {
-  filtered = filtered.filter(
-    (p: any) => p.numericPrices?.some((n: number) => n >= minPrice)
-  );
-}
+        if (searchParams.has("min")) {
+          filtered = filtered.filter((p: any) =>
+            p.numericPrices?.some((n: number) => n >= minPrice)
+          );
+        }
 
-// ⭐ Filter by Max Price
-if (searchParams.has("max")) {
-  filtered = filtered.filter(
-    (p: any) => p.numericPrices?.some((n: number) => n <= maxPrice)
-  );
-}
+        // ⭐ Filter by Max Price
+        if (searchParams.has("max")) {
+          filtered = filtered.filter((p: any) =>
+            p.numericPrices?.some((n: number) => n <= maxPrice)
+          );
+        }
 
+        // ⭐ SORT BY PRICE
+        if (sortPrice === "asc") {
+          filtered.sort((a, b) => {
+            const minA = Math.min(...(a.numericPrices || [0]));
+            const minB = Math.min(...(b.numericPrices || [0]));
+            return minA - minB;
+          });
+        }
 
+        if (sortPrice === "desc") {
+          filtered.sort((a, b) => {
+            const maxA = Math.max(...(a.numericPrices || [0]));
+            const maxB = Math.max(...(b.numericPrices || [0]));
+            return maxB - maxA;
+          });
+        }
 
+        // ⭐ SORT BY NAME
+        if (sortName === "az") {
+          filtered.sort((a, b) => a.name.localeCompare(b.name));
+        }
 
-        
+        if (sortName === "za") {
+          filtered.sort((a, b) => b.name.localeCompare(a.name));
+        }
 
         // ⭐ Filter by Search Keyword
         if (keywordSearch) {
@@ -191,8 +212,14 @@ if (searchParams.has("max")) {
     }
 
     fetchProducts();
- }, [searchParams, categoryFilter, keywordSearch, qualityFilter, minPrice, maxPrice]);
-
+  }, [
+    searchParams,
+    categoryFilter,
+    keywordSearch,
+    qualityFilter,
+    minPrice,
+    maxPrice,
+  ]);
 
   const totalPages = Math.ceil(products.length / ITEMS_PER_PAGE);
 

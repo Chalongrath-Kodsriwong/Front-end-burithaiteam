@@ -1,69 +1,146 @@
 "use client";
 
-import { useCart } from "@/app/context/CartContext";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useCart } from "@/app/context/CartContext";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 interface Product {
-  id: string;
+  cartItemId: number;
+  id: number;
   name: string;
   branch: string;
   price: number;
   description: string;
   avatar: string;
+  quantity: number;
 }
 
 export default function DisplayItemCart() {
-  const { cartItems, increaseQuantity, decreaseQuantity } = useCart();
   const [products, setProducts] = useState<Product[]>([]);
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [selectAll, setSelectAll] = useState(false);
 
+  const { refreshCart } = useCart();  // ⭐ ดึง refreshCart จาก Context
+
+  const loadCart = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/carts`, {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        console.error("Failed to load cart.");
+        return;
+      }
+
+      const json = await res.json();
+      const items = json?.data?.items || [];
+
+      const mapped: Product[] = items.map((ci: any) => ({
+        cartItemId: ci.id_itemcart,
+        id: ci.product.id_products,
+        name: ci.product.name,
+        branch: ci.product.brand,
+        price: ci.unit_price,
+        description: ci.product.short_description ?? "-",
+        avatar: ci.product.images?.[0]?.url || "/image/logo_white.jpeg",
+        quantity: ci.quantity,
+      }));
+
+      mapped.sort((a, b) => b.cartItemId - a.cartItemId);
+
+      setProducts(mapped);
+    } catch (err) {
+      console.error("Cart fetch error:", err);
+    }
+  };
+
   useEffect(() => {
-    const fetchProducts = async () => {
-      const fetchedProducts = await Promise.all(
-        cartItems.map(async (item) => {
-          const res = await fetch(`http://localhost:3000/products/${item.id}`);
-          const data = await res.json();
-          return { ...data };
-        })
-      );
-      setProducts(fetchedProducts);
-    };
+    loadCart();
+  }, []);
 
-    if (cartItems.length > 0) fetchProducts();
-  }, [cartItems]);
+  /* เพิ่มจำนวนสินค้า */
+  const handleIncrease = async (cartItemId: number) => {
+    const target = products.find(p => p.cartItemId === cartItemId);
+    if (!target) return;
 
-  const toggleItem = (id: string) => {
+    const newQty = target.quantity + 1;
+
+    try {
+      await fetch(`${API_URL}/api/carts/items/${cartItemId}`, {
+        method: "PUT",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ quantity: newQty }),
+      });
+
+      await loadCart();
+      await refreshCart();   // ⭐ อัปเดต Context ให้ realtime
+    } catch (err) {
+      console.error("Increase quantity error:", err);
+    }
+  };
+
+  /* ลดจำนวนสินค้า */
+  const handleDecrease = async (cartItemId: number) => {
+    const target = products.find(p => p.cartItemId === cartItemId);
+    if (!target) return;
+
+    const newQty = target.quantity - 1;
+    if (newQty < 1) return;
+
+    try {
+      await fetch(`${API_URL}/api/carts/items/${cartItemId}`, {
+        method: "PUT",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ quantity: newQty }),
+      });
+
+      await loadCart();
+      await refreshCart();  // ⭐ อัปเดต Context เช่นเดียวกัน
+    } catch (err) {
+      console.error("Decrease quantity error:", err);
+    }
+  };
+
+  const toggleItem = (cartItemId: number) => {
     setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((itemId) => itemId !== id) : [...prev, id]
+      prev.includes(cartItemId)
+        ? prev.filter((id) => id !== cartItemId)
+        : [...prev, cartItemId]
     );
   };
 
   const toggleSelectAll = () => {
-    if (selectAll) {
-      setSelectedIds([]);
-    } else {
-      setSelectedIds(products.map((p) => p.id));
-    }
+    if (selectAll) setSelectedIds([]);
+    else setSelectedIds(products.map((p) => p.cartItemId));
     setSelectAll(!selectAll);
   };
 
-  const selectedItems = products.filter((p) => selectedIds.includes(p.id));
-  const selectedSummary = selectedItems.reduce((acc, p) => {
-    const item = cartItems.find((c) => c.id === p.id);
-    return acc + (item ? p.price * item.quantity : 0);
-  }, 0);
-  const totalSelectedQuantity = selectedItems.reduce((acc, p) => {
-    const item = cartItems.find((c) => c.id === p.id);
-    return acc + (item ? item.quantity : 0);
-  }, 0);
+  const selectedItems = products.filter((p) =>
+    selectedIds.includes(p.cartItemId)
+  );
+
+  const selectedSummary = selectedItems.reduce(
+    (acc, p) => acc + p.price * p.quantity,
+    0
+  );
+
+  const totalSelectedQuantity = selectedItems.reduce(
+    (acc, p) => acc + p.quantity,
+    0
+  );
 
   return (
     <div>
       <h1 className="text-3xl font-bold mb-6 text-center">🛒 Shopping Cart</h1>
 
-      {cartItems.length === 0 ? (
+      {/* — UI ทั้งหมดเหมือนเดิม 100% — */}
+      {products.length === 0 ? (
         <div className="text-center text-gray-500">
           <p>No items in cart.</p>
           <Link
@@ -75,68 +152,58 @@ export default function DisplayItemCart() {
         </div>
       ) : (
         <div className="space-y-4">
-          {products.map((product) => {
-            const cartItem = cartItems.find((item) => item.id === product.id);
-            if (!cartItem) return null;
+          {products.map((product) => (
+            <div
+              key={product.cartItemId}
+              className="relative flex flex-col text-center md:flex-row md:items-center justify-between border p-4 rounded-lg shadow-sm gap-4"
+            >
+              <input
+                type="checkbox"
+                checked={selectedIds.includes(product.cartItemId)}
+                onChange={() => toggleItem(product.cartItemId)}
+                className="absolute left-2 top-1/2 -translate-y-1/2 w-5 h-5 md:static md:translate-y-0"
+              />
 
-            return (
-              <div
-                key={product.id}
-                className="relative flex flex-col text-center md:flex-row md:items-center justify-between border p-4 rounded-lg shadow-sm gap-4"
-              >
-                {/* ✅ Checkbox */}
-                <input
-                  type="checkbox"
-                  checked={selectedIds.includes(product.id)}
-                  onChange={() => toggleItem(product.id)}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 w-5 h-5 md:static md:translate-y-0"
-                />
+              <img
+                src={product.avatar}
+                alt={product.name}
+                className="w-24 h-24 object-cover rounded mx-auto"
+              />
 
-                {/* ✅ รูปภาพ */}
-                <img
-                  src={product.avatar}
-                  alt={product.name}
-                  className="w-24 h-24 object-cover rounded mx-auto"
-                />
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 flex-grow text-center md:text-left">
+                <h3 className="font-semibold">{product.name}</h3>
+                <p className="text-gray-600">Brand: {product.branch}</p>
+                <p className="text-gray-600">Price: {product.price} THB</p>
 
-                {/* ✅ รายละเอียดสินค้า */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 flex-grow text-center md:text-left">
-                  <h3 className="font-semibold">{product.name}</h3>
-                  <p className="text-gray-600">Branch: {product.branch}</p>
-                  <p className="text-gray-600">Price: {product.price} THB</p>
+                <div className="text-sm text-gray-500 flex items-center justify-center gap-2">
+                  <button
+                    className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                    onClick={() => handleDecrease(product.cartItemId)}
+                  >
+                    -
+                  </button>
 
-                  {/* ✅ Quantity */}
-                  <div className="text-sm text-gray-500 flex items-center justify-center gap-2">
-                    <button
-                      onClick={() => decreaseQuantity(product.id)}
-                      className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
-                    >
-                      -
-                    </button>
-                    <span>{cartItem.quantity}</span>
-                    <button
-                      onClick={() => increaseQuantity(product.id)}
-                      className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
-                    >
-                      +
-                    </button>
-                  </div>
+                  <span>{product.quantity}</span>
+
+                  <button
+                    className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                    onClick={() => handleIncrease(product.cartItemId)}
+                  >
+                    +
+                  </button>
                 </div>
-
-                {/* ✅ ปุ่ม View */}
-                <Link
-                  href={`/detail_product/${product.id}`}
-                  className="text-blue-600 underline hover:text-blue-800 whitespace-nowrap"
-                >
-                  View Product
-                </Link>
               </div>
-            );
-          })}
 
-          {/* ✅ สรุปรายการ */}
+              <Link
+                href={`/detail_product/${product.id}`}
+                className="text-blue-600 underline hover:text-blue-800 whitespace-nowrap"
+              >
+                View Product
+              </Link>
+            </div>
+          ))}
+
           <div className="grid grid-cols-9 gap-4 items-center border-t-2 border-b-2 pt-4 font-bold pb-4">
-            {/* Select All */}
             <div className="col-span-2 flex items-center gap-2 justify-start">
               <input
                 type="checkbox"
@@ -146,24 +213,23 @@ export default function DisplayItemCart() {
               <label className="text-sm">Select All Items</label>
             </div>
 
-            {/* Summary */}
             <div className="col-span-5 flex justify-end">
               <h3>
-                Total: {selectedSummary} THB | Selected Items:{" "}
+                Total: {selectedSummary} THB | Selected:{" "}
                 {totalSelectedQuantity}
               </h3>
             </div>
 
-            {/* Order Button */}
             <div className="col-span-2 flex justify-end">
               <Link
                 href={{
                   pathname: "/orderbuy",
                   query: {
                     items: JSON.stringify(
-                      cartItems
-                        .filter((c) => selectedIds.includes(c.id))
-                        .map((c) => ({ id: c.id, quantity: c.quantity }))
+                      selectedItems.map((c) => ({
+                        id: c.id,
+                        quantity: c.quantity,
+                      }))
                     ),
                     total: selectedSummary,
                     totalQuantity: totalSelectedQuantity,
@@ -176,7 +242,6 @@ export default function DisplayItemCart() {
             </div>
           </div>
 
-          {/* ปุ่มเพิ่มเติม */}
           <div className="text-right mt-6 space-x-4">
             <Link
               href="/product"

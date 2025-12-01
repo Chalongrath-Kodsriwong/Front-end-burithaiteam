@@ -76,7 +76,9 @@ export default function TopicMenu({ setSelectedCategory }: TopicMenuProps) {
 
   const isActive = (cat: string) => {
     const current = searchParams.get("category") || "All";
-    return current === cat ? "font-bold text-blue-600" : "";
+    return current === cat
+      ? "font-bold text-blue-700 border border-gray-300 rounded-full px-2 py-1.5 inline-block leading-none"
+      : "hover:font-bold hover:text-blue-700 cursor-pointer";
   };
 
   const qualitySelected = searchParams.get("quality");
@@ -170,51 +172,50 @@ export default function TopicMenu({ setSelectedCategory }: TopicMenuProps) {
               </div>
 
               <div className="pt-2 text-center">
-  {/* ⭐ Submit filter */}
-  <button
-    type="button"
-    onClick={() => {
-      const category = searchParams.get("category") || "All";
-      const quality = searchParams.get("quality") || "";
+                {/* ⭐ Submit filter */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    const category = searchParams.get("category") || "All";
+                    const quality = searchParams.get("quality") || "";
 
-      const params = new URLSearchParams();
-      params.set("category", category);
+                    const params = new URLSearchParams();
+                    params.set("category", category);
 
-      if (quality) params.set("quality", quality);
-      if (minInput) params.set("min", minInput);
-      if (maxInput) params.set("max", maxInput);
+                    if (quality) params.set("quality", quality);
+                    if (minInput) params.set("min", minInput);
+                    if (maxInput) params.set("max", maxInput);
 
-      router.push(`/product?${params.toString()}`);
-    }}
-    className="text-white bg-blue-700 hover:bg-blue-800 rounded-lg text-sm w-full px-5 py-2.5"
-  >
-    Submit
-  </button>
+                    router.push(`/product?${params.toString()}`);
+                  }}
+                  className="text-white bg-blue-700 hover:bg-blue-800 rounded-lg text-sm w-full px-5 py-2.5"
+                >
+                  Submit
+                </button>
 
-  {/* ⭐ CLEAR FILTER → แสดงเฉพาะเมื่อมีค่าในช่องใดช่องหนึ่ง */}
-  {(minInput !== "" || maxInput !== "") && (
-    <button
-      type="button"
-      onClick={() => {
-        setMinInput("");
-        setMaxInput("");
+                {/* ⭐ CLEAR FILTER → แสดงเฉพาะเมื่อมีค่าในช่องใดช่องหนึ่ง */}
+                {(minInput !== "" || maxInput !== "") && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMinInput("");
+                      setMaxInput("");
 
-        const category = searchParams.get("category") || "All";
-        const quality = searchParams.get("quality") || "";
+                      const category = searchParams.get("category") || "All";
+                      const quality = searchParams.get("quality") || "";
 
-        const params = new URLSearchParams();
-        params.set("category", category);
-        if (quality) params.set("quality", quality);
+                      const params = new URLSearchParams();
+                      params.set("category", category);
+                      if (quality) params.set("quality", quality);
 
-        router.push(`/product?${params.toString()}`);
-      }}
-      className="text-white bg-red-600 hover:bg-red-700 rounded-lg text-sm w-full px-5 py-2.5 mt-2"
-    >
-      Clear
-    </button>
-  )}
-</div>
-
+                      router.push(`/product?${params.toString()}`);
+                    }}
+                    className="text-white bg-red-600 hover:bg-red-700 rounded-lg text-sm w-full px-5 py-2.5 mt-2"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>

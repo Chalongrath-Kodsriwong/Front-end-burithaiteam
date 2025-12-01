@@ -1,52 +1,63 @@
 "use client";
+
 import React, { useState } from "react";
 import { Heart } from "lucide-react";
-
+import { useCart } from "@/app/context/CartContext";
 
 export default function DetailOfProductShort({ product }: any) {
   if (!product) return <div>กำลังโหลดสินค้า...</div>;
 
-  // ฟังก์ชันเพื่อดึงช่วงราคาจาก variants และ inventories ราคาสินค้า
   const extractPriceRange = (product: any) => {
     if (!product?.variants) return "0";
 
-    const allPrices = product.variants.flatMap((variant: any) =>
-      variant.inventories.map((inv: any) => Number(inv.price))
-    );
+    const prices = product.variants
+      .flatMap((v: any) => v.inventories.map((i: any) => Number(i.price)))
+      .filter((n: number) => !isNaN(n));
 
-    const prices = allPrices.filter((x: number) => !isNaN(x));
-
-    if (prices.length === 0) return "0";
+    if (prices.length <= 0) return "0";
     if (prices.length === 1) return prices[0].toLocaleString();
 
-    const min = Math.min(...prices);
-    const max = Math.max(...prices);
-    return `${min.toLocaleString()} - ${max.toLocaleString()}`;
+    return `${Math.min(...prices).toLocaleString()} - ${Math.max(
+      ...prices
+    ).toLocaleString()}`;
   };
 
   const priceText = extractPriceRange(product);
 
-  // ⭐ State สำหรับเก็บจำนวนสินค้า
   const [quantity, setQuantity] = useState(1);
-  // ⭐ ฟังก์ชันเพิ่ม & ลดจำนวนสินค้า
-  const increaseQty = () => setQuantity((prev) => prev + 1);
-  const decreaseQty = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
+
+  const increaseQty = () => setQuantity((q) => q + 1);
+  const decreaseQty = () => setQuantity((q) => (q > 1 ? q - 1 : 1));
+
+  const { addToCart } = useCart();
+
+  // ✅ ดึงค่า variant/inventory ตรงกับ Database
+  const variant = product?.variants?.[0];
+  const inventory = variant?.inventories?.[0];
+
+  const variantId = Number(variant?.variant_id);
+  const inventoryId = Number(inventory?.inventory_id);
+
+  const handleAddToCartClick = () => {
+  addToCart(
+    Number(product.id_products),
+    quantity,
+    variantId,
+    inventoryId
+  );
+};
+
 
   return (
     <div className="p-4 bg-white rounded shadow">
       <h2 className="text-2xl font-bold mb-1">{product.name}</h2>
 
-      {/* <span className="text-base text-gray-600 mb-2 block">
-        brand: {product.brand ?? "-"}
-      </span> */}
-
       <p className="text-xl font-semibold mb-4">ราคา: ฿ {priceText}</p>
 
-      {/* ⭐ Quantity Selector */}
       <div className="flex items-center gap-4 mb-6">
         <button
           onClick={decreaseQty}
-          className="px-3 py-1.5 bg-gray-300 hover:bg-gray-400 rounded-l text-lg font-bold transition duration-300 ease-in-out"
+          className="px-3 py-1.5 bg-gray-300 hover:bg-gray-400 rounded-l text-lg font-bold"
         >
           -
         </button>
@@ -60,16 +71,21 @@ export default function DetailOfProductShort({ product }: any) {
 
         <button
           onClick={increaseQty}
-          className="px-3 py-1.5 bg-gray-300 hover:bg-gray-400 rounded-r text-lg font-bold transition duration-300 ease-in-out"
+          className="px-3 py-1.5 bg-gray-300 hover:bg-gray-400 rounded-r text-lg font-bold"
         >
           +
         </button>
       </div>
+
       <div className="flex items-center gap-4 mb-5">
-        <button className="px-6 py-2 bg-black text-white rounded hover:bg-gray-800 transition duration-300 ease-in-out">
+        <button className="px-6 py-2 bg-black text-white rounded hover:bg-gray-800">
           ซื้อสินค้า
         </button>
-        <button className="px-6 py-2 bg-black text-white rounded hover:bg-gray-800 transition duration-300 ease-in-out">
+
+        <button
+          className="px-6 py-2 bg-black text-white rounded hover:bg-gray-800"
+          onClick={handleAddToCartClick}
+        >
           เพิ่มลงตะกร้า ({quantity})
         </button>
       </div>
@@ -80,16 +96,14 @@ export default function DetailOfProductShort({ product }: any) {
         </span>
         <span className="text-gray-600">BRAND: {product.brand ?? "-"}</span>
       </div>
-      <div>
-        <p className="text-gray-700 mb-3">
-          {product.short_description ?? "ไม่มีรายละเอียดสินค้า"}
-        </p>
-      </div>
-      <div>
-        <button className="px-6 py-2 bg-black text-white rounded hover:bg-gray-800 transition duration-300 ease-in-out flex items-center gap-2">
-          <Heart className="w-4 h-4" /> Add Wishlist
-        </button>
-      </div>
+
+      <p className="text-gray-700 mb-3">
+        {product.short_description ?? "ไม่มีรายละเอียดสินค้า"}
+      </p>
+
+      <button className="px-6 py-2 bg-black text-white rounded hover:bg-gray-800 flex items-center gap-2">
+        <Heart className="w-4 h-4" /> Add Wishlist
+      </button>
     </div>
   );
 }
