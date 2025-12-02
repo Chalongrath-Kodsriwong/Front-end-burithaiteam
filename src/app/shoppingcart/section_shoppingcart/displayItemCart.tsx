@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useCart } from "@/app/context/CartContext";
+import { useRouter } from "next/navigation";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
@@ -21,8 +22,11 @@ export default function DisplayItemCart() {
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [selectAll, setSelectAll] = useState(false);
+  const [error, setError] = useState<string | null>(null); // Store error messages
 
-  const { refreshCart } = useCart();  // ⭐ ดึง refreshCart จาก Context
+  const router = useRouter();
+
+  const { refreshCart } = useCart();  // Get refreshCart from context
 
   const loadCart = async () => {
     try {
@@ -32,9 +36,18 @@ export default function DisplayItemCart() {
       });
 
       if (!res.ok) {
-        console.error("Failed to load cart.");
-        return;
-      }
+    // console.error("Failed to load cart.");
+    // setError("Failed to load cart."); // Set error message
+    // Redirect to login page, passing the current page as the redirect URL
+    router.replace(`/login?redirect=/shoppingcart`);
+    return;
+}
+
+if (res.ok) {
+    // Redirect to shopping cart if the user is authenticated
+    router.replace(`/shoppingcart`);
+}
+
 
       const json = await res.json();
       const items = json?.data?.items || [];
@@ -53,8 +66,10 @@ export default function DisplayItemCart() {
       mapped.sort((a, b) => b.cartItemId - a.cartItemId);
 
       setProducts(mapped);
+      setError(null); // Clear error if loading is successful
     } catch (err) {
       console.error("Cart fetch error:", err);
+      setError("Failed to load cart."); // Set error message
     }
   };
 
@@ -62,7 +77,7 @@ export default function DisplayItemCart() {
     loadCart();
   }, []);
 
-  /* เพิ่มจำนวนสินค้า */
+  // Handle increasing quantity
   const handleIncrease = async (cartItemId: number) => {
     const target = products.find(p => p.cartItemId === cartItemId);
     if (!target) return;
@@ -78,13 +93,13 @@ export default function DisplayItemCart() {
       });
 
       await loadCart();
-      await refreshCart();   // ⭐ อัปเดต Context ให้ realtime
+      await refreshCart();   // Update context in real-time
     } catch (err) {
       console.error("Increase quantity error:", err);
     }
   };
 
-  /* ลดจำนวนสินค้า */
+  // Handle decreasing quantity
   const handleDecrease = async (cartItemId: number) => {
     const target = products.find(p => p.cartItemId === cartItemId);
     if (!target) return;
@@ -101,7 +116,7 @@ export default function DisplayItemCart() {
       });
 
       await loadCart();
-      await refreshCart();  // ⭐ อัปเดต Context เช่นเดียวกัน
+      await refreshCart();  // Update context in real-time
     } catch (err) {
       console.error("Decrease quantity error:", err);
     }
@@ -139,8 +154,20 @@ export default function DisplayItemCart() {
     <div>
       <h1 className="text-3xl font-bold mb-6 text-center">🛒 Shopping Cart</h1>
 
-      {/* — UI ทั้งหมดเหมือนเดิม 100% — */}
-      {products.length === 0 ? (
+      {/* Error Message for Failed Cart Loading */}
+      {/* {error && (
+        <div className="text-center text-red-500 mb-4">
+          <p>{error}</p>
+          <Link href="/login?redirect=/shoppingcart">
+            <button className="inline-block mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+              Login
+            </button>
+          </Link>
+        </div>
+      )} */}
+
+      {/* No items in cart */}
+      {products.length === 0 && !error ? (
         <div className="text-center text-gray-500">
           <p>No items in cart.</p>
           <Link
