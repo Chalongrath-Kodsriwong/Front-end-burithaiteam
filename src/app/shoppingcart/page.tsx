@@ -1,6 +1,6 @@
 "use client";
 
-import DisplayItemCart from "./section_shoppingcart/displayItemCart";
+import DisplayItemCart from "./section_shoppingcart/displayItemcart";
 import SimilarProduct from "../detail_product/section_detailproduct/similar_product";
 import Normalproducts from "../components/section_page/Normalproducts";
 
