@@ -179,6 +179,23 @@ export default function TopNavbar() {
     fetchCategories();
   }, []);
 
+  useEffect(() => {
+    const handleClickOutsideCategories = (event: MouseEvent) => {
+      if (
+        event.target instanceof HTMLElement &&
+        !event.target.closest(".categories-dropdown") &&
+        !event.target.closest(".categories-button")
+      ) {
+        setIsDropdownOpenCategories(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutsideCategories);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutsideCategories);
+    };
+  }, []);
+
   return (
     <nav className="bg-white border-gray-200 dark:bg-gray-900">
       <div className="w-full flex flex-wrap items-center justify-between p-4">
@@ -256,8 +273,8 @@ export default function TopNavbar() {
             type="button"
             onClick={() =>
               setIsDropdownOpenCategories(!isDropdownOpenCategories)
-            } // เปิด/ปิด dropdown ของ categories
-            className="shrink-0 z-10 inline-flex items-center py-2.5 px-4 text-sm font-medium text-gray-900 bg-gray-100 border border-gray-300 rounded-s-lg hover:bg-gray-200 focus:outline-none dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white dark:border-gray-600"
+            }
+            className="categories-button shrink-0 z-10 inline-flex items-center py-2.5 px-4 text-sm font-medium text-gray-900 bg-gray-100 border border-gray-300 rounded-s-lg hover:bg-gray-200 focus:outline-none dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white dark:border-gray-600"
           >
             All categories
             <svg
@@ -278,7 +295,7 @@ export default function TopNavbar() {
 
           {/* Dropdown ของ All Categories */}
           {isDropdownOpenCategories && (
-            <div className="absolute top-14 z-50 bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-[200px] dark:bg-gray-700">
+            <div className="categories-dropdown absolute top-14 z-50 bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-[150px] dark:bg-gray-700">
               <ul className="py-2 text-sm text-gray-700 dark:text-gray-200">
                 {/* ⭐ NEW: ปุ่ม All แสดงสินค้าทั้งหมด */}
                 <li>

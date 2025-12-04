@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation"; // Next.js 13 App Router
 import Link from "next/link";
 
+import { useCart } from "@/app/context/CartContext";
+
+
 export default function LoginPage() {
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
@@ -18,6 +21,9 @@ export default function LoginPage() {
   const [lockedUntil, setLockedUntil] = useState<number | null>(null);
 
   const router = useRouter();
+
+  const { refreshCart } = useCart();
+
 
   // อ่าน redirect จาก URL
   useEffect(() => {
@@ -117,6 +123,7 @@ export default function LoginPage() {
       }
 
       console.log("Logged in user:", data.user);
+      await refreshCart(); // ดึงข้อมูลตะกร้าจากเซิร์ฟเวอร์ใหม่
 
       // ⭐ login สำเร็จ → reset ตัวนับ / ลบ lock
       setLoginAttempts(0);

@@ -23,6 +23,7 @@ export default function DisplayItemCart() {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [selectAll, setSelectAll] = useState(false);
   const [error, setError] = useState<string | null>(null); // Store error messages
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
 
   const router = useRouter();
 
@@ -104,7 +105,12 @@ export default function DisplayItemCart() {
     if (!target) return;
 
     const newQty = target.quantity - 1;
-    if (newQty < 1) return;
+
+    // ⭐ ถ้าจำนวนจะกลายเป็น 0 → เปิด popup แทน
+    if (newQty < 1) {
+      setConfirmDeleteId(cartItemId);
+      return;
+    }
 
     try {
       await fetch(`${API_URL}/api/carts/items/${cartItemId}`, {
@@ -115,9 +121,41 @@ export default function DisplayItemCart() {
       });
 
       await loadCart();
-      await refreshCart(); // Update context in real-time
+      await refreshCart();
     } catch (err) {
       console.error("Decrease quantity error:", err);
+    }
+  };
+
+  // Handle delete single item
+  const handleDelete = async (cartItemId: number) => {
+    try {
+      await fetch(`${API_URL}/api/carts/items/${cartItemId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      await loadCart(); // โหลดข้อมูลใหม่
+      await refreshCart(); // อัปเดต Context → ตัวเลข basket บน navbar อัปเดตทันที
+    } catch (err) {
+      console.error("Delete item error:", err);
+    }
+  };
+
+  const confirmDeleteItem = async () => {
+    if (!confirmDeleteId) return;
+
+    try {
+      await fetch(`${API_URL}/api/carts/items/${confirmDeleteId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      setConfirmDeleteId(null);
+      await loadCart();
+      await refreshCart();
+    } catch (err) {
+      console.error("Delete item error:", err);
     }
   };
 
@@ -189,15 +227,18 @@ export default function DisplayItemCart() {
                 onChange={() => toggleItem(product.cartItemId)}
                 className="absolute left-2 top-1/2 -translate-y-1/2 w-5 h-5 md:static md:translate-y-0"
               />
-
-              <img
-                src={product.avatar}
-                alt={product.name}
-                className="w-24 h-24 object-cover rounded mx-auto"
-              />
+              <Link href={`/detail_product/${product.id}`}>
+                <img
+                  src={product.avatar}
+                  alt={product.name}
+                  className="w-24 h-24 object-cover rounded mx-auto"
+                />
+              </Link>
 
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4 flex-grow text-center md:text-left">
-                <h3 className="font-semibold">{product.name}</h3>
+                <Link href={`/detail_product/${product.id}`}>
+                  <h3 className="font-semibold">{product.name}</h3>
+                </Link>
                 <p className="text-gray-600">Brand: {product.branch}</p>
                 <p className="text-gray-600">Price: {product.price} THB</p>
 
@@ -220,12 +261,59 @@ export default function DisplayItemCart() {
                 </div>
               </div>
 
-              <Link
+              {/* <Link
                 href={`/detail_product/${product.id}`}
                 className="text-blue-600 underline hover:text-blue-800 whitespace-nowrap"
               >
                 View Product
-              </Link>
+              </Link> */}
+
+              <button
+                onClick={() => handleDelete(product.cartItemId)}
+                className="ml-4 text-red-600 hover:text-red-800"
+                title="Delete Item"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-7 h-7"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7h6m2 0h-2.5m-5 0H7m3-3h4a1 1 0 011 1v1H9V5a1 1 0 011-1z"
+                  />
+                </svg>
+              </button>
+
+              {confirmDeleteId !== null && (
+                <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+                  <div className="bg-white p-6 rounded-lg shadow-lg text-center w-72">
+                    <h3 className="text-lg font-semibold mb-4">
+                      คุณต้องการลบสินค้านี้ใช่ไหม?
+                    </h3>
+
+                    <div className="flex justify-around mt-4">
+                      <button
+                        onClick={confirmDeleteItem}
+                        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                      >
+                        ใช่
+                      </button>
+
+                      <button
+                        onClick={() => setConfirmDeleteId(null)}
+                        className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                      >
+                        ไม่
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
 
