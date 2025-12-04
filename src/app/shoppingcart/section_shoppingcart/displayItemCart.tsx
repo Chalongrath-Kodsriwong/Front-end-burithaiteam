@@ -26,7 +26,7 @@ export default function DisplayItemCart() {
 
   const router = useRouter();
 
-  const { refreshCart } = useCart();  // Get refreshCart from context
+  const { refreshCart } = useCart(); // Get refreshCart from context
 
   const loadCart = async () => {
     try {
@@ -36,18 +36,17 @@ export default function DisplayItemCart() {
       });
 
       if (!res.ok) {
-    // console.error("Failed to load cart.");
-    // setError("Failed to load cart."); // Set error message
-    // Redirect to login page, passing the current page as the redirect URL
-    router.replace(`/login?redirect=/shoppingcart`);
-    return;
-}
+        // console.error("Failed to load cart.");
+        // setError("Failed to load cart."); // Set error message
+        // Redirect to login page, passing the current page as the redirect URL
+        router.replace(`/login?redirect=/shoppingcart`);
+        return;
+      }
 
-if (res.ok) {
-    // Redirect to shopping cart if the user is authenticated
-    router.replace(`/shoppingcart`);
-}
-
+      if (res.ok) {
+        // Redirect to shopping cart if the user is authenticated
+        router.replace(`/shoppingcart`);
+      }
 
       const json = await res.json();
       const items = json?.data?.items || [];
@@ -79,7 +78,7 @@ if (res.ok) {
 
   // Handle increasing quantity
   const handleIncrease = async (cartItemId: number) => {
-    const target = products.find(p => p.cartItemId === cartItemId);
+    const target = products.find((p) => p.cartItemId === cartItemId);
     if (!target) return;
 
     const newQty = target.quantity + 1;
@@ -93,7 +92,7 @@ if (res.ok) {
       });
 
       await loadCart();
-      await refreshCart();   // Update context in real-time
+      await refreshCart(); // Update context in real-time
     } catch (err) {
       console.error("Increase quantity error:", err);
     }
@@ -101,7 +100,7 @@ if (res.ok) {
 
   // Handle decreasing quantity
   const handleDecrease = async (cartItemId: number) => {
-    const target = products.find(p => p.cartItemId === cartItemId);
+    const target = products.find((p) => p.cartItemId === cartItemId);
     if (!target) return;
 
     const newQty = target.quantity - 1;
@@ -116,7 +115,7 @@ if (res.ok) {
       });
 
       await loadCart();
-      await refreshCart();  // Update context in real-time
+      await refreshCart(); // Update context in real-time
     } catch (err) {
       console.error("Decrease quantity error:", err);
     }
@@ -242,8 +241,7 @@ if (res.ok) {
 
             <div className="col-span-5 flex justify-end">
               <h3>
-                Total: {selectedSummary} THB | Selected:{" "}
-                {totalSelectedQuantity}
+                Total: {selectedSummary} THB | Selected: {totalSelectedQuantity}
               </h3>
             </div>
 
