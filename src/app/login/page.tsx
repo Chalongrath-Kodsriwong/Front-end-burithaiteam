@@ -6,7 +6,6 @@ import Link from "next/link";
 
 import { useCart } from "@/app/context/CartContext";
 
-
 export default function LoginPage() {
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
@@ -23,7 +22,6 @@ export default function LoginPage() {
   const router = useRouter();
 
   const { refreshCart } = useCart();
-
 
   // อ่าน redirect จาก URL
   useEffect(() => {
@@ -123,16 +121,24 @@ export default function LoginPage() {
       }
 
       console.log("Logged in user:", data.user);
-      await refreshCart(); // ดึงข้อมูลตะกร้าจากเซิร์ฟเวอร์ใหม่
+      await refreshCart();
 
       // ⭐ login สำเร็จ → reset ตัวนับ / ลบ lock
       setLoginAttempts(0);
       setLockedUntil(null);
 
-      // redirect กลับหน้าที่มาก่อน
-      const params = new URLSearchParams(window.location.search);
-      const redirect = params.get("redirect") || "/";
-      router.push(redirect);
+      // ⭐ บันทึก username / first_name ลง localStorage ก่อน
+      localStorage.setItem("username", data.user.username);
+      localStorage.setItem("first_name", data.user.first_name);
+
+      // ⭐ แจ้ง Navbar ว่า login เสร็จ แล้วค่อย redirect (delay 50ms)
+      setTimeout(() => {
+        window.dispatchEvent(new Event("login-success"));
+
+        const params = new URLSearchParams(window.location.search);
+        const redirect = params.get("redirect") || "/";
+        router.push(redirect);
+      }, 50);
     } catch (err) {
       console.error("Login error:", err);
       setError("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง");

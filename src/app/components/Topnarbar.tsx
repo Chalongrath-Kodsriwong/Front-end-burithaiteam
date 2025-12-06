@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCart } from "@/app/context/CartContext";
+import { FaRegUserCircle } from "react-icons/fa";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -26,6 +27,10 @@ export default function TopNavbar() {
 
   // ⭐ เพิ่ม state categories
   const [categories, setCategories] = useState<string[]>([]);
+
+  const { clearCart } = useCart();
+
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   const navItems = [
     { label: "Home", href: "/" },
@@ -129,6 +134,45 @@ export default function TopNavbar() {
     }
   };
 
+  // ⭐ เช็คว่า login แล้วหรือยัง
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // useEffect(() => {
+  //   async function checkLogin() {
+  //     try {
+  //       const res = await fetch(`${API_BASE_URL}/api/carts`, {
+  //         method: "GET",
+  //         credentials: "include",
+  //       });
+
+  //       console.log("🔍 Checking login (via carts):", res.status);
+
+  //       if (res.status === 200) {
+  //         setIsLoggedIn(true);
+  //       } else {
+  //         setIsLoggedIn(false);
+  //       }
+  //     } catch (error) {
+  //       console.log("Login check failed:", error);
+  //       setIsLoggedIn(false);
+  //     }
+  //   }
+
+  //   checkLogin();
+  // }, []);
+
+  const [username, setUsername] = useState<string | null>(null);
+
+  // โหลด username เมื่อหน้า Navbar ถูกเปิดขึ้น
+  useEffect(() => {
+    const name = localStorage.getItem("username");
+    // || localStorage.getItem("first_name");
+
+    console.log("Navbar initial username:", name);
+
+    if (name) setUsername(name);
+  }, []);
+
   // ฟังก์ชันที่ตรวจสอบการคลิก
   useEffect(() => {
     // ฟังก์ชันที่ตรวจสอบการคลิก
@@ -196,6 +240,45 @@ export default function TopNavbar() {
     };
   }, []);
 
+  const checkLogin = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/carts`, {
+        credentials: "include",
+      });
+
+      if (res.status === 200) setIsLoggedIn(true);
+      else setIsLoggedIn(false);
+    } catch {
+      setIsLoggedIn(false);
+    }
+  };
+
+  useEffect(() => {
+    checkLogin();
+  }, []);
+
+  // เมื่อ login-success → โหลด username ใหม่ + reload login state
+  useEffect(() => {
+    function handleLoginSuccess() {
+      console.log("🔄 Navbar received login-success event");
+
+      setTimeout(() => {
+        const name = localStorage.getItem("username");
+        // || localStorage.getItem("first_name");
+
+        console.log("🔄 Username from localStorage:", name);
+
+        setUsername(name || null);
+        checkLogin();
+      }, 50);
+    }
+
+    window.addEventListener("login-success", handleLoginSuccess);
+
+    return () =>
+      window.removeEventListener("login-success", handleLoginSuccess);
+  }, []);
+
   return (
     <nav className="bg-white border-gray-200 dark:bg-gray-900">
       <div className="w-full flex flex-wrap items-center justify-between p-4">
@@ -252,12 +335,77 @@ export default function TopNavbar() {
               </li>
             ))}
 
-            <li>
-              <Link href="/login" className="text-white">
-                <button className="block bg-blue-700 py-2 px-3 text-white rounded-md hover:bg-blue-700 md:pl-2 md:pr-2 dark:text-white dark:hover:bg-blue-800">
-                  Login
-                </button>
-              </Link>
+            <li className="flex items-center relative">
+              {!isLoggedIn ? (
+                <Link href="/login" className="text-white">
+                  <button className="block bg-blue-700 py-2 px-3 text-white rounded-md hover:bg-blue-700 md:pl-2 md:pr-2">
+                    Login
+                  </button>
+                </Link>
+              ) : (
+                <div
+                  className="flex flex-col items-center ml-2 mr-2 cursor-pointer select-none relative"
+                  onMouseEnter={() => setIsUserMenuOpen(true)}
+                  onMouseLeave={() => setIsUserMenuOpen(false)}
+                >
+                  {/* ไอคอน */}
+                  <FaRegUserCircle size={28} className="text-blue-600" />
+
+                  {/* ชื่อ + ลูกศรในบรรทัดเดียวกัน */}
+                  <div className="flex items-center gap-1 mt-1">
+                    <span className="text-xs text-white">{username}</span>
+
+                    <svg
+                      className={`w-3 h-3 text-white transition-transform duration-200 ${
+                        isUserMenuOpen ? "rotate-180" : ""
+                      }`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </div>
+
+                  {/* Dropdown (ตำแหน่งเดิม, ไม่แตะต้อง) */}
+                  <div
+                    className={`
+    absolute top-[50px] right-0 bg-white shadow-md rounded-md overflow-hidden 
+    transition-all duration-200 z-50
+    ${
+      isUserMenuOpen
+        ? "opacity-100 max-h-20 pointer-events-auto"
+        : "opacity-0 max-h-0 pointer-events-none"
+    }
+  `}
+                  >
+                    <button
+                      onClick={async () => {
+                        await fetch(`${API_BASE_URL}/api/auth/logout`, {
+                          method: "POST",
+                          credentials: "include",
+                        });
+
+                        localStorage.removeItem("username");
+                        // localStorage.removeItem("first_name");
+
+                        clearCart();
+                        setIsLoggedIn(false);
+                        setUsername(null);
+                        router.refresh();
+                      }}
+                      className="block w-full text-left px-6 py-1 text-red-600 hover:bg-gray-100 text-sm"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                </div>
+              )}
             </li>
           </ul>
         </div>

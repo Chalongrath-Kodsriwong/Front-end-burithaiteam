@@ -23,7 +23,9 @@ interface CartContextType {
   ) => Promise<void>;
   increaseQuantity: (cartItemId: number) => Promise<void>;
   decreaseQuantity: (cartItemId: number) => Promise<void>;
+  clearCart: () => void;   // ⭐ เพิ่มตรงนี้
 }
+
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
@@ -132,16 +134,23 @@ export function CartProvider({ children }: { children: ReactNode }) {
     await refreshCart();
   };
 
+  const clearCart = () => {
+  setCartItems([]); // เคลียร์ตะกร้าทั้งหมดหลัง logout
+};
+
+
   return (
     <CartContext.Provider
-      value={{
-        cartItems,
-        refreshCart,
-        addToCart,
-        increaseQuantity,
-        decreaseQuantity,
-      }}
-    >
+  value={{
+    cartItems,
+    refreshCart,
+    addToCart,
+    increaseQuantity,
+    decreaseQuantity,
+    clearCart,   // ⭐ เพิ่มตรงนี้
+  }}
+>
+
       {children}
     </CartContext.Provider>
   );
