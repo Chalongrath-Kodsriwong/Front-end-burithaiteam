@@ -36,17 +36,9 @@ export default function DisplayItemCart() {
         credentials: "include",
       });
 
-      if (!res.ok) {
-        // console.error("Failed to load cart.");
-        // setError("Failed to load cart."); // Set error message
-        // Redirect to login page, passing the current page as the redirect URL
+      if (res.status === 401) {
         router.replace(`/login?redirect=/shoppingcart`);
         return;
-      }
-
-      if (res.ok) {
-        // Redirect to shopping cart if the user is authenticated
-        router.replace(`/shoppingcart`);
       }
 
       const json = await res.json();
@@ -66,10 +58,10 @@ export default function DisplayItemCart() {
       mapped.sort((a, b) => b.cartItemId - a.cartItemId);
 
       setProducts(mapped);
-      setError(null); // Clear error if loading is successful
+      setError(null);
     } catch (err) {
       console.error("Cart fetch error:", err);
-      setError("Failed to load cart."); // Set error message
+      setError("Failed to load cart.");
     }
   };
 
@@ -186,6 +178,16 @@ export default function DisplayItemCart() {
     (acc, p) => acc + p.quantity,
     0
   );
+
+  useEffect(() => {
+    function handleUserLogout() {
+      router.replace(`/login?redirect=/shoppingcart`);
+    }
+
+    window.addEventListener("user-logout", handleUserLogout);
+
+    return () => window.removeEventListener("user-logout", handleUserLogout);
+  }, [router]);
 
   return (
     <div>
@@ -335,23 +337,30 @@ export default function DisplayItemCart() {
 
             <div className="col-span-2 flex justify-end">
               <Link
-                href={{
-                  pathname: "/orderbuy",
-                  query: {
-                    items: JSON.stringify(
-                      selectedItems.map((c) => ({
-                        id: c.id,
-                        quantity: c.quantity,
-                      }))
-                    ),
-                    total: selectedSummary,
-                    totalQuantity: totalSelectedQuantity,
-                  },
-                }}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-              >
-                Order Selected
-              </Link>
+  href={{
+    pathname: "/orderbuy",
+    query: {
+      items: JSON.stringify(
+        selectedItems.map((c) => ({
+          cartItemId: c.cartItemId,   // สำคัญมาก!
+          id: c.id,
+          quantity: c.quantity,
+          price: c.price,
+          name: c.name,
+          avatar: c.avatar,
+        }))
+      ),
+      itemcart_ids: JSON.stringify(selectedItems.map((c) => c.cartItemId)),
+      total: selectedSummary,
+      totalQuantity: totalSelectedQuantity,
+    },
+  }}
+  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+>
+  Order Selected
+</Link>
+
+
             </div>
           </div>
 

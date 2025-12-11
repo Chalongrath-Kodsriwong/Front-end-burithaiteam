@@ -17,7 +17,17 @@ export default function ProductDetailPage() {
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  // ⭐ 1) เช็คการ Login ผ่าน Backend (เช็ค JWT HttpOnly cookie)
+  // ⭐ ดักเหตุการณ์ logout จาก TopNavbar
+  useEffect(() => {
+    function handleLogout() {
+      router.replace(`/login?redirect=/detail_product/${id}`);
+    }
+
+    window.addEventListener("user-logout", handleLogout);
+    return () => window.removeEventListener("user-logout", handleLogout);
+  }, [id, router]);
+
+  // ⭐ 1) เช็คการ Login ผ่าน Backend
   useEffect(() => {
     async function checkAuth() {
       try {
@@ -25,13 +35,11 @@ export default function ProductDetailPage() {
           credentials: "include",
         });
 
-        // ❌ ถ้าไม่มี token → ให้ redirect ไป Login
         if (res.status === 401) {
           router.replace(`/login?redirect=/detail_product/${id}`);
           return;
         }
 
-        // ✔ มี token → อนุญาตให้โหลดสินค้า
         setAuthChecked(true);
       } catch (err) {
         router.replace(`/login?redirect=/detail_product/${id}`);
@@ -41,7 +49,7 @@ export default function ProductDetailPage() {
     checkAuth();
   }, [id, router]);
 
-  // ⭐ 2) โหลดข้อมูลสินค้า เมื่อ auth เช็คเสร็จแล้ว
+  // ⭐ 2) โหลดข้อมูลสินค้าเมื่อ auth ผ่าน
   useEffect(() => {
     if (!authChecked || !id) return;
 

@@ -8,6 +8,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { useCart } from "@/app/context/CartContext";
 import { FaRegUserCircle } from "react-icons/fa";
 
+import { useRef } from "react";
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function TopNavbar() {
@@ -258,26 +260,43 @@ export default function TopNavbar() {
   }, []);
 
   // เมื่อ login-success → โหลด username ใหม่ + reload login state
-  useEffect(() => {
-    function handleLoginSuccess() {
-      console.log("🔄 Navbar received login-success event");
+useEffect(() => {
+  function handleLoginSuccess() {
+    console.log("🔄 Navbar received login-success event");
 
-      setTimeout(() => {
-        const name = localStorage.getItem("username");
-        // || localStorage.getItem("first_name");
+    setIsUserMenuOpen(false); // ⬅️ ปิด Dropdown ทันที
 
-        console.log("🔄 Username from localStorage:", name);
+    setTimeout(() => {
+      const name = localStorage.getItem("username");
+      setUsername(name || null);
+      checkLogin();
+    }, 50);
+  }
 
-        setUsername(name || null);
-        checkLogin();
-      }, 50);
+  window.addEventListener("login-success", handleLoginSuccess);
+  return () => window.removeEventListener("login-success", handleLoginSuccess);
+}, []);
+
+
+  const menuRef = useRef<HTMLDivElement | null>(null);
+
+  // ปิดเมนูเมื่อคลิกที่อื่น
+useEffect(() => {
+  function handleClickOutside(e: MouseEvent) {
+    if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+      setIsUserMenuOpen(false);
     }
+  }
+  document.addEventListener("mousedown", handleClickOutside);
+  return () => document.removeEventListener("mousedown", handleClickOutside);
+}, []);
 
-    window.addEventListener("login-success", handleLoginSuccess);
+useEffect(() => {
+  if (isLoggedIn) {
+    setIsUserMenuOpen(false); // ปิด dropdown เมื่อสถานะ login เปลี่ยน
+  }
+}, [isLoggedIn]);
 
-    return () =>
-      window.removeEventListener("login-success", handleLoginSuccess);
-  }, []);
 
   return (
     <nav className="bg-white border-gray-200 dark:bg-gray-900">
@@ -336,77 +355,78 @@ export default function TopNavbar() {
             ))}
 
             <li className="flex items-center relative">
-              {!isLoggedIn ? (
-                <Link href="/login" className="text-white">
-                  <button className="block bg-blue-700 py-2 px-3 text-white rounded-md hover:bg-blue-700 md:pl-2 md:pr-2">
-                    Login
-                  </button>
-                </Link>
-              ) : (
-                <div
-                  className="flex flex-col items-center ml-2 mr-2 cursor-pointer select-none relative"
-                  onMouseEnter={() => setIsUserMenuOpen(true)}
-                  onMouseLeave={() => setIsUserMenuOpen(false)}
-                >
-                  {/* ไอคอน */}
-                  <FaRegUserCircle size={28} className="text-blue-600" />
+  {!isLoggedIn ? (
+    <Link href="/login">
+      <button className="block bg-blue-700 py-2 px-3 text-white rounded-md hover:bg-blue-700">
+        Login
+      </button>
+    </Link>
+  ) : (
+    <div
+      ref={menuRef}
+      className="flex flex-col items-center ml-2 mr-2 cursor-pointer select-none relative"
+      onClick={() => {
+        // toggle dropdown
+        setIsUserMenuOpen((prev) => !prev);
+      }}
+    >
+      {/* ไอคอน */}
+      <FaRegUserCircle size={28} className="text-blue-600" />
 
-                  {/* ชื่อ + ลูกศรในบรรทัดเดียวกัน */}
-                  <div className="flex items-center gap-1 mt-1">
-                    <span className="text-xs text-white">{username}</span>
+      {/* ชื่อ + ลูกศร */}
+      <div className="flex items-center gap-1 mt-1">
+        <span className="text-xs text-white">{username}</span>
+        <svg
+          className={`w-3 h-3 text-white transition-transform duration-200 ${
+            isUserMenuOpen ? "rotate-180" : ""
+          }`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </div>
 
-                    <svg
-                      className={`w-3 h-3 text-white transition-transform duration-200 ${
-                        isUserMenuOpen ? "rotate-180" : ""
-                      }`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-                  </div>
+      {/* Dropdown Menu */}
+      <div
+        className={`
+          absolute top-[50px] right-0 bg-white shadow-md rounded-md overflow-hidden
+          transition-all duration-300 z-50
+          ${
+            isUserMenuOpen
+              ? "opacity-100 max-h-20 pointer-events-auto"
+              : "opacity-0 max-h-0 pointer-events-none"
+          }
+        `}
+      >
+        <button
+          onClick={async () => {
+            await fetch(`${API_BASE_URL}/api/auth/logout`, {
+              method: "POST",
+              credentials: "include",
+            });
 
-                  {/* Dropdown (ตำแหน่งเดิม, ไม่แตะต้อง) */}
-                  <div
-                    className={`
-    absolute top-[50px] right-0 bg-white shadow-md rounded-md overflow-hidden 
-    transition-all duration-200 z-50
-    ${
-      isUserMenuOpen
-        ? "opacity-100 max-h-20 pointer-events-auto"
-        : "opacity-0 max-h-0 pointer-events-none"
-    }
-  `}
-                  >
-                    <button
-                      onClick={async () => {
-                        await fetch(`${API_BASE_URL}/api/auth/logout`, {
-                          method: "POST",
-                          credentials: "include",
-                        });
+            localStorage.removeItem("username");
+            clearCart();
+            setIsLoggedIn(false);
+            setUsername(null);
+            setIsUserMenuOpen(false);
 
-                        localStorage.removeItem("username");
-                        // localStorage.removeItem("first_name");
+            // แจ้งทุกหน้าในระบบว่าผู้ใช้ได้ Logout แล้ว
+            window.dispatchEvent(new Event("user-logout"));
 
-                        clearCart();
-                        setIsLoggedIn(false);
-                        setUsername(null);
-                        router.refresh();
-                      }}
-                      className="block w-full text-left px-6 py-1 text-red-600 hover:bg-gray-100 text-sm"
-                    >
-                      Logout
-                    </button>
-                  </div>
-                </div>
-              )}
-            </li>
+            router.refresh();
+          }}
+          className="block w-full text-left px-6 py-1 text-red-600 hover:bg-gray-100 text-sm"
+        >
+          Logout
+        </button>
+      </div>
+    </div>
+  )}
+</li>
+
           </ul>
         </div>
       </div>
