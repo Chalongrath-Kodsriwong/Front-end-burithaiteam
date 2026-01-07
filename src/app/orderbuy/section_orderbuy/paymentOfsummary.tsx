@@ -6,77 +6,103 @@ import { useCart } from "@/app/context/CartContext";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
-export default function PaymentSummary({ addressId }: any) {
+export default function PaymentSummary({ addressId }: { addressId: number | null }) {
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const { refreshCart } = useCart();
 
   const total = Number(searchParams.get("total") || 0);
 
-  // ⭐ รับ itemcart_ids ที่ส่งมาจากหน้า cart
-  const itemcartIds = (() => {
+  const itemcartIds: number[] = (() => {
     try {
-      return JSON.parse(searchParams.get("itemcart_ids") || "[]");
+      const raw = JSON.parse(searchParams.get("itemcart_ids") || "[]");
+      // กันพัง + บังคับเป็น number
+      return Array.isArray(raw) ? raw.map((x) => Number(x)).filter((x) => !Number.isNaN(x)) : [];
     } catch (err) {
-      console.error("Failed to parse itemcart_ids:", err);
+      console.error("[orderbuy] Failed to parse itemcart_ids:", err);
       return [];
     }
   })();
 
-  const router = useRouter();
-  const { refreshCart } = useCart();
-
-  const shippingFee = 50;
+  const shippingFee = 0;
   const grandTotal = total + shippingFee;
 
   const [loading, setLoading] = useState(false);
 
-  // 🔥 ฟังก์ชันสร้างคำสั่งซื้อจริง
   async function handleOrder() {
-    if (!addressId) {
+    console.log("[orderbuy] addressId:", addressId);
+    console.log("[orderbuy] itemcartIds:", itemcartIds);
+    console.log("[orderbuy] total:", total, "shippingFee:", shippingFee, "grandTotal:", grandTotal);
+
+    const address_id = Number(addressId);
+    if (!addressId || Number.isNaN(address_id)) {
       alert("กรุณาเลือกที่อยู่จัดส่ง");
       return;
     }
 
     if (!Array.isArray(itemcartIds) || itemcartIds.length === 0) {
       alert("ไม่พบสินค้าในตะกร้าที่เลือก");
-      console.error("itemcart_ids invalid:", itemcartIds);
+      console.error("[orderbuy] itemcart_ids invalid:", itemcartIds);
       return;
     }
 
     try {
       setLoading(true);
 
+      const payload = {
+        address_id,
+        shipping_fee: shippingFee,
+        itemcart_ids: itemcartIds,
+      };
+
+      console.log("[orderbuy] create order payload:", payload);
+
       const res = await fetch(`${API_URL}/api/orders`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          address_id: addressId,
-          shipping_fee: shippingFee,
-          itemcart_ids: itemcartIds,  // ⭐ ส่งให้ backend ใช้สร้าง order_items
-        }),
+        body: JSON.stringify(payload),
       });
 
-      if (res.status === 401) {
-        alert("กรุณาเข้าสู่ระบบใหม่");
-        router.replace(`/login?redirect=/orderbuy`);
-        return;
-      }
-
-      const json = await res.json();
+      const json = await res.json().catch(() => null);
+      console.log("[orderbuy] create order response:", json);
 
       if (!res.ok) {
-        alert(json.message || "เกิดข้อผิดพลาดในการสั่งซื้อ");
+        alert(json?.message || json?.data?.message || `เกิดข้อผิดพลาดในการสั่งซื้อ (${res.status})`);
         return;
       }
 
-      // ⭐ เคลียร์ตะกร้าเฉพาะรายการที่สั่ง
+      // ✅ รองรับหลายรูปแบบ response
+      // แบบที่คุณบอก: { status, message, data: { status, message, data: order } }
+      // หรือบางทีอาจเป็น: { status, data: order }
+      const createdOrder =
+        json?.data?.data?.data || // ซ้อน 3 ชั้น (เผื่อบางที)
+        json?.data?.data ||      // ซ้อน 2 ชั้น (ตามที่คุณคอมเมนต์)
+        json?.data ||            // ไม่ซ้อน
+        null;
+
+      const id_order = createdOrder?.id_order;
+      const total_price_raw = createdOrder?.total_price;
+
+      const total_price = Number(total_price_raw);
+      const finalTotalForPayment =
+        !Number.isNaN(total_price) && total_price > 0 ? total_price : grandTotal;
+
+      console.log("[orderbuy] createdOrder:", createdOrder);
+      console.log("[orderbuy] extracted id_order:", id_order);
+      console.log("[orderbuy] extracted total_price:", total_price_raw, "=> final:", finalTotalForPayment);
+
+      if (!id_order) {
+        alert("สร้างออเดอร์ไม่สำเร็จ (ไม่พบ id_order จาก backend)");
+        return;
+      }
+
       await refreshCart();
 
-      // ⭐ ไปหน้า success พร้อม order_id
-      router.replace(`/orderbuy/success?order_id=${json.data.id_order}`);
-
+      // ✅ ส่งทั้ง id_order และ total_price ไปหน้า payment
+      router.replace(`/payment?order_id=${id_order}&total_price=${finalTotalForPayment}`);
     } catch (err) {
-      console.error("Order error:", err);
+      console.error("[orderbuy] Order error:", err);
       alert("Server error. กรุณาลองใหม่");
     } finally {
       setLoading(false);
