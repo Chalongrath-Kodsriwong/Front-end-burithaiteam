@@ -260,43 +260,42 @@ export default function TopNavbar() {
   }, []);
 
   // เมื่อ login-success → โหลด username ใหม่ + reload login state
-useEffect(() => {
-  function handleLoginSuccess() {
-    console.log("🔄 Navbar received login-success event");
+  useEffect(() => {
+    function handleLoginSuccess() {
+      console.log("🔄 Navbar received login-success event");
 
-    setIsUserMenuOpen(false); // ⬅️ ปิด Dropdown ทันที
+      setIsUserMenuOpen(false); // ⬅️ ปิด Dropdown ทันที
 
-    setTimeout(() => {
-      const name = localStorage.getItem("username");
-      setUsername(name || null);
-      checkLogin();
-    }, 50);
-  }
+      setTimeout(() => {
+        const name = localStorage.getItem("username");
+        setUsername(name || null);
+        checkLogin();
+      }, 50);
+    }
 
-  window.addEventListener("login-success", handleLoginSuccess);
-  return () => window.removeEventListener("login-success", handleLoginSuccess);
-}, []);
-
+    window.addEventListener("login-success", handleLoginSuccess);
+    return () =>
+      window.removeEventListener("login-success", handleLoginSuccess);
+  }, []);
 
   const menuRef = useRef<HTMLDivElement | null>(null);
 
   // ปิดเมนูเมื่อคลิกที่อื่น
-useEffect(() => {
-  function handleClickOutside(e: MouseEvent) {
-    if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-      setIsUserMenuOpen(false);
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setIsUserMenuOpen(false);
+      }
     }
-  }
-  document.addEventListener("mousedown", handleClickOutside);
-  return () => document.removeEventListener("mousedown", handleClickOutside);
-}, []);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
-useEffect(() => {
-  if (isLoggedIn) {
-    setIsUserMenuOpen(false); // ปิด dropdown เมื่อสถานะ login เปลี่ยน
-  }
-}, [isLoggedIn]);
-
+  useEffect(() => {
+    if (isLoggedIn) {
+      setIsUserMenuOpen(false); // ปิด dropdown เมื่อสถานะ login เปลี่ยน
+    }
+  }, [isLoggedIn]);
 
   return (
     <nav className="bg-white border-gray-200 dark:bg-gray-900">
@@ -355,78 +354,92 @@ useEffect(() => {
             ))}
 
             <li className="flex items-center relative">
-  {!isLoggedIn ? (
-    <Link href="/login">
-      <button className="block bg-blue-700 py-2 px-3 text-white rounded-md hover:bg-blue-700">
-        Login
-      </button>
-    </Link>
-  ) : (
-    <div
-      ref={menuRef}
-      className="flex flex-col items-center ml-2 mr-2 cursor-pointer select-none relative"
-      onClick={() => {
-        // toggle dropdown
-        setIsUserMenuOpen((prev) => !prev);
-      }}
-    >
-      {/* ไอคอน */}
-      <FaRegUserCircle size={28} className="text-blue-600" />
+              {!isLoggedIn ? (
+                <Link href="/login">
+                  <button className="block bg-blue-700 py-2 px-3 text-white rounded-md hover:bg-blue-700">
+                    Login
+                  </button>
+                </Link>
+              ) : (
+                <div
+                  ref={menuRef}
+                  className="flex flex-col items-center ml-2 mr-2 cursor-pointer select-none relative"
+                  onClick={() => {
+                    // toggle dropdown
+                    setIsUserMenuOpen((prev) => !prev);
+                  }}
+                >
+                  {/* ไอคอน */}
+                  <FaRegUserCircle size={28} className="text-blue-600" />
 
-      {/* ชื่อ + ลูกศร */}
-      <div className="flex items-center gap-1 mt-1">
-        <span className="text-xs text-white">{username}</span>
-        <svg
-          className={`w-3 h-3 text-white transition-transform duration-200 ${
-            isUserMenuOpen ? "rotate-180" : ""
-          }`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
-      </div>
+                  {/* ชื่อ + ลูกศร */}
+                  <div className="flex items-center gap-1 mt-1">
+                    <span className="text-xs text-white">{username}</span>
+                    <svg
+                      className={`w-3 h-3 text-white transition-transform duration-200 ${
+                        isUserMenuOpen ? "rotate-180" : ""
+                      }`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </div>
 
-      {/* Dropdown Menu */}
-      <div
-        className={`
-          absolute top-[50px] right-0 bg-white shadow-md rounded-md overflow-hidden
-          transition-all duration-300 z-50
-          ${
-            isUserMenuOpen
-              ? "opacity-100 max-h-20 pointer-events-auto"
-              : "opacity-0 max-h-0 pointer-events-none"
-          }
-        `}
-      >
-        <button
-          onClick={async () => {
-            await fetch(`${API_BASE_URL}/api/auth/logout`, {
-              method: "POST",
-              credentials: "include",
-            });
+                  {/* Dropdown Menu */}
+                  <div
+                    className={`
+                      absolute top-[50px] right-0 bg-white shadow-md rounded-md overflow-hidden
+                      transition-all duration-300 z-50
+                      ${
+                        isUserMenuOpen
+                          ? "opacity-100 max-h-[200px] pointer-events-auto" // เพิ่ม max-h ขึ้น
+                          : "opacity-0 max-h-0 pointer-events-none"
+                      }
+                    `}
+                  >
+                    <Link href="/history_payment">
+                      <button className="block w-full text-left px-6 py-1 text-blue-600 hover:bg-gray-100 text-sm">
+                        History Payment
+                      </button>
+                    </Link>
+                    <Link href="/setting_menu">
+                      <button className="block w-full text-left px-6 py-1 text-blue-600 hover:bg-gray-100 text-sm">
+                        Settings
+                      </button>
+                    </Link>
+                    <button
+                      onClick={async () => {
+                        await fetch(`${API_BASE_URL}/api/auth/logout`, {
+                          method: "POST",
+                          credentials: "include",
+                        });
 
-            localStorage.removeItem("username");
-            clearCart();
-            setIsLoggedIn(false);
-            setUsername(null);
-            setIsUserMenuOpen(false);
+                        localStorage.removeItem("username");
+                        clearCart();
+                        setIsLoggedIn(false);
+                        setUsername(null);
+                        setIsUserMenuOpen(false);
 
-            // แจ้งทุกหน้าในระบบว่าผู้ใช้ได้ Logout แล้ว
-            window.dispatchEvent(new Event("user-logout"));
+                        // แจ้งทุกหน้าในระบบว่าผู้ใช้ได้ Logout แล้ว
+                        window.dispatchEvent(new Event("user-logout"));
 
-            router.refresh();
-          }}
-          className="block w-full text-left px-6 py-1 text-red-600 hover:bg-gray-100 text-sm"
-        >
-          Logout
-        </button>
-      </div>
-    </div>
-  )}
-</li>
-
+                        router.refresh();
+                      }}
+                      className="block w-full text-left px-6 py-1 text-red-600 hover:bg-gray-100 text-sm"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                </div>
+              )}
+            </li>
           </ul>
         </div>
       </div>
