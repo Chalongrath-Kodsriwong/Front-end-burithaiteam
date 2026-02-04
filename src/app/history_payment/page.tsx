@@ -1,6 +1,7 @@
-// ✅ สร้างหน้าใหม่: /app/order_history/page.tsx
-// ใช้ API เดิม: GET http://localhost:8080/api/orders/users
-// แสดงเฉพาะของ user ที่ login อยู่ (ฝั่ง backend จะคืนของ user นั้นเอง เพราะใช้ cookie session)
+// ✅ history_payment/page.tsx
+// เปลี่ยน API จาก /api/orders/users -> /api/account/orders
+// ✅ UI/โครงสร้าง state/ฟังก์ชัน/การ render เดิม "คงไว้เหมือนเดิม"
+// 👉 เราจะ map ข้อมูลจาก API ใหม่ ให้เป็น shape เดิมที่หน้านี้ใช้อยู่ (id_order, order_items, product_image, product_name ฯลฯ)
 
 "use client";
 
@@ -23,7 +24,7 @@ export default function OrderHistoryPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // sort ล่าสุดขึ้นก่อน
+  // sort ล่าสุดขึ้นก่อน (คงเดิม)
   const sortedOrders = useMemo(() => {
     return [...orders].sort((a, b) => {
       const ta = new Date(a?.created_at || 0).getTime();
@@ -35,21 +36,54 @@ export default function OrderHistoryPage() {
   useEffect(() => {
     const fetchHistory = async () => {
       setLoading(true);
-      setError(null);
+      setError("");
 
       try {
-        const res = await fetch(`${API_URL}/api/orders/users`, {
+        // ✅ เปลี่ยนมาใช้ API ใหม่
+        const res = await fetch(`${API_URL}/api/account/orders`, {
           method: "GET",
           credentials: "include", // ✅ Beer Token cookie
         });
 
-        if (!res.ok) {
-          const txt = await res.text().catch(() => "");
-          throw new Error(txt || `โหลดประวัติไม่สำเร็จ (${res.status})`);
-        }
+        // if (!res.ok) {
+        //   const txt = await res.text().catch(() => "");
+        //   throw new Error(txt || `โหลดประวัติไม่สำเร็จ (${res.status})`);
+        // }
 
         const json = await res.json();
-        setOrders(Array.isArray(json?.data) ? json.data : []);
+        const rawOrders = Array.isArray(json?.data) ? json.data : [];
+
+        // ✅ map โครงสร้างใหม่ -> ให้เหมือนโครงสร้างเดิมที่หน้าใช้อยู่
+        const mappedOrders = rawOrders.map((o: any) => ({
+          id_order: o?.id_order,
+          shipping_address: o?.shipping_address,
+          shipping_fee: o?.shipping_fee,
+          tracking_number: o?.tracking_number,
+          status: o?.status,
+          dynamic_total_price: o?.dynamic_total_price,
+          created_at: o?.created_at,
+          updated_at: o?.updated_at,
+
+          // เดิมหน้าใช้ o.order_items
+          order_items: Array.isArray(o?.items)
+            ? o.items.map((it: any) => ({
+                // เดิมหน้าใช้ it.id_orderitem เป็น key
+                id_orderitem:
+                  it?.id_orderitems ??
+                  `${o?.id_order}-${it?.name ?? "item"}-${it?.variant_name ?? ""}-${it?.inventory_name ?? ""}`,
+
+                // เดิมหน้าใช้ product_image/product_name/variant_name/inventory_name/quantity/dynamic_total
+                product_image: it?.imageUrl ?? null,
+                product_name: it?.name ?? null,
+                variant_name: it?.variant_name ?? null,
+                inventory_name: it?.inventory_name ?? null,
+                quantity: it?.quantity ?? null,
+                dynamic_total: it?.dynamic_total ?? it?.price ?? null,
+              }))
+            : [],
+        }));
+
+        setOrders(mappedOrders);
       } catch (e: any) {
         setError(e?.message || "เกิดข้อผิดพลาด");
       } finally {
@@ -98,9 +132,7 @@ export default function OrderHistoryPage() {
             >
               {/* Header Order */}
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="text-xl font-bold">
-                  Order #{o.id_order}
-                </div>
+                <div className="text-xl font-bold">Order #{o.id_order}</div>
 
                 <div className="flex items-center gap-4">
                   <div className="text-lg font-semibold">
@@ -134,9 +166,7 @@ export default function OrderHistoryPage() {
                 <div>
                   <div className="font-semibold">วันที่สั่งซื้อ</div>
                   <div>
-                    {o.created_at
-                      ? new Date(o.created_at).toLocaleString()
-                      : "-"}
+                    {o.created_at ? new Date(o.created_at).toLocaleString() : "-"}
                   </div>
                 </div>
 
@@ -172,9 +202,7 @@ export default function OrderHistoryPage() {
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <span className="text-xs text-gray-600">
-                            no image
-                          </span>
+                          <span className="text-xs text-gray-600">no image</span>
                         )}
                       </div>
 

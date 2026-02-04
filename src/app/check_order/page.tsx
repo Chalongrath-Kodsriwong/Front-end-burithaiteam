@@ -1,5 +1,6 @@
-// ✅ แก้ทั้งไฟล์ /check_order/page.tsx ให้รองรับหลายสินค้าแบบ “เพิ่มบล็อกตามจำนวนสินค้า”
-// (เรียงตาม order_items ของ order นั้น ๆ)
+// ✅ /check_order/page.tsx
+// เปลี่ยน API จาก /api/orders/users -> /api/account/orders
+// ✅ โครงสร้างหน้า + state + UI เดิม (order, items, status, progress, layout) ไว้เหมือนเดิม
 
 "use client";
 
@@ -39,7 +40,8 @@ const CheckOrderPage = () => {
       setError(null);
 
       try {
-        const res = await fetch(`${API_URL}/api/orders/users`, {
+        // ✅ เปลี่ยนมาใช้ API ใหม่
+        const res = await fetch(`${API_URL}/api/account/orders`, {
           method: "GET",
           credentials: "include",
         });
@@ -51,14 +53,34 @@ const CheckOrderPage = () => {
 
         const json = await res.json();
 
+        // ✅ โครงสร้างใหม่: data[].id_order
         const foundOrder = json?.data?.find(
           (o: any) => o.id_order === Number(orderId)
         );
 
         if (!foundOrder) throw new Error("ไม่พบคำสั่งซื้อที่ต้องการ");
 
+        // ✅ คง state เดิม: order, items, status
+        // - API ใหม่ใช้ items (แทน order_items)
+        // - item ใหม่ใช้ imageUrl, name, id_orderitems
+        // - แต่ UI เดิมอ้าง product_image, product_name, id_orderitem
+        // 👉 จึง "map แปลงชื่อ field" ให้หน้าเดิมใช้ได้เหมือนเดิม
         setOrder(foundOrder);
-        setItems(Array.isArray(foundOrder.order_items) ? foundOrder.order_items : []);
+
+        const mappedItems = Array.isArray(foundOrder.items)
+          ? foundOrder.items.map((it: any) => ({
+              // ให้ key เดิมยังทำงาน: it.id_orderitem
+              id_orderitem: it?.id_orderitems ?? `${foundOrder.id_order}-${it?.name ?? "item"}`,
+              product_image: it?.imageUrl ?? null,
+              product_name: it?.name ?? null,
+              variant_name: it?.variant_name ?? null,
+              inventory_name: it?.inventory_name ?? null,
+              quantity: it?.quantity ?? null,
+              dynamic_total: it?.dynamic_total ?? it?.price ?? null,
+            }))
+          : [];
+
+        setItems(mappedItems);
         setStatus(foundOrder.status || null);
       } catch (err: any) {
         setError(err?.message || "เกิดข้อผิดพลาด");
@@ -136,7 +158,9 @@ const CheckOrderPage = () => {
                     </div>
 
                     <div className="mt-4 text-lg text-gray-700 space-y-1">
-                      <div className="font-semibold">{it?.product_name || "-"}</div>
+                      <div className="font-semibold">
+                        {it?.product_name || "-"}
+                      </div>
                       <div className="text-gray-600">
                         {it?.variant_name || "-"}
                         {it?.inventory_name ? ` • ${it.inventory_name}` : ""}

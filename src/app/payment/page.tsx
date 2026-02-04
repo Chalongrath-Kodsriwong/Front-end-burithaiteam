@@ -206,78 +206,86 @@ export default function PaymentPage() {
   };
 
   // ฟังก์ชันสำหรับอัปโหลดสลิป
-  const handleUploadSlip = async () => {
-    setIsProcessing(true); // เปิด Popup เมื่อเริ่มประมวลผล
+const handleUploadSlip = async () => {
+  setIsProcessing(true); // เปิด Popup เมื่อเริ่มประมวลผล
 
-    if (!file) {
-      setUploadError("กรุณาเลือกไฟล์สลิปก่อน");
-      setIsProcessing(false); // ปิด Popup เมื่อเกิด error
-      return;
+  if (!file) {
+    setUploadError("กรุณาเลือกไฟล์สลิปก่อน");
+    setIsProcessing(false);
+    return;
+  }
+  if (!paymentId) {
+    setUploadError("ไม่พบ paymentId กรุณาสร้างรายการชำระเงินก่อน");
+    setIsProcessing(false);
+    return;
+  }
+
+  setUploading(true);
+  setUploadError("");
+  setSuccessMessage("");
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  try {
+    // 1) upload slip
+    const res = await fetch(`${API_URL}/api/payment/${paymentId}`, {
+      method: "PUT",
+      credentials: "include", // ส่ง cookie session (Beer Token)
+      body: formData,
+    });
+
+    if (!res.ok) {
+      const errText = await res.text().catch(() => "");
+      throw new Error(errText || `Error: ${res.status} - ${res.statusText}`);
     }
-    if (!paymentId) {
-      setUploadError("ไม่พบ paymentId กรุณาสร้างรายการชำระเงินก่อน");
-      setIsProcessing(false); // ปิด Popup เมื่อเกิด error
-      return;
+
+    const data = await res.json();
+
+    if (data?.status !== "success") {
+      throw new Error(data?.message || "เกิดข้อผิดพลาดในการอัปโหลด");
     }
 
-    setUploading(true);
-    setUploadError("");
-    setSuccessMessage("");
+    setSuccessMessage("สลิปถูกอัปโหลดและตรวจสอบสำเร็จ");
 
-    const formData = new FormData();
-    formData.append("file", file); // ส่งไฟล์ที่เลือกไป
+    // 2) --- ดึงสถานะ order หลัง upload slip ---
+    const orderRes = await fetch(`${API_URL}/api/account/orders`, {
+      method: "GET",
+      credentials: "include", // Beer Token
+    });
 
-    try {
-      const res = await fetch(`${API_URL}/api/payment/${paymentId}`, {
-        method: "PUT",
-        credentials: "include", // ส่ง cookie session (Beer Token)
-        body: formData,
-      });
-
-      if (!res.ok) {
-        const errText = await res.text().catch(() => "");
-        throw new Error(errText || `Error: ${res.status} - ${res.statusText}`);
-      }
-
-      const data = await res.json();
-
-      if (data?.status !== "success") {
-        throw new Error(data?.message || "เกิดข้อผิดพลาดในการอัปโหลด");
-      }
-
-      setSuccessMessage("สลิปถูกอัปโหลดและตรวจสอบสำเร็จ");
-
-      // --- Log ข้อมูลสถานะในฐานข้อมูล ---
-      const orderRes = await fetch(`${API_URL}/api/orders/users`, {
-        method: "GET",
-        credentials: "include", // ส่ง cookie session (Beer Token)
-      });
-
-      if (!orderRes.ok) {
-        throw new Error("ไม่สามารถดึงข้อมูลออร์เดอร์ได้");
-      }
-
-      const orderData = await orderRes.json();
-
-      console.log("สถานะในฐานข้อมูล:", orderData?.data[0]?.status); // ดึง status จากอาเรย์ data
-
-      // ในส่วนของการ redirect หลังจาก upload slip
-if (orderData?.data[0]?.status === "checking") {
-  console.log("สถานะเป็น checking, กำลังกำไรไปที่หน้า /check_order");
-  router.push(`/check_order?order_id=${orderId}`);  // เพิ่ม query parameter เพื่อส่ง order_id
-} else {
-  console.log("สถานะยังไม่เป็น checking, ไม่สามารถรีไดเรกต์ได้");
-}
-
-    } catch (error: any) {
-      setUploadError(error?.message || "เกิดข้อผิดพลาดในการอัปโหลด");
-      console.log("อัปโหลดไม่สำเร็จ");
-      console.error("Error during upload:", error);
-    } finally {
-      setUploading(false);
-      setIsProcessing(false); // ปิด Popup เมื่อเสร็จสิ้น
+    if (!orderRes.ok) {
+      throw new Error("ไม่สามารถดึงข้อมูลออร์เดอร์ได้");
     }
-  };
+
+    const orderData = await orderRes.json();
+
+    // หา order ที่ตรงกับ orderId ปัจจุบัน
+    const currentOrder = orderData?.data?.find(
+      (o: any) => o.id_order === orderId
+    );
+
+    console.log("สถานะในฐานข้อมูล:", currentOrder?.status);
+
+    // redirect เมื่อสถานะเป็น checking
+    if (currentOrder?.status === "checking") {
+      console.log("สถานะเป็น checking, redirect ไปหน้า /check_order");
+      router.push(`/check_order?order_id=${orderId}`);
+    } else {
+      console.log("สถานะยังไม่เป็น checking:", currentOrder?.status);
+    }
+  } catch (error: any) {
+    // ❗️ตามที่คุณกำชับ: ห้ามลบ/ห้ามเปลี่ยน logic ใน catch/finally
+    setUploadError(error?.message || "เกิดข้อผิดพลาดในการอัปโหลด");
+    console.log("อัปโหลดไม่สำเร็จ");
+    console.error("Error during upload:", error);
+  } finally {
+    // ❗️ตามที่คุณกำชับ: ห้ามลบ/ห้ามเปลี่ยน logic ใน catch/finally
+    setUploading(false);
+    setIsProcessing(false); // ปิด Popup เมื่อเสร็จสิ้น
+  }
+};
+
 
   const openModal = () => {
     setIsModalOpen(true); // เปิด Modal
@@ -635,7 +643,6 @@ if (orderData?.data[0]?.status === "checking") {
               : "Upload slip"}
           </button>
         </div>
-
 
         {/* // **Popup** เมื่อ QR หมดอายุ */}
         {isPopupOpen && (
