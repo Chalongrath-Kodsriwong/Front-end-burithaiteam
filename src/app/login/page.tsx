@@ -6,6 +6,15 @@ import Link from "next/link";
 
 import { useCart } from "@/app/context/CartContext";
 
+declare global {
+  interface Window {
+    google?: any;
+  }
+}
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+
 export default function LoginPage() {
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
@@ -15,13 +24,22 @@ export default function LoginPage() {
   const [redirectUrl, setRedirectUrl] = useState("/");
   const [isLoading, setIsLoading] = useState(false);
 
+  // Google loading
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+
   // ⭐ ใช้สำหรับกัน brute-force แบบฝั่ง client
   const [loginAttempts, setLoginAttempts] = useState(0);
   const [lockedUntil, setLockedUntil] = useState<number | null>(null);
 
   const router = useRouter();
 
+  const [gsiReady, setGsiReady] = useState(false);
+
   const { refreshCart } = useCart();
+
+  useEffect(() => {
+    console.log("GOOGLE_CLIENT_ID:", process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
+  }, []);
 
   // อ่าน redirect จาก URL
   useEffect(() => {
@@ -46,7 +64,6 @@ export default function LoginPage() {
     }
   }, []);
 
-  // ถ้า lockedUntil เปลี่ยน → sync ไป localStorage
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (lockedUntil && lockedUntil > Date.now()) {
@@ -58,6 +75,135 @@ export default function LoginPage() {
       window.localStorage.removeItem("login_lock");
     }
   }, [lockedUntil]);
+
+  // ✅ Load Google Identity Services script + init
+  useEffect(() => {
+    if (!GOOGLE_CLIENT_ID) return;
+    if (typeof window === "undefined") return;
+
+    function initGoogle() {
+      if (!window.google) return;
+
+      window.google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleGoogleCredential,
+        ux_mode: "popup",
+        use_fedcm_for_prompt: false,
+      });
+
+      const btn = document.getElementById("googleBtn");
+      if (btn) {
+        btn.innerHTML = ""; // 🔥 สำคัญมาก ล้างก่อน render ใหม่
+        window.google.accounts.id.renderButton(btn, {
+          theme: "filled_blue",
+          size: "large",
+          width: 320,
+        });
+      }
+    }
+
+    const existingScript = document.getElementById("google-gsi");
+
+    if (existingScript) {
+      // 🔥 ถ้า script มีอยู่แล้ว ให้ init ใหม่เลย
+      initGoogle();
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.id = "google-gsi";
+    script.src = "https://accounts.google.com/gsi/client";
+    script.async = true;
+    script.defer = true;
+    script.onload = initGoogle;
+
+    document.body.appendChild(script);
+  }, []);
+
+  const afterLoginSuccess = async (user: any) => {
+    // refresh cart ก่อน (เหมือนเดิม)
+    await refreshCart();
+
+    // เก็บชื่อไว้ให้ Navbar (เหมือนเดิม)
+    localStorage.setItem("username", user?.username || "");
+    localStorage.setItem("first_name", user?.first_name || "");
+
+    // reset lock
+    setLoginAttempts(0);
+    setLockedUntil(null);
+
+    // แจ้ง event เหมือนเดิม
+    window.dispatchEvent(new Event("login-success"));
+
+    // หา redirect เหมือนเดิม (query > state > "/")
+    const params = new URLSearchParams(window.location.search);
+    const redirect = params.get("redirect") || redirectUrl || "/";
+
+    // ✅ พยายามใช้ Next router ก่อน
+    router.push(redirect);
+
+    // ✅ fallback: ถ้า push ไม่พาไปจริงภายใน 150ms ให้ใช้ location
+    setTimeout(() => {
+      if (window.location.pathname !== redirect) {
+        window.location.assign(redirect);
+      }
+    }, 150);
+  };
+
+  // ✅ callback จาก Google จะได้ id token (credential)
+  const handleGoogleCredential = async (response: any) => {
+    try {
+      setError("");
+      setIsGoogleLoading(true);
+
+      const tokenId = response?.credential;
+      if (!tokenId) {
+        setError("ไม่พบ Google credential");
+        return;
+      }
+
+      const res = await fetch(`${API_URL}/api/auth/google/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include", // ✅ ให้ cookie จาก backend ถูก set
+        body: JSON.stringify({ tokenId }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        const msg =
+          data?.message && typeof data.message === "string"
+            ? data.message
+            : "Google login failed";
+        setError(msg);
+        return;
+      }
+
+      // ✅ redirect เหมือน login ปกติ
+      await afterLoginSuccess(data.user);
+
+      if (data?.user) {
+        localStorage.setItem("username", data.user.username || "");
+        localStorage.setItem("first_name", data.user.first_name || "");
+      }
+
+      setLoginAttempts(0);
+      setLockedUntil(null);
+
+      setTimeout(() => {
+        window.dispatchEvent(new Event("login-success"));
+        const params = new URLSearchParams(window.location.search);
+        const redirect = params.get("redirect") || "/";
+        router.push(redirect);
+      }, 50);
+    } catch (err) {
+      console.error("Google login error:", err);
+      setError("ไม่สามารถ Login ด้วย Google ได้ กรุณาลองใหม่");
+    } finally {
+      setIsGoogleLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,7 +228,7 @@ export default function LoginPage() {
     try {
       setIsLoading(true);
 
-      const res = await fetch("http://localhost:8080/api/auth/login", {
+      const res = await fetch(`${API_URL}/api/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -121,7 +267,7 @@ export default function LoginPage() {
       }
 
       console.log("Logged in user:", data.user);
-      await refreshCart();
+      await afterLoginSuccess(data.user);
 
       // ⭐ login สำเร็จ → reset ตัวนับ / ลบ lock
       setLoginAttempts(0);
@@ -153,6 +299,8 @@ export default function LoginPage() {
     !identifier ||
     !password ||
     (lockedUntil && lockedUntil > Date.now());
+
+  const isGoogleDisabled = isGoogleLoading; // (จะเพิ่มเงื่อนไขอื่นก็ได้)
 
   return (
     <div className="container px-0 mx-auto p-2">
@@ -281,14 +429,22 @@ export default function LoginPage() {
                 Continue with Facebook
               </button>
             </Link>
-            <Link href="/">
-              <button
-                type="button"
-                className="w-full py-2 text-white bg-red-600 hover:bg-red-700 font-medium rounded-lg text-sm cursor-pointer"
-              >
-                Continue with Google
-              </button>
-            </Link>
+            {/* ✅ Google Login Button */}
+            {/* <button
+              type="button"
+              onClick={handleGoogleLoginClick}
+              disabled={isGoogleDisabled}
+              className={`w-full py-2 text-white font-medium rounded-lg text-sm cursor-pointer ${
+                isGoogleDisabled
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-red-600 hover:bg-red-700"
+              }`}
+            >
+              {isGoogleLoading
+                ? "Signing in with Google..."
+                : "Continue with Google"}
+            </button> */}
+            <div id="googleBtn" className="w-full flex justify-center" />
           </div>
         </div>
       </form>
