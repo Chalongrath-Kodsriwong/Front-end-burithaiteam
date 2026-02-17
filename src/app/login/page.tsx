@@ -37,9 +37,9 @@ export default function LoginPage() {
 
   const { refreshCart } = useCart();
 
-  useEffect(() => {
-    console.log("GOOGLE_CLIENT_ID:", process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
-  }, []);
+  // useEffect(() => {
+  //   console.log("GOOGLE_CLIENT_ID:", process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
+  // }, []);
 
   // อ่าน redirect จาก URL
   useEffect(() => {
@@ -367,18 +367,24 @@ export default function LoginPage() {
         )}
 
         {/* Remember Me */}
-        <div className="flex items-start mb-5">
-          <input
-            id="remember"
-            type="checkbox"
-            className="w-4 h-4 border border-gray-300 rounded-sm bg-gray-50 focus:ring-1"
-          />
-          <label
-            htmlFor="remember"
-            className="ml-2 text-sm font-medium text-gray-900"
-          >
-            Remember me?
-          </label>
+        <div className="flex items-start justify-between mb-5">
+          <div className="flex items-center">
+            <input
+              id="remember"
+              type="checkbox"
+              className="w-4 h-4 border border-gray-300 rounded-sm bg-gray-50 focus:ring-1"
+            />
+            <label
+              htmlFor="remember"
+              className="ml-2 text-sm font-medium text-gray-900"
+            >
+              Remember me?
+            </label>
+          </div>
+
+          <div className="text-sm text-blue-600 cursor-pointer hover:underline">
+            <Link href="/request-password">Forgot password?</Link>
+          </div>
         </div>
 
         {/* Sign In Button */}
@@ -421,29 +427,6 @@ export default function LoginPage() {
           </div>
 
           <div className="flex flex-col gap-3 text-center">
-            <Link href="/">
-              <button
-                type="button"
-                className="w-full py-2 text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm cursor-pointer"
-              >
-                Continue with Facebook
-              </button>
-            </Link>
-            {/* ✅ Google Login Button */}
-            {/* <button
-              type="button"
-              onClick={handleGoogleLoginClick}
-              disabled={isGoogleDisabled}
-              className={`w-full py-2 text-white font-medium rounded-lg text-sm cursor-pointer ${
-                isGoogleDisabled
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-red-600 hover:bg-red-700"
-              }`}
-            >
-              {isGoogleLoading
-                ? "Signing in with Google..."
-                : "Continue with Google"}
-            </button> */}
             <div id="googleBtn" className="w-full flex justify-center" />
           </div>
         </div>
