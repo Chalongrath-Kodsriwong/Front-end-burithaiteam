@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import DisplayItemCart from "../shoppingcart/section_shoppingcart/displayItemcart";
+import DisplayItemCart from "../shoppingcart/section_shoppingcart/displayItemCart";
 import Normalproducts from "../components/section_page/Normalproducts";
 import { Link } from "lucide-react";
 

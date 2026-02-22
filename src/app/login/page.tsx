@@ -37,6 +37,10 @@ export default function LoginPage() {
 
   const { refreshCart } = useCart();
 
+  const [rememberMe, setRememberMe] = useState(false);
+
+  const REMEMBER_KEY = "remember_login_v1";
+
   // useEffect(() => {
   //   console.log("GOOGLE_CLIENT_ID:", process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
   // }, []);
@@ -47,7 +51,20 @@ export default function LoginPage() {
       const params = new URLSearchParams(window.location.search);
       setRedirectUrl(params.get("redirect") || "/");
 
-      // ⭐ โหลดสถานะ lock จาก localStorage (กันรีเฟรชแล้วหาย)
+      // ⭐ โหลด remember login
+      const remember = window.localStorage.getItem(REMEMBER_KEY);
+      if (remember) {
+        try {
+          const parsed = JSON.parse(remember);
+          if (parsed?.identifier) setIdentifier(parsed.identifier);
+          if (parsed?.password) setPassword(parsed.password);
+          setRememberMe(true);
+        } catch {
+          window.localStorage.removeItem(REMEMBER_KEY);
+        }
+      }
+
+      // ⭐ โหลดสถานะ lock จาก localStorage (ของเดิม)
       const lockData = window.localStorage.getItem("login_lock");
       if (lockData) {
         try {
@@ -121,28 +138,31 @@ export default function LoginPage() {
   }, []);
 
   const afterLoginSuccess = async (user: any) => {
-    // refresh cart ก่อน (เหมือนเดิม)
     await refreshCart();
 
-    // เก็บชื่อไว้ให้ Navbar (เหมือนเดิม)
     localStorage.setItem("username", user?.username || "");
     localStorage.setItem("first_name", user?.first_name || "");
 
-    // reset lock
+    // ✅ Remember me logic
+    if (rememberMe) {
+      window.localStorage.setItem(
+        REMEMBER_KEY,
+        JSON.stringify({ identifier, password })
+      );
+    } else {
+      window.localStorage.removeItem(REMEMBER_KEY);
+    }
+
     setLoginAttempts(0);
     setLockedUntil(null);
 
-    // แจ้ง event เหมือนเดิม
     window.dispatchEvent(new Event("login-success"));
 
-    // หา redirect เหมือนเดิม (query > state > "/")
     const params = new URLSearchParams(window.location.search);
     const redirect = params.get("redirect") || redirectUrl || "/";
 
-    // ✅ พยายามใช้ Next router ก่อน
     router.push(redirect);
 
-    // ✅ fallback: ถ้า push ไม่พาไปจริงภายใน 150ms ให้ใช้ location
     setTimeout(() => {
       if (window.location.pathname !== redirect) {
         window.location.assign(redirect);
@@ -221,7 +241,7 @@ export default function LoginPage() {
 
     // validate เบื้องต้น
     if (!identifier || !password) {
-      setError("กรุณากรอกอีเมลและรหัสผ่าน");
+      setError("กรุณากรอก Username/Email และรหัสผ่าน");
       return;
     }
 
@@ -315,20 +335,24 @@ export default function LoginPage() {
         {/* Email */}
         <div className="mb-5">
           <label
-            htmlFor="email"
+            htmlFor="identifier"
             className="block mb-2 text-sm font-medium text-gray-900"
           >
-            Email
+            Username or Email
           </label>
+
           <input
-            type="email"
-            id="email"
+            type="text"
+            id="identifier"
+            name="identifier"
+            autoComplete="username"
             value={identifier}
             onChange={(e) => setIdentifier(e.target.value)}
             className={`shadow-xs bg-gray-50 border ${
               error && submitted ? "border-red-600" : "border-gray-300"
             } text-gray-900 text-sm rounded-lg block w-full p-2.5`}
-            placeholder="Please enter your email"
+            placeholder="Enter username or email"
+            inputMode="email"
           />
         </div>
 
@@ -344,6 +368,7 @@ export default function LoginPage() {
             <input
               type={showPassword ? "text" : "password"}
               id="password"
+              autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className={`shadow-xs bg-gray-50 border ${
@@ -372,6 +397,16 @@ export default function LoginPage() {
             <input
               id="remember"
               type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => {
+                const checked = e.target.checked;
+                setRememberMe(checked);
+
+                // ถ้า user เอาติ๊กออก ให้ล้างข้อมูลที่จำไว้ทันที
+                if (!checked && typeof window !== "undefined") {
+                  window.localStorage.removeItem(REMEMBER_KEY);
+                }
+              }}
               className="w-4 h-4 border border-gray-300 rounded-sm bg-gray-50 focus:ring-1"
             />
             <label

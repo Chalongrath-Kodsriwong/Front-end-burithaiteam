@@ -34,6 +34,8 @@ export default function TopNavbar() {
 
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
   const navItems = [
     { label: "Home", href: "/" },
     { label: "About", href: "/about" },
@@ -49,6 +51,26 @@ export default function TopNavbar() {
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
+
+  const fetchProfileAvatar = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/account/profile`, {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        setAvatarUrl(null);
+        return;
+      }
+
+      const json = await res.json().catch(() => ({}));
+      const url = json?.data?.avatar || null;
+      setAvatarUrl(typeof url === "string" && url.trim() ? url : null);
+    } catch (e) {
+      setAvatarUrl(null);
+    }
+  };
 
   // ⭐ ยิง 3 API: productName + categoryName + brandName
   const handleSearchChange = async (e: any) => {
@@ -138,30 +160,6 @@ export default function TopNavbar() {
 
   // ⭐ เช็คว่า login แล้วหรือยัง
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  // useEffect(() => {
-  //   async function checkLogin() {
-  //     try {
-  //       const res = await fetch(`${API_BASE_URL}/api/carts`, {
-  //         method: "GET",
-  //         credentials: "include",
-  //       });
-
-  //       console.log("🔍 Checking login (via carts):", res.status);
-
-  //       if (res.status === 200) {
-  //         setIsLoggedIn(true);
-  //       } else {
-  //         setIsLoggedIn(false);
-  //       }
-  //     } catch (error) {
-  //       console.log("Login check failed:", error);
-  //       setIsLoggedIn(false);
-  //     }
-  //   }
-
-  //   checkLogin();
-  // }, []);
 
   const [username, setUsername] = useState<string | null>(null);
 
@@ -293,9 +291,21 @@ export default function TopNavbar() {
 
   useEffect(() => {
     if (isLoggedIn) {
+      fetchProfileAvatar();
       setIsUserMenuOpen(false); // ปิด dropdown เมื่อสถานะ login เปลี่ยน
+    } else {
+      setAvatarUrl(null);
     }
   }, [isLoggedIn]);
+
+  useEffect(() => {
+    const handler = () => {
+      fetchProfileAvatar();
+    };
+
+    window.addEventListener("avatar-updated", handler);
+    return () => window.removeEventListener("avatar-updated", handler);
+  }, []);
 
   return (
     <nav className="bg-white border-gray-200 dark:bg-gray-900">
@@ -365,12 +375,20 @@ export default function TopNavbar() {
                   ref={menuRef}
                   className="flex flex-col items-center ml-2 mr-2 cursor-pointer select-none relative"
                   onClick={() => {
-                    // toggle dropdown
                     setIsUserMenuOpen((prev) => !prev);
                   }}
                 >
-                  {/* ไอคอน */}
-                  <FaRegUserCircle size={28} className="text-blue-600" />
+                  {/* ไอคอน / Avatar */}
+                  {avatarUrl ? (
+                    <img
+                      src={avatarUrl}
+                      alt="avatar"
+                      className="w-7 h-7 rounded-full object-cover border border-blue-300"
+                      onError={() => setAvatarUrl(null)}
+                    />
+                  ) : (
+                    <FaRegUserCircle size={28} className="text-blue-600" />
+                  )}
 
                   {/* ชื่อ + ลูกศร */}
                   <div className="flex items-center gap-1 mt-1">
@@ -431,6 +449,8 @@ export default function TopNavbar() {
                         window.dispatchEvent(new Event("user-logout"));
 
                         router.refresh();
+
+                        router.push("/login");
                       }}
                       className="block w-full text-left px-6 py-1 text-red-600 hover:bg-gray-100 text-sm"
                     >

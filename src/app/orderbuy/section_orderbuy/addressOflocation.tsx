@@ -1,11 +1,28 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
 import { provinceList } from "@/data/provinces";
 import { labelOptions } from "@/data/addressLabels";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+
+// ✅ shared storage key/event (ต้องเหมือน edit_address)
+const SELECTED_ADDRESS_KEY = "selected_address_id_v1";
+const ADDRESS_SELECTED_EVENT = "address-selected";
+
+function getSelectedAddressId(): number | null {
+  if (typeof window === "undefined") return null;
+  const raw = window.localStorage.getItem(SELECTED_ADDRESS_KEY);
+  const n = raw ? Number(raw) : NaN;
+  return Number.isFinite(n) ? n : null;
+}
+
+function setSelectedAddressId(id: number | null) {
+  if (typeof window === "undefined") return;
+  if (id === null) window.localStorage.removeItem(SELECTED_ADDRESS_KEY);
+  else window.localStorage.setItem(SELECTED_ADDRESS_KEY, String(id));
+  window.dispatchEvent(new Event(ADDRESS_SELECTED_EVENT));
+}
 
 export default function AddressLocation({ onAddressSelect }: any) {
   const [addresses, setAddresses] = useState<any[]>([]);
@@ -15,7 +32,6 @@ export default function AddressLocation({ onAddressSelect }: any) {
   const [showAddPopup, setShowAddPopup] = useState(false);
   const [showEditPopup, setShowEditPopup] = useState(false);
 
-  // 🔧 แก้จาก string → เป็น object เก็บทั้งชุดของ address
   const [editAddressText, setEditAddressText] = useState({
     label: "",
     address_text: "",
@@ -63,12 +79,24 @@ export default function AddressLocation({ onAddressSelect }: any) {
           credentials: "include",
         });
 
-        const json = await res.json();
+        const json = await res.json().catch(() => ({}));
         setAddresses(json.data || []);
 
-        if (json.data?.length > 0) {
-          setSelectedId(json.data[0].id_address);
-          onAddressSelect(json.data[0].id_address);
+        const list = json.data || [];
+
+        // ✅ เลือกจาก localStorage ก่อน
+        const saved = getSelectedAddressId();
+        if (saved && list.some((a: any) => a.id_address === saved)) {
+          setSelectedId(saved);
+          onAddressSelect(saved);
+        } else if (list.length > 0) {
+          setSelectedId(list[0].id_address);
+          onAddressSelect(list[0].id_address);
+          setSelectedAddressId(list[0].id_address);
+        } else {
+          setSelectedId(null);
+          onAddressSelect(null);
+          setSelectedAddressId(null);
         }
       } catch (err) {
         console.error("Failed to load addresses:", err);
@@ -77,6 +105,27 @@ export default function AddressLocation({ onAddressSelect }: any) {
 
     loadAddresses();
   }, []);
+
+  // ✅ sync ถ้าเลือกจาก setting หรืออีก tab
+  useEffect(() => {
+    function syncFromStorage() {
+      const saved = getSelectedAddressId();
+      if (saved && addresses.some((a: any) => a.id_address === saved)) {
+        setSelectedId(saved);
+        onAddressSelect(saved);
+      }
+    }
+
+    if (typeof window === "undefined") return;
+
+    window.addEventListener("storage", syncFromStorage);
+    window.addEventListener(ADDRESS_SELECTED_EVENT, syncFromStorage);
+
+    return () => {
+      window.removeEventListener("storage", syncFromStorage);
+      window.removeEventListener(ADDRESS_SELECTED_EVENT, syncFromStorage);
+    };
+  }, [addresses, onAddressSelect]);
 
   /* ------------------------ ADD ADDRESS ------------------------ */
   async function handleAdd() {
@@ -91,10 +140,17 @@ export default function AddressLocation({ onAddressSelect }: any) {
       body: JSON.stringify(newAddress),
     });
 
-    const json = await res.json();
+    const json = await res.json().catch(() => ({}));
 
     if (res.ok) {
-      setAddresses((prev) => [...prev, json.data]);
+      const created = json.data;
+      setAddresses((prev) => [...prev, created]);
+
+      // ✅ เลือกอันใหม่ + persist
+      setSelectedId(created.id_address);
+      setSelectedAddressId(created.id_address);
+      onAddressSelect(created.id_address);
+
       setNewAddress({
         label: "",
         address_text: "",
@@ -131,16 +187,14 @@ export default function AddressLocation({ onAddressSelect }: any) {
       method: "PUT",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(editAddressText), // ✅ ส่งทั้ง object ไปอัปเดต
+      body: JSON.stringify(editAddressText),
     });
 
-    const json = await res.json();
+    const json = await res.json().catch(() => ({}));
 
     if (res.ok) {
       setAddresses((prev) =>
-        prev.map((a) =>
-          a.id_address === editId ? { ...a, ...editAddressText } : a
-        )
+        prev.map((a) => (a.id_address === editId ? { ...a, ...editAddressText } : a))
       );
       setShowEditPopup(false);
     } else {
@@ -162,10 +216,13 @@ export default function AddressLocation({ onAddressSelect }: any) {
 
       if (selectedId === id) {
         if (addresses.length > 1) {
-          setSelectedId(addresses[0].id_address);
-          onAddressSelect(addresses[0].id_address);
+          const nextId = addresses[0].id_address === id ? addresses[1].id_address : addresses[0].id_address;
+          setSelectedId(nextId);
+          setSelectedAddressId(nextId);
+          onAddressSelect(nextId);
         } else {
           setSelectedId(null);
+          setSelectedAddressId(null);
           onAddressSelect(null);
         }
       }
@@ -174,16 +231,11 @@ export default function AddressLocation({ onAddressSelect }: any) {
     }
   }
 
-  /* --------------------------------------------------------- */
-  /* ------------------------ RENDER UI ----------------------- */
-  /* --------------------------------------------------------- */
-
   return (
     <div>
       <h2 className="text-xl font-semibold mb-4">เลือกที่อยู่การจัดส่ง</h2>
 
       <div className="border border-gray-300 rounded-md p-4">
-        {/* ไม่มีที่อยู่ */}
         {addresses.length === 0 ? (
           <div className="text-center py-4">
             <p className="text-gray-600 mb-4">ยังไม่มีที่อยู่จัดส่งตอนนี้</p>
@@ -198,11 +250,8 @@ export default function AddressLocation({ onAddressSelect }: any) {
           </div>
         ) : (
           <>
-            {/* แสดงที่อยู่ที่เลือก */}
             <div className="mb-2">
-              {formatAddress(
-                addresses.find((a) => a.id_address === selectedId)
-              )}
+              {formatAddress(addresses.find((a) => a.id_address === selectedId))}
             </div>
 
             <button
@@ -223,15 +272,12 @@ export default function AddressLocation({ onAddressSelect }: any) {
 
         {/* Popup เลือกที่อยู่ */}
         {showPopup && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-            <div className="bg-white p-6 rounded-md shadow-md w-80">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-md shadow-md w-80 max-w-[92vw]">
               <h3 className="text-lg font-semibold mb-4">เลือกที่อยู่ใหม่</h3>
 
               {addresses.map((addr) => (
-                <div
-                  key={addr.id_address}
-                  className="border p-2 rounded-md mb-2"
-                >
+                <div key={addr.id_address} className="border p-2 rounded-md mb-2">
                   <label className="flex items-start gap-2">
                     <input
                       type="radio"
@@ -271,6 +317,8 @@ export default function AddressLocation({ onAddressSelect }: any) {
                 <button
                   className="bg-blue-500 text-white px-4 py-2 rounded-md"
                   onClick={() => {
+                    // ✅ persist + ส่งขึ้นไปให้ PaymentSummary
+                    setSelectedAddressId(selectedId);
                     onAddressSelect(selectedId);
                     setShowPopup(false);
                   }}
@@ -285,7 +333,7 @@ export default function AddressLocation({ onAddressSelect }: any) {
         {/* Popup เพิ่มที่อยู่ */}
         {showAddPopup && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-md shadow-md w-96">
+            <div className="bg-white p-6 rounded-md shadow-md w-96 max-w-[92vw]">
               <h3 className="text-lg font-semibold mb-4">เพิ่มที่อยู่ใหม่</h3>
 
               {/* Label Autocomplete */}
@@ -310,6 +358,7 @@ export default function AddressLocation({ onAddressSelect }: any) {
                     setFilteredLabels(labelOptions);
                     setShowLabelDropdown(true);
                   }}
+                  onBlur={() => setTimeout(() => setShowLabelDropdown(false), 150)}
                 />
 
                 {showLabelDropdown && filteredLabels.length > 0 && (
@@ -345,7 +394,6 @@ export default function AddressLocation({ onAddressSelect }: any) {
               {/* Province Autocomplete */}
               <div className="relative mb-4">
                 <label className="block mb-2 font-medium">จังหวัด</label>
-
                 <input
                   type="text"
                   className="border border-gray-300 rounded-md p-2 w-full"
@@ -355,9 +403,7 @@ export default function AddressLocation({ onAddressSelect }: any) {
                     const value = e.target.value;
                     setNewAddress({ ...newAddress, province: value });
 
-                    const results = provinceList.filter((p) =>
-                      p.includes(value)
-                    );
+                    const results = provinceList.filter((p) => p.includes(value));
                     setFilteredProvinces(results);
                     setShowProvinceDropdown(true);
                   }}
@@ -365,6 +411,7 @@ export default function AddressLocation({ onAddressSelect }: any) {
                     setFilteredProvinces(provinceList);
                     setShowProvinceDropdown(true);
                   }}
+                  onBlur={() => setTimeout(() => setShowProvinceDropdown(false), 150)}
                 />
 
                 {showProvinceDropdown && filteredProvinces.length > 0 && (
@@ -406,12 +453,9 @@ export default function AddressLocation({ onAddressSelect }: any) {
                 placeholder="0801234567"
                 maxLength={10}
                 value={newAddress.phone}
-                onChange={(e) =>
-                  setNewAddress({ ...newAddress, phone: e.target.value })
-                }
+                onChange={(e) => setNewAddress({ ...newAddress, phone: e.target.value })}
               />
 
-              {/* Buttons */}
               <div className="flex justify-end mt-4">
                 <button
                   className="bg-gray-300 px-4 py-2 rounded-md mr-2"
@@ -434,26 +478,19 @@ export default function AddressLocation({ onAddressSelect }: any) {
         {/* Popup แก้ไขที่อยู่ */}
         {showEditPopup && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-md shadow-md w-96">
+            <div className="bg-white p-6 rounded-md shadow-md w-96 max-w-[92vw]">
               <h3 className="text-lg font-semibold mb-4">แก้ไขที่อยู่</h3>
 
-              {/* Label */}
-              <div className="relative mb-4">
-                <label className="block mb-2 font-medium">ป้ายกำกับ</label>
-                <input
-                  type="text"
-                  className="border border-gray-300 rounded-md p-2 w-full"
-                  value={editAddressText.label}
-                  onChange={(e) =>
-                    setEditAddressText({
-                      ...editAddressText,
-                      label: e.target.value,
-                    })
-                  }
-                />
-              </div>
+              <label className="block mb-2 font-medium">ป้ายกำกับ</label>
+              <input
+                type="text"
+                className="border border-gray-300 rounded-md p-2 w-full mb-4"
+                value={editAddressText.label}
+                onChange={(e) =>
+                  setEditAddressText({ ...editAddressText, label: e.target.value })
+                }
+              />
 
-              {/* Address */}
               <label className="block mb-2 font-medium">ที่อยู่</label>
               <textarea
                 className="border border-gray-300 rounded-md p-2 w-full mb-4"
@@ -467,21 +504,16 @@ export default function AddressLocation({ onAddressSelect }: any) {
                 }
               />
 
-              {/* Province */}
               <label className="block mb-2 font-medium">จังหวัด</label>
               <input
                 type="text"
                 className="border border-gray-300 rounded-md p-2 w-full mb-4"
                 value={editAddressText.province}
                 onChange={(e) =>
-                  setEditAddressText({
-                    ...editAddressText,
-                    province: e.target.value,
-                  })
+                  setEditAddressText({ ...editAddressText, province: e.target.value })
                 }
               />
 
-              {/* Postal Code */}
               <label className="block mb-2 font-medium">รหัสไปรษณีย์</label>
               <input
                 type="text"
@@ -496,7 +528,6 @@ export default function AddressLocation({ onAddressSelect }: any) {
                 }
               />
 
-              {/* Phone */}
               <label className="block mb-2 font-medium">เบอร์โทรศัพท์</label>
               <input
                 type="text"
@@ -504,14 +535,10 @@ export default function AddressLocation({ onAddressSelect }: any) {
                 maxLength={10}
                 value={editAddressText.phone}
                 onChange={(e) =>
-                  setEditAddressText({
-                    ...editAddressText,
-                    phone: e.target.value,
-                  })
+                  setEditAddressText({ ...editAddressText, phone: e.target.value })
                 }
               />
 
-              {/* Buttons */}
               <div className="flex justify-end">
                 <button
                   className="bg-gray-300 px-4 py-2 rounded-md mr-2"

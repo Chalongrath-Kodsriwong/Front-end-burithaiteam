@@ -11,6 +11,8 @@ export default function ResetPasswordRequestPage() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
+  const [successPopup, setSuccessPopup] = useState(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -33,10 +35,13 @@ export default function ResetPasswordRequestPage() {
       }
 
       // แจ้งให้ผู้ใช้ทราบว่าอีเมลได้ถูกส่งแล้ว
-      alert("Check your email for the reset link");
+      // alert("Check your email for the reset link");
 
       // Redirect ไปยังหน้า login
-      router.push("/login");
+      // router.push("/login");
+
+      // แสดง popup แทน alert
+      setSuccessPopup(true);
     } catch (err) {
       setError("An error occurred while requesting reset");
     } finally {
@@ -48,9 +53,52 @@ export default function ResetPasswordRequestPage() {
     <div className="container mx-auto p-4">
       <h1 className="text-3xl font-bold mb-6">Forgot Password</h1>
 
-      <form onSubmit={handleSubmit} className="max-w-md mx-auto bg-gray-100 p-6 rounded-lg shadow-md">
+      {/* ---------------- Success Popup ---------------- */}
+      {successPopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-xl shadow-lg w-80 text-center">
+            <h2 className="text-xl font-bold mb-3 text-green-700">
+              ส่งลิงก์รีเซ็ตรหัสผ่านแล้ว!
+            </h2>
+
+            <p className="text-gray-700 text-sm mb-4">
+              กรุณาตรวจสอบอีเมลของคุณเพื่อทำการตั้งรหัสผ่านใหม่
+            </p>
+
+            {/* ไป Gmail */}
+            <a
+              href="https://mail.google.com"
+              className="block w-full py-2 bg-green-600 text-white rounded-lg mb-4 hover:bg-green-700 transition"
+            >
+              ไปที่ Gmail
+            </a>
+
+            <div className="flex items-center justify-center mb-4 text-sm text-gray-600">
+              <span className="flex-grow h-px bg-gray-500"></span>
+              <span className="px-3">Reset Password</span>
+              <span className="flex-grow h-px bg-gray-500"></span>
+            </div>
+
+            {/* กลับไป Login */}
+            <button
+              onClick={() => router.push("/login")}
+              className="w-full py-2 bg-black text-white rounded-lg hover:bg-gray-800"
+            >
+              กลับไปหน้า Sign In
+            </button>
+          </div>
+        </div>
+      )}
+
+      <form
+        onSubmit={handleSubmit}
+        className="max-w-md mx-auto bg-gray-100 p-6 rounded-lg shadow-md"
+      >
         <div className="mb-5">
-          <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-900">
+          <label
+            htmlFor="email"
+            className="block mb-2 text-sm font-medium text-gray-900"
+          >
             Email
           </label>
           <input

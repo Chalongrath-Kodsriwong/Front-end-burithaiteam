@@ -146,7 +146,7 @@ export default function RegisterPage() {
             {/* ไป Gmail */}
             <a
               href="https://mail.google.com"
-              target="_blank"
+              // target="_blank"
               className="block w-full py-2 bg-green-600 text-white rounded-lg mb-4 hover:bg-green-700 transition"
             >
               ไปที่ Gmail
