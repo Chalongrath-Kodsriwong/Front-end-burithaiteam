@@ -27,56 +27,6 @@ export default function ProductDetailPage() {
     return () => window.removeEventListener("user-logout", handleLogout);
   }, [id, router]);
 
-  // ⭐ 1) เช็คการ Login ผ่าน Backend
-  // useEffect(() => {
-  //   async function checkAuth() {
-  //     try {
-  //       const res = await fetch(`${API_URL}/api/auth/me`, {
-  //         credentials: "include",
-  //       });
-
-  //       if (res.status === 401) {
-  //         router.replace(`/login?redirect=/detail_product/${id}`);
-  //         return;
-  //       }
-
-  //       setAuthChecked(true);
-  //     } catch (err) {
-  //       router.replace(`/login?redirect=/detail_product/${id}`);
-  //     }
-  //   }
-
-  //   checkAuth();
-  // }, [id, router]);
-
-  // ⭐ 2) โหลดข้อมูลสินค้าเมื่อ auth ผ่าน
-  // useEffect(() => {
-  //   if (!authChecked || !id) return;
-
-  //   async function fetchProduct() {
-  //     try {
-  //       const res = await fetch(`${API_URL}/api/products/${id}`, {
-  //         credentials: "include",
-  //       });
-
-  //       if (res.status === 401) {
-  //         router.replace(`/login?redirect=/detail_product/${id}`);
-  //         return;
-  //       }
-
-  //       const result = await res.json();
-  //       setProduct(result.data);
-  //     } catch (error) {
-  //       console.error("Error fetching product:", error);
-  //       setProduct(null);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   }
-
-  //   fetchProduct();
-  // }, [authChecked, id, router]);
-
   useEffect(() => {
   if (!id) return;
 

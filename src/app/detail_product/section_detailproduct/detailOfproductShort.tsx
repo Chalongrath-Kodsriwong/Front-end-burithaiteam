@@ -1,8 +1,11 @@
 "use client";
 
+import { useRouter, useParams } from "next/navigation";
 import React, { useState } from "react";
 import { Heart } from "lucide-react";
 import { useCart } from "@/app/context/CartContext";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 export default function DetailOfProductShort({ product }: any) {
   if (!product) return <div>กำลังโหลดสินค้า...</div>;
@@ -38,15 +41,55 @@ export default function DetailOfProductShort({ product }: any) {
   const variantId = Number(variant?.variant_id);
   const inventoryId = Number(inventory?.inventory_id);
 
-  const handleAddToCartClick = () => {
-  addToCart(
-    Number(product.id_products),
-    quantity,
-    variantId,
-    inventoryId
-  );
-};
+  const router = useRouter();
+  const { id } = useParams();
 
+  const [wishlistLoading, setWishlistLoading] = useState(false);
+  const [wishlistMsg, setWishlistMsg] = useState("");
+
+  const handleAddToCartClick = () => {
+    addToCart(Number(product.id_products), quantity, variantId, inventoryId);
+  };
+
+  const handleAddWishlist = async () => {
+    try {
+      setWishlistMsg("");
+      setWishlistLoading(true);
+
+      const productId = Number(product.id_products);
+
+      const res = await fetch(`${API_URL}/api/wish-list`, {
+        method: "POST", // ✅ ใช้ POST ตาม backend route
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId }),
+      });
+
+      if (res.status === 401 || res.status === 403) {
+        router.replace(`/login?redirect=/detail_product/${id}`);
+        return;
+      }
+
+      const json = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        if (res.status === 409) {
+          setWishlistMsg("สินค้านี้อยู่ใน Wishlist แล้ว ❤️");
+          return;
+        }
+        setWishlistMsg(json?.message || "เพิ่ม Wishlist ไม่สำเร็จ");
+        return;
+      }
+
+      setWishlistMsg("เพิ่มสินค้าเข้า Wishlist แล้ว ✅");
+    } catch (e) {
+      console.error(e);
+      setWishlistMsg("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้");
+    } finally {
+      setWishlistLoading(false);
+      setTimeout(() => setWishlistMsg(""), 2000);
+    }
+  };
 
   return (
     <div className="p-4 bg-white rounded shadow">
@@ -101,9 +144,22 @@ export default function DetailOfProductShort({ product }: any) {
         {product.short_description ?? "ไม่มีรายละเอียดสินค้า"}
       </p>
 
-      <button className="px-6 py-2 bg-black text-white rounded hover:bg-gray-800 flex items-center gap-2">
-        <Heart className="w-4 h-4" /> Add Wishlist
+      <button
+        onClick={handleAddWishlist}
+        disabled={wishlistLoading}
+        className={`px-6 py-2 rounded flex items-center gap-2 text-white ${
+          wishlistLoading
+            ? "bg-gray-400 cursor-not-allowed"
+            : "bg-black hover:bg-gray-800"
+        }`}
+      >
+        <Heart className="w-4 h-4" />
+        {wishlistLoading ? "Adding..." : "Add Wishlist"}
       </button>
+
+      {wishlistMsg && (
+        <p className="mt-2 text-sm text-green-700">{wishlistMsg}</p>
+      )}
     </div>
   );
 }

@@ -7,6 +7,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCart } from "@/app/context/CartContext";
 import { FaRegUserCircle } from "react-icons/fa";
+import { FaHeart } from "react-icons/fa";
 
 import { useRef } from "react";
 
@@ -590,7 +591,7 @@ export default function TopNavbar() {
           </div>
 
           {/* Basket Icon */}
-          <div className="relative ml-4">
+          <div className="relative ml-4 flex items-center gap-4">
             <Link href="/shoppingcart">
               <button className="relative p-2.5 text-blue-900 bg-blue-100 rounded-lg hover:bg-blue-200">
                 <svg
@@ -618,6 +619,23 @@ export default function TopNavbar() {
                     {totalItems}
                   </span>
                 )}
+              </button>
+            </Link>
+            <Link href="/wishlist">
+              <button className="relative p-2.5 text-pink-700 bg-white rounded-lg hover:bg-pink-200 transition">
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                  />
+                </svg>
               </button>
             </Link>
           </div>
