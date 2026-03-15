@@ -300,8 +300,8 @@ export default function EditAddress({ user }: { user: any }) {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-2">Address</h1>
-      <p className="text-gray-700 mb-4">จัดการที่อยู่ของคุณ (user_id: {user?.user_id})</p>
+      <h1 className="text-2xl font-bold mb-2">My Address</h1>
+      {/* <p className="text-gray-700 mb-4">จัดการที่อยู่ของคุณ (user_id: {user?.user_id})</p> */}
 
       {errorMsg && (
         <div className="mb-4 rounded-md bg-red-50 border border-red-200 p-3 text-red-700">

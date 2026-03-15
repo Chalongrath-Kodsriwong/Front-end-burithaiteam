@@ -325,7 +325,7 @@ export default function TopNavbar() {
           </span>
         </Link>
 
-        {/* hamburger (เดิม) */}
+        {/* hamburger */}
         <button
           data-collapse-toggle="navbar-default"
           type="button"

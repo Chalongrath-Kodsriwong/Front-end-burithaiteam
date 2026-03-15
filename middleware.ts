@@ -1,26 +1,32 @@
-// middleware.ts
 import { NextRequest, NextResponse } from "next/server";
 
-const PROTECTED_PREFIXES = [
-  "/detail_product",
-  "/wishlist",
-  "/whishlist",    // ✅ เผื่อคุณสะกดแบบนี้ใน app folder
-  "/shoppingcart",
-];
-
 export function middleware(req: NextRequest) {
+  const token = req.cookies.get("token")?.value;
   const { pathname, search } = req.nextUrl;
 
-  const isProtected = PROTECTED_PREFIXES.some((p) => pathname.startsWith(p));
-  if (!isProtected) return NextResponse.next();
+  const protectedRoutes = [
+    "/wishlist",
+    "/whishlist",   // เผื่อสะกดผิด
+    "/shoppingcart",
+  ];
 
-  const token = req.cookies.get("token")?.value;
+  const isProtected = protectedRoutes.some((route) =>
+    pathname.startsWith(route)
+  );
 
-  if (!token) {
+  // ถ้ายังไม่ได้ login และพยายามเข้า protected page
+  if (isProtected && !token) {
     const loginUrl = req.nextUrl.clone();
+
     loginUrl.pathname = "/login";
     loginUrl.search = `?redirect=${encodeURIComponent(pathname + search)}`;
+
     return NextResponse.redirect(loginUrl);
+  }
+
+  // ถ้า login แล้ว ห้ามเข้า login page
+  if (pathname === "/login" && token) {
+    return NextResponse.redirect(new URL("/", req.url));
   }
 
   return NextResponse.next();
@@ -28,9 +34,9 @@ export function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    "/detail_product/:path*",
     "/wishlist/:path*",
-    "/whishlist/:path*",      // ✅ เผื่อสะกดผิดในโปรเจค
+    "/whishlist/:path*",
     "/shoppingcart/:path*",
+    "/login",
   ],
 };

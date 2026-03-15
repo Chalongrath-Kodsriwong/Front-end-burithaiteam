@@ -51,6 +51,11 @@ export default function DetailOfProductShort({ product }: any) {
     addToCart(Number(product.id_products), quantity, variantId, inventoryId);
   };
 
+  const handleBuyNow = () => {
+    addToCart(Number(product.id_products), quantity, variantId, inventoryId);
+    router.push("/shoppingcart");
+  };
+
   const handleAddWishlist = async () => {
     try {
       setWishlistMsg("");
@@ -121,7 +126,10 @@ export default function DetailOfProductShort({ product }: any) {
       </div>
 
       <div className="flex items-center gap-4 mb-5">
-        <button className="px-6 py-2 bg-black text-white rounded hover:bg-gray-800">
+        <button
+          onClick={handleBuyNow}
+          className="px-6 py-2 bg-black text-white rounded hover:bg-gray-800"
+        >
           ซื้อสินค้า
         </button>
 
