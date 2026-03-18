@@ -125,6 +125,16 @@ export default function RegisterPage() {
     }
   };
 
+  useEffect(() => {
+  if (typeof window === "undefined") return;
+
+  const username = localStorage.getItem("username");
+
+  if (username) {
+    router.replace("/");
+  }
+}, []);
+
   // ======================================================================
   // UI + POPUP
   // ======================================================================

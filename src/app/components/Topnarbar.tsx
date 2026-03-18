@@ -2,12 +2,10 @@
 
 // เพิ่ม import
 import { useState, useEffect } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCart } from "@/app/context/CartContext";
 import { FaRegUserCircle } from "react-icons/fa";
-import { FaHeart } from "react-icons/fa";
 
 import { useRef } from "react";
 
@@ -20,7 +18,6 @@ export default function TopNavbar() {
   const router = useRouter();
 
   const [searchProductName, setSearchProductName] = useState("");
-  const [searchCategories, setSearchCategories] = useState("");
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
 
@@ -309,8 +306,10 @@ export default function TopNavbar() {
   }, []);
 
   return (
-    <nav className="bg-white border-gray-200 dark:bg-gray-900">
+    // <nav className="bg-gray-900 border-gray-200 dark:bg-gray-900">
+    <nav className="bg-[rgb(26,26,26)] border-gray-200">
       <div className="w-full flex flex-wrap items-center justify-between p-4">
+        {/* LEFT LOGO */}
         <Link
           href="/"
           className="flex items-center space-x-3 rtl:space-x-reverse"
@@ -320,148 +319,147 @@ export default function TopNavbar() {
             className="h-[70px]"
             alt="Logo"
           />
-          <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">
-            Burithaiteam
+          <span className="self-center text-2xl font-semibold text-yellow-500 whitespace-nowrap">
+            Burithai team
           </span>
         </Link>
 
-        {/* hamburger */}
-        <button
-          data-collapse-toggle="navbar-default"
-          type="button"
-          className="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
-          aria-controls="navbar-default"
-          aria-expanded="false"
-        >
-          <span className="sr-only">Open main menu</span>
-          <svg
-            className="w-5 h-5"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 17 14"
-          >
-            <path
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M1 1h15M1 7h15M1 13h15"
-            />
-          </svg>
-        </button>
-
-        <div className="hidden w-full md:block md:w-auto" id="navbar-default">
-          <ul className="font-medium flex flex-col justify-center items-center p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
+        {/* CENTER NAV ITEMS */}
+        <div className="hidden md:flex flex-1 justify-center">
+          <ul className="font-medium flex flex-row items-center space-x-8">
             {navItems.map(({ label, href }) => (
-              <li key={href}>
+              <li key={href} className="relative group">
                 <Link
                   href={href}
                   aria-current={isActive(href) ? "page" : undefined}
-                  className={`${base} ${isActive(href) ? active : inactive}`}
+                  className="
+                    relative z-10
+                    text-yellow-500
+                    px-2 py-1
+                    transition-all duration-300
+                    group-hover:text-[rgb(255,215,0)]
+                    group-hover:[text-shadow:0_0_6px_rgb(255,215,0),0_0_12px_rgb(255,215,0),0_0_20px_rgb(212,175,55)]
+                  "
                 >
                   {label}
                 </Link>
+
+                {/* GOLD NEON HOVER EFFECT */}
+                <span className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <span
+                    className="
+                      w-[45px] h-[35px]
+                      rounded-full
+                      bg-[rgba(212,175,55,0.25)]
+                      scale-0 opacity-0
+                      group-hover:scale-150 group-hover:opacity-100
+                      transition-all duration-500
+                      group-hover:[box-shadow:0_0_10px_rgba(212,175,55,0.4),0_0_20px_rgba(212,175,55,0.3)]
+                      "
+                  ></span>
+                </span>
               </li>
             ))}
+          </ul>
+        </div>
 
-            <li className="flex items-center relative">
-              {!isLoggedIn ? (
-                <Link href="/login">
-                  <button className="block bg-blue-700 py-2 px-3 text-white rounded-md hover:bg-blue-700">
-                    Login
+        {/* RIGHT LOGIN / USER */}
+        <div className="flex items-center gap-4">
+          {!isLoggedIn ? (
+            <Link href="/login">
+              <button className="block bg-[rgb(212,175,55)] py-2 px-4 text-black rounded-md transition-all duration-300 hover:scale-105 hover:bg-[rgb(255,215,0)] hover:[box-shadow:0_0_10px_rgb(255,215,0),0_0_20px_rgb(255,215,0)]">
+                Login
+              </button>
+            </Link>
+          ) : (
+            <div
+              ref={menuRef}
+              className="flex flex-col items-center ml-2 mr-2 cursor-pointer select-none relative"
+              onClick={() => {
+                setIsUserMenuOpen((prev) => !prev);
+              }}
+            >
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt="avatar"
+                  className="w-7 h-7 rounded-full object-cover border border-[rgba(212,175,55,0.5)]"
+                  onError={() => setAvatarUrl(null)}
+                />
+              ) : (
+                <FaRegUserCircle size={28} className="text-[rgb(212,175,55)]" />
+              )}
+
+              <div className="flex items-center gap-1 mt-1">
+                <span className="text-[15px] text-white">{username}</span>
+                <svg
+                  className={`w-3 h-3 text-white transition-transform duration-200 ${
+                    isUserMenuOpen ? "rotate-180" : ""
+                  }`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </div>
+
+              <div
+                className={`
+          absolute top-[55px] right-0 bg-[rgb(30,30,30)] shadow-md rounded-md overflow-hidden
+          transition-all duration-300 z-50
+          ${
+            isUserMenuOpen
+              ? "opacity-100 max-h-[200px] pointer-events-auto"
+              : "opacity-0 max-h-0 pointer-events-none"
+          }
+        `}
+              >
+                <Link href="/history_payment">
+                  <button
+                    className="block w-full text-left px-6 py-1 text-[rgba(212,175,55)] hover:bg-[rgba(212,175,55,0.25)]
+                  text-sm transition-colors duration-200"
+                  >
+                    Payment
                   </button>
                 </Link>
-              ) : (
-                <div
-                  ref={menuRef}
-                  className="flex flex-col items-center ml-2 mr-2 cursor-pointer select-none relative"
-                  onClick={() => {
-                    setIsUserMenuOpen((prev) => !prev);
+
+                <Link href="/setting_menu">
+                  <button className="block w-full text-left px-6 py-1 text-[rgba(212,175,55)] hover:bg-[rgba(212,175,55,0.25)] text-sm transition-colors duration-200">
+                    Settings
+                  </button>
+                </Link>
+
+                <button
+                  onClick={async () => {
+                    await fetch(`${API_BASE_URL}/api/auth/logout`, {
+                      method: "POST",
+                      credentials: "include",
+                    });
+
+                    localStorage.removeItem("username");
+                    clearCart();
+                    setIsLoggedIn(false);
+                    setUsername(null);
+                    setIsUserMenuOpen(false);
+
+                    window.dispatchEvent(new Event("user-logout"));
+
+                    router.refresh();
+                    router.push("/login");
                   }}
+                  className="block w-full text-left px-6 py-1 text-red-600 hover:bg-[rgba(115,0,0,0.50)] text-sm"
                 >
-                  {/* ไอคอน / Avatar */}
-                  {avatarUrl ? (
-                    <img
-                      src={avatarUrl}
-                      alt="avatar"
-                      className="w-7 h-7 rounded-full object-cover border border-blue-300"
-                      onError={() => setAvatarUrl(null)}
-                    />
-                  ) : (
-                    <FaRegUserCircle size={28} className="text-blue-600" />
-                  )}
-
-                  {/* ชื่อ + ลูกศร */}
-                  <div className="flex items-center gap-1 mt-1">
-                    <span className="text-xs text-white">{username}</span>
-                    <svg
-                      className={`w-3 h-3 text-white transition-transform duration-200 ${
-                        isUserMenuOpen ? "rotate-180" : ""
-                      }`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-                  </div>
-
-                  {/* Dropdown Menu */}
-                  <div
-                    className={`
-                      absolute top-[50px] right-0 bg-white shadow-md rounded-md overflow-hidden
-                      transition-all duration-300 z-50
-                      ${
-                        isUserMenuOpen
-                          ? "opacity-100 max-h-[200px] pointer-events-auto" // เพิ่ม max-h ขึ้น
-                          : "opacity-0 max-h-0 pointer-events-none"
-                      }
-                    `}
-                  >
-                    <Link href="/history_payment">
-                      <button className="block w-full text-left px-6 py-1 text-blue-600 hover:bg-gray-100 text-sm">
-                        History Payment
-                      </button>
-                    </Link>
-                    <Link href="/setting_menu">
-                      <button className="block w-full text-left px-6 py-1 text-blue-600 hover:bg-gray-100 text-sm">
-                        Settings
-                      </button>
-                    </Link>
-                    <button
-                      onClick={async () => {
-                        await fetch(`${API_BASE_URL}/api/auth/logout`, {
-                          method: "POST",
-                          credentials: "include",
-                        });
-
-                        localStorage.removeItem("username");
-                        clearCart();
-                        setIsLoggedIn(false);
-                        setUsername(null);
-                        setIsUserMenuOpen(false);
-
-                        // แจ้งทุกหน้าในระบบว่าผู้ใช้ได้ Logout แล้ว
-                        window.dispatchEvent(new Event("user-logout"));
-
-                        router.refresh();
-
-                        router.push("/login");
-                      }}
-                      className="block w-full text-left px-6 py-1 text-red-600 hover:bg-gray-100 text-sm"
-                    >
-                      Logout
-                    </button>
-                  </div>
-                </div>
-              )}
-            </li>
-          </ul>
+                  Logout
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -476,9 +474,11 @@ export default function TopNavbar() {
             onClick={() =>
               setIsDropdownOpenCategories(!isDropdownOpenCategories)
             }
-            className="categories-button shrink-0 z-10 inline-flex items-center py-2.5 px-4 text-sm font-medium text-gray-900 bg-gray-100 border border-gray-300 rounded-s-lg hover:bg-gray-200 focus:outline-none dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white dark:border-gray-600"
+            className="categories-button shrink-0 z-10 inline-flex items-center py-2.5 px-4 text-sm font-medium text-yellow-500 bg-gray-800 border border-gray-600 rounded-s-lg hover:border-[rgb(255,215,0)] hover:text-[rgb(255,215,0)]
+      hover:[text-shadow:0_0_6px_rgb(255,215,0),0_0_12px_rgb(255,215,0),0_0_20px_rgb(212,175,55)] hover:bg-gray-900 focus:bg-gray-900 focus:border-[rgb(255,215,0)] transition-colors duration-300
+    "
           >
-            All categories
+            Categories
             <svg
               className="w-2.5 h-2.5 ml-2"
               xmlns="http://www.w3.org/2000/svg"
@@ -497,13 +497,14 @@ export default function TopNavbar() {
 
           {/* Dropdown ของ All Categories */}
           {isDropdownOpenCategories && (
-            <div className="categories-dropdown absolute top-14 z-50 bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-[150px] dark:bg-gray-700">
-              <ul className="py-2 text-sm text-gray-700 dark:text-gray-200">
+            <div className="categories-dropdown absolute top-[52px] z-50 bg-gray-800 border border-gray-600 rounded-s-lg divide-y divide-gray-100 rounded-lg shadow-sm w-[125px] h-[74px] overflow-y-auto">
+              <ul className="text-sm text-yellow-500 ">
                 {/* ⭐ NEW: ปุ่ม All แสดงสินค้าทั้งหมด */}
                 <li>
                   <button
                     type="button"
-                    className="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white font-semibold"
+                    className="inline-flex w-full px-4 py-2 font-semibold hover:text-[rgb(255,215,0)]
+      hover:[text-shadow:0_0_6px_rgb(255,215,0),0_0_12px_rgb(255,215,0),0_0_20px_rgb(212,175,55)] hover:bg-[rgba(212,175,55,0.25)] transition-colors duration-300"
                     onClick={() => {
                       router.push(`/product`);
                       setIsDropdownOpenCategories(false);
@@ -518,7 +519,8 @@ export default function TopNavbar() {
                   <li key={cat}>
                     <button
                       type="button"
-                      className="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                      className="inline-flex w-full px-4 py-2 font-semibold hover:text-[rgb(255,215,0)]
+      hover:[text-shadow:0_0_6px_rgb(255,215,0),0_0_12px_rgb(255,215,0),0_0_20px_rgb(212,175,55)] hover:bg-[rgba(212,175,55,0.25)] transition-colors duration-300"
                       onClick={() => {
                         router.push(
                           `/product?category=${encodeURIComponent(cat)}`
@@ -537,7 +539,7 @@ export default function TopNavbar() {
           <div className="relative w-full">
             <input
               type="search"
-              className="search-bar block p-2.5 w-full z-10 text-sm text-gray-900 bg-gray-50 rounded-e-lg border-s-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+              className="search-bar block p-2.5 w-full z-10 text-sm  rounded-e-lg border-s-2 border border-gray-700 focus:border-yellow-500 bg-gray-800 border-gray-600 placeholder-yellow-500 text-white hover:bg-gray-900 focus:bg-gray-900  transition-colors duration-300"
               placeholder="Search products..."
               value={searchProductName}
               onChange={handleSearchChange}
@@ -546,7 +548,22 @@ export default function TopNavbar() {
 
             <button
               type="submit"
-              className="absolute top-0 right-0 p-2.5 text-sm font-medium h-full text-white bg-blue-700 rounded-e-lg border border-blue-700 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+              className="
+                absolute top-0 right-0 h-full
+                px-4 text-sm font-medium text-black
+                bg-yellow-400 rounded-e-lg border border-gray-700
+
+                transition-all duration-300 ease-out
+
+                hover:bg-[rgb(255,215,0)]
+                hover:border-[rgb(255,215,0)]
+
+                hover:shadow-[0_0_8px_rgba(255,215,0,0.7),
+                              0_0_16px_rgba(255,215,0,0.5),
+                              0_0_24px_rgba(212,175,55,0.6)]
+
+                hover:scale-105
+              "
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 20 20">
                 <path
@@ -561,13 +578,13 @@ export default function TopNavbar() {
             </button>
 
             {/* Dropdown suggestions ของสินค้าที่เกี่ยวข้อง */}
-            {/* Dropdown suggestions ของสินค้าที่เกี่ยวข้อง */}
             {isDropdownOpen && suggestions.length > 0 && (
-              <ul className="dropdown-suggestions absolute left-0 right-0 mt-1 max-h-64 overflow-y-auto bg-white border border-gray-200 rounded-md shadow-md text-sm z-50">
+              <ul className="dropdown-suggestions absolute left-0 right-0 mt-1 max-h-64 overflow-y-auto bg-gray-800 border border-yellow-500 rounded-lg shadow-md text-sm text-yellow-500 z-50">
                 {suggestions.map((item: any) => (
                   <li
                     key={item.id_products}
-                    className="px-3 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
+                    className="px-3 py-2 hover:text-[rgb(255,215,0)]
+      hover:[text-shadow:0_0_6px_rgb(255,215,0),0_0_12px_rgb(255,215,0),0_0_20px_rgb(212,175,55)] hover:bg-gray-900 transition-colors duration-300 cursor-pointer flex items-center gap-2"
                     onClick={() => handleSelectProduct(item.name)}
                   >
                     {item.images && item.images.length > 0 && (
@@ -590,10 +607,24 @@ export default function TopNavbar() {
             )}
           </div>
 
-          {/* Basket Icon */}
+          {/* Basket Icon And Wishlist Icon */}
           <div className="relative ml-4 flex items-center gap-4">
             <Link href="/shoppingcart">
-              <button className="relative p-2.5 text-blue-900 bg-blue-100 rounded-lg hover:bg-blue-200">
+              <button className="relative p-2.5 text-black
+                bg-yellow-400 rounded-e-lg border border-gray-700
+
+                transition-all duration-300 ease-out
+
+                hover:bg-[rgb(255,215,0)]
+                hover:border-[rgb(255,215,0)]
+
+                hover:shadow-[0_0_8px_rgba(255,215,0,0.7),
+                              0_0_16px_rgba(255,215,0,0.5),
+                              0_0_24px_rgba(212,175,55,0.6)]
+
+                hover:scale-105 
+                hover:text-blue-500
+                rounded-lg transition duration-300">
                 <svg
                   className="w-6 h-6"
                   fill="none"
@@ -622,7 +653,20 @@ export default function TopNavbar() {
               </button>
             </Link>
             <Link href="/wishlist">
-              <button className="relative p-2.5 text-pink-700 bg-white rounded-lg hover:bg-pink-200 transition">
+              <button className="relative p-2.5 text-black
+                bg-yellow-400 rounded-e-lg border border-gray-700
+
+                transition-all duration-300 ease-out
+
+                hover:bg-[rgb(255,215,0)]
+                hover:border-[rgb(255,215,0)]
+
+                hover:shadow-[0_0_8px_rgba(255,215,0,0.7),
+                              0_0_16px_rgba(255,215,0,0.5),
+                              0_0_24px_rgba(212,175,55,0.6)]
+
+                hover:scale-105 rounded-lg 
+                hover:text-pink-500 transition duration-300">
                 <svg
                   className="w-6 h-6"
                   fill="none"

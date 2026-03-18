@@ -3,7 +3,7 @@ import "flowbite";
 import { useEffect, useState } from "react";
 import { BookmarkIcon } from "@heroicons/react/24/solid";
 
-import Promote from "./components/section_page/Promote";
+import Banner from "./components/section_page/Banner";
 import Newproducts from "./components/section_page/Newproduct";
 import IntroWeb from "./components/section_page/Introweb";
 import BrandSupport from "./components/section_page/Brandsupport";
@@ -24,7 +24,7 @@ export default function Home() {
           <div>
             <div className="flex flex-col gap-3">
               <section className="Promote ">
-                <Promote />
+                <Banner />
               </section>
 
               <section className="NewProducts">

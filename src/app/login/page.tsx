@@ -322,6 +322,16 @@ export default function LoginPage() {
 
   const isGoogleDisabled = isGoogleLoading; // (จะเพิ่มเงื่อนไขอื่นก็ได้)
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const username = localStorage.getItem("username");
+
+    if (username) {
+      router.replace("/");
+    }
+  }, []);
+
   return (
     <div className="container px-0 mx-auto p-2">
       <form

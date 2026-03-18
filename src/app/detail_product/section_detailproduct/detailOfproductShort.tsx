@@ -34,12 +34,26 @@ export default function DetailOfProductShort({ product }: any) {
 
   const { addToCart } = useCart();
 
-  // ✅ ดึงค่า variant/inventory ตรงกับ Database
-  const variant = product?.variants?.[0];
-  const inventory = variant?.inventories?.[0];
+  // ✅ รวม inventories
+  const allInventories =
+    product?.variants?.flatMap((v: any) =>
+      v.inventories.map((inv: any) => ({
+        ...inv,
+        variant_name: v.variant_name,
+        variant_id: v.variant_id,
+      }))
+    ) || [];
 
-  const variantId = Number(variant?.variant_id);
-  const inventoryId = Number(inventory?.inventory_id);
+  // ❌ ไม่มี default แล้ว
+  const [selectedInventory, setSelectedInventory] = useState<any>(null);
+
+  const variantId = Number(selectedInventory?.variant_id);
+  const inventoryId = Number(selectedInventory?.inventory_id);
+
+  // ✅ ถ้ายังไม่เลือก → แสดง range
+  const displayPrice = selectedInventory
+    ? selectedInventory.price.toLocaleString()
+    : priceText;
 
   const router = useRouter();
   const { id } = useParams();
@@ -48,10 +62,18 @@ export default function DetailOfProductShort({ product }: any) {
   const [wishlistMsg, setWishlistMsg] = useState("");
 
   const handleAddToCartClick = () => {
+    if (!selectedInventory) {
+      alert("กรุณาเลือกสินค้า");
+      return;
+    }
     addToCart(Number(product.id_products), quantity, variantId, inventoryId);
   };
 
   const handleBuyNow = () => {
+    if (!selectedInventory) {
+      alert("กรุณาเลือกสินค้า");
+      return;
+    }
     addToCart(Number(product.id_products), quantity, variantId, inventoryId);
     router.push("/shoppingcart");
   };
@@ -64,7 +86,7 @@ export default function DetailOfProductShort({ product }: any) {
       const productId = Number(product.id_products);
 
       const res = await fetch(`${API_URL}/api/wish-list`, {
-        method: "POST", // ✅ ใช้ POST ตาม backend route
+        method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ productId }),
@@ -100,7 +122,32 @@ export default function DetailOfProductShort({ product }: any) {
     <div className="p-4 bg-white rounded shadow">
       <h2 className="text-2xl font-bold mb-1">{product.name}</h2>
 
-      <p className="text-xl font-semibold mb-4">ราคา: ฿ {priceText}</p>
+      <p className="text-xl font-semibold mb-4">ราคา: ฿ {displayPrice}</p>
+
+      {/* ✅ variant_name เป็น label เฉยๆ */}
+      <div className="mb-2 font-medium text-gray-700">
+        {product.variants?.[0]?.variant_name || "ตัวเลือกสินค้า"}
+      </div>
+
+      {/* ✅ inventory */}
+      <div className="mb-4">
+        <div className="flex flex-wrap gap-2">
+          {allInventories.map((inv: any) => (
+            <button
+              key={inv.inventory_id}
+              onClick={() => setSelectedInventory(inv)}
+              disabled={inv.stock === 0}
+              className={`px-3 py-1 border rounded ${
+                selectedInventory?.inventory_id === inv.inventory_id
+                  ? "border-red-500 bg-red-50"
+                  : "border-gray-300"
+              } ${inv.stock === 0 ? "opacity-50 cursor-not-allowed" : ""}`}
+            >
+              {inv.inventory_name}
+            </button>
+          ))}
+        </div>
+      </div>
 
       <div className="flex items-center gap-4 mb-6">
         <button

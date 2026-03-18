@@ -144,6 +144,30 @@ export default function PaymentPage() {
 
   const [paymentId, setPaymentId] = useState<string | null>(null);
 
+  // state สำหรับเก็บข้อมูล PromptPay ที่ active อยู่ (ถ้ามี)
+  const [activePromptPay, setActivePromptPay] = useState<{
+    first_name?: string;
+    last_name?: string;
+    payKey?: string;
+  } | null>(null);
+
+  const formatPayKey = (value: string) => {
+    const digits = value.replace(/\D/g, "");
+
+    if (digits.length === 10) {
+      return digits.replace(/(\d{3})(\d{3})(\d{4})/, "$1-$2-$3");
+    }
+
+    if (digits.length === 13) {
+      return digits.replace(
+        /(\d{1})(\d{4})(\d{5})(\d{2})(\d{1})/,
+        "$1-$2-$3-$4-$5"
+      );
+    }
+
+    return value;
+  };
+
   // State สำหรับ Modal และการอัปโหลดไฟล์
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [file, setFile] = useState<File | null>(null);
@@ -206,86 +230,85 @@ export default function PaymentPage() {
   };
 
   // ฟังก์ชันสำหรับอัปโหลดสลิป
-const handleUploadSlip = async () => {
-  setIsProcessing(true); // เปิด Popup เมื่อเริ่มประมวลผล
+  const handleUploadSlip = async () => {
+    setIsProcessing(true); // เปิด Popup เมื่อเริ่มประมวลผล
 
-  if (!file) {
-    setUploadError("กรุณาเลือกไฟล์สลิปก่อน");
-    setIsProcessing(false);
-    return;
-  }
-  if (!paymentId) {
-    setUploadError("ไม่พบ paymentId กรุณาสร้างรายการชำระเงินก่อน");
-    setIsProcessing(false);
-    return;
-  }
-
-  setUploading(true);
-  setUploadError("");
-  setSuccessMessage("");
-
-  const formData = new FormData();
-  formData.append("file", file);
-
-  try {
-    // 1) upload slip
-    const res = await fetch(`${API_URL}/api/payment/${paymentId}`, {
-      method: "PUT",
-      credentials: "include", // ส่ง cookie session (Beer Token)
-      body: formData,
-    });
-
-    if (!res.ok) {
-      const errText = await res.text().catch(() => "");
-      throw new Error(errText || `Error: ${res.status} - ${res.statusText}`);
+    if (!file) {
+      setUploadError("กรุณาเลือกไฟล์สลิปก่อน");
+      setIsProcessing(false);
+      return;
+    }
+    if (!paymentId) {
+      setUploadError("ไม่พบ paymentId กรุณาสร้างรายการชำระเงินก่อน");
+      setIsProcessing(false);
+      return;
     }
 
-    const data = await res.json();
+    setUploading(true);
+    setUploadError("");
+    setSuccessMessage("");
 
-    if (data?.status !== "success") {
-      throw new Error(data?.message || "เกิดข้อผิดพลาดในการอัปโหลด");
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      // 1) upload slip
+      const res = await fetch(`${API_URL}/api/payment/${paymentId}`, {
+        method: "PUT",
+        credentials: "include", // ส่ง cookie session (Beer Token)
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const errText = await res.text().catch(() => "");
+        throw new Error(errText || `Error: ${res.status} - ${res.statusText}`);
+      }
+
+      const data = await res.json();
+
+      if (data?.status !== "success") {
+        throw new Error(data?.message || "เกิดข้อผิดพลาดในการอัปโหลด");
+      }
+
+      setSuccessMessage("สลิปถูกอัปโหลดและตรวจสอบสำเร็จ");
+
+      // 2) --- ดึงสถานะ order หลัง upload slip ---
+      const orderRes = await fetch(`${API_URL}/api/account/orders`, {
+        method: "GET",
+        credentials: "include", // Beer Token
+      });
+
+      if (!orderRes.ok) {
+        throw new Error("ไม่สามารถดึงข้อมูลออร์เดอร์ได้");
+      }
+
+      const orderData = await orderRes.json();
+
+      // หา order ที่ตรงกับ orderId ปัจจุบัน
+      const currentOrder = orderData?.data?.find(
+        (o: any) => o.id_order === orderId
+      );
+
+      console.log("สถานะในฐานข้อมูล:", currentOrder?.status);
+
+      // redirect เมื่อสถานะเป็น checking
+      if (currentOrder?.status === "checking") {
+        console.log("สถานะเป็น checking, redirect ไปหน้า /check_order");
+        router.push(`/check_order?order_id=${orderId}`);
+      } else {
+        console.log("สถานะยังไม่เป็น checking:", currentOrder?.status);
+      }
+    } catch (error: any) {
+      // ❗️ตามที่คุณกำชับ: ห้ามลบ/ห้ามเปลี่ยน logic ใน catch/finally
+      setUploadError(error?.message || "เกิดข้อผิดพลาดในการอัปโหลด");
+      console.log("อัปโหลดไม่สำเร็จ");
+      console.error("Error during upload:", error);
+    } finally {
+      // ❗️ตามที่คุณกำชับ: ห้ามลบ/ห้ามเปลี่ยน logic ใน catch/finally
+      setUploading(false);
+      setIsProcessing(false); // ปิด Popup เมื่อเสร็จสิ้น
     }
-
-    setSuccessMessage("สลิปถูกอัปโหลดและตรวจสอบสำเร็จ");
-
-    // 2) --- ดึงสถานะ order หลัง upload slip ---
-    const orderRes = await fetch(`${API_URL}/api/account/orders`, {
-      method: "GET",
-      credentials: "include", // Beer Token
-    });
-
-    if (!orderRes.ok) {
-      throw new Error("ไม่สามารถดึงข้อมูลออร์เดอร์ได้");
-    }
-
-    const orderData = await orderRes.json();
-
-    // หา order ที่ตรงกับ orderId ปัจจุบัน
-    const currentOrder = orderData?.data?.find(
-      (o: any) => o.id_order === orderId
-    );
-
-    console.log("สถานะในฐานข้อมูล:", currentOrder?.status);
-
-    // redirect เมื่อสถานะเป็น checking
-    if (currentOrder?.status === "checking") {
-      console.log("สถานะเป็น checking, redirect ไปหน้า /check_order");
-      router.push(`/check_order?order_id=${orderId}`);
-    } else {
-      console.log("สถานะยังไม่เป็น checking:", currentOrder?.status);
-    }
-  } catch (error: any) {
-    // ❗️ตามที่คุณกำชับ: ห้ามลบ/ห้ามเปลี่ยน logic ใน catch/finally
-    setUploadError(error?.message || "เกิดข้อผิดพลาดในการอัปโหลด");
-    console.log("อัปโหลดไม่สำเร็จ");
-    console.error("Error during upload:", error);
-  } finally {
-    // ❗️ตามที่คุณกำชับ: ห้ามลบ/ห้ามเปลี่ยน logic ใน catch/finally
-    setUploading(false);
-    setIsProcessing(false); // ปิด Popup เมื่อเสร็จสิ้น
-  }
-};
-
+  };
 
   const openModal = () => {
     setIsModalOpen(true); // เปิด Modal
@@ -362,6 +385,42 @@ const handleUploadSlip = async () => {
       requestedRef.current = false;
     }
   }
+
+  useEffect(() => {
+  async function fetchPromptPay() {
+    try {
+      const res = await fetch(`${API_URL}/api/promtpay?page=1&limit=10`, {
+        credentials: "include",
+      });
+
+      const text = await res.text();
+
+      let json;
+      try {
+        json = JSON.parse(text);
+      } catch (e) {
+        console.error("Response ไม่ใช่ JSON:", text);
+        return;
+      }
+
+      const list = json?.data?.data || [];
+
+      const active = list.find((item: any) => item.is_active === true);
+
+      if (active) {
+        setActivePromptPay({
+          first_name: active.first_name,
+          last_name: active.last_name,
+          payKey: active.payKey,
+        });
+      }
+    } catch (err) {
+      console.error("โหลด promptpay ไม่ได้", err);
+    }
+  }
+
+  fetchPromptPay();
+}, []);
 
   // ✅ auto gen เมื่อ param พร้อมจริง
   // เปลี่ยน logic: ก่อนจะยิง API ให้พยายามใช้ cache ก่อน (กันเวลาเริ่มใหม่ตอน refresh)
@@ -510,15 +569,6 @@ const handleUploadSlip = async () => {
                 </div>
               </div>
             </div>
-            {/* <span
-              className={`absolute right-4 top-1/2 -translate-y-1/2 text-[11px] px-2 py-1 rounded-full border ${
-                isExpired
-                  ? "border-red-200 bg-red-50 text-red-700"
-                  : "border-emerald-200 bg-emerald-50 text-emerald-700"
-              }`}
-            >
-              {isExpired ? "Expired" : "Active"}
-            </span> */}
           </div>
 
           <div className="p-4">
@@ -572,12 +622,21 @@ const handleUploadSlip = async () => {
                   <p className="text-xl font-bold text-sky-800">
                     แสกน QR เพื่อโอนเข้าบัญชี
                   </p>
-                  <p className="text-[17px] font-bold text-gray-600">
-                    ชื่อ: บริษัท บุรีไทย จำกัด
-                  </p>
-                  <p className="text-[17px] font-bold text-gray-600">
-                    บัญชี: 125-010-1524-087
-                  </p>
+                  {activePromptPay ? (
+                    <>
+                      <p className="text-[17px] font-bold text-gray-600">
+                        ชื่อ: {activePromptPay.first_name}{" "}
+                        {activePromptPay.last_name}
+                      </p>
+                      <p className="text-[17px] font-bold text-gray-600">
+                        บัญชี: {formatPayKey(activePromptPay.payKey || "")}
+                      </p>
+                    </>
+                  ) : (
+                    <p className="text-sm text-gray-400">
+                      กำลังโหลดข้อมูลบัญชี...
+                    </p>
+                  )}
                 </div>
 
                 {isExpired && (
