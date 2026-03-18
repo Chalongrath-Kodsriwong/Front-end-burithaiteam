@@ -99,7 +99,8 @@ export default function Newproducts() {
   );
 
   const handleNext = () => setPage((prev) => (prev + 1) % totalPages);
-  const handlePrev = () => setPage((prev) => (prev - 1 + totalPages) % totalPages);
+  const handlePrev = () =>
+    setPage((prev) => (prev - 1 + totalPages) % totalPages);
 
   const paginatedItems = products.slice(
     page * ITEMS_PER_PAGE,
@@ -111,29 +112,38 @@ export default function Newproducts() {
     return <div className="p-4">ไม่มีข้อมูลสินค้า</div>;
 
   return (
-    <div>
-      <h2 className="text-2xl font-bold flex items-center gap-2">
+    <div className="pb-3">
+      <h2 className="text-2xl font-bold flex items-center gap-4 mb-4">
         <div className="relative w-14 h-14">
-          <BookmarkIcon className="w-20 h-16 text-red-600 rotate-[4.70rad]" />
+          <BookmarkIcon className="w-20 h-16 text-red-600 rotate-[4.70rad] -translate-y-[1px]" />
           <span className="absolute inset-0 flex items-center justify-center text-white text-xl font-bold ml-4">
             New
           </span>
         </div>
-        <p>สินค้ามาใหม่</p>
+        <p>สินค้าใหม่</p>
       </h2>
 
       <div className="relative">
         <button
           onClick={handlePrev}
-          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-gray-300 hover:bg-gray-400 px-3 py-2 rounded-l"
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 
+             w-12 h-12 flex items-center justify-center
+            rounded-full bg-gray-300 hover:text-[rgb(255,215,0)]
+      hover:[text-shadow:0_0_6px_rgb(255,215,0),0_0_12px_rgb(255,215,0),0_0_20px_rgb(212,175,55)] hover:bg-black/70
+             text-xl font-bold shadow-md  transition"
         >
           ‹
         </button>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mx-12">
+        <div className="grid grid-cols-[repeat(auto-fit,220px)] gap-5 mx-20">
           {paginatedItems.map((product) => (
             <Link key={product.id} href={`/detail_product/${product.id}`}>
-              <div className="p-4 border rounded bg-white cursor-pointer hover:shadow-lg transition">
+              <div
+                className="w-[220px] p-2 border border-gray-300 rounded-md bg-white cursor-pointer 
+                  hover:border-yellow-500
+                  hover:shadow-[0_0_4px_rgba(212,175,55,0.5),0_0_8px_rgba(184,134,11,0.4)]
+                  transition-all duration-300"
+              >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={product.avatar}
@@ -141,55 +151,63 @@ export default function Newproducts() {
                   onError={(e) =>
                     (e.currentTarget.src = "/image/logo_white.jpeg")
                   }
-                  className="w-full h-[250px] object-cover rounded"
+                  className="w-full h-[200px] object-cover rounded-md"
                 />
 
-                <h3 className="font-semibold mt-2 line-clamp-2">
-                  {product.name}
-                </h3>
+                <div className="p-1">
+                  <h3 className="font-semibold text-lg leading-snug line-clamp-2">
+                    {product.name}
+                  </h3>
 
-                <div className="mt-1">
-                  {product.finalPriceText ? (
-                    <div className="space-y-0.5">
-                      <p className="text-sm text-gray-500 line-through">
+                  <div className="mt-2">
+                    {product.finalPriceText ? (
+                      <div className="space-y-1">
+                        <p className="text-sm text-gray-500 line-through">
+                          ฿ {product.priceText}
+                        </p>
+                        <p className="font-bold text-red-600 text-base">
+                          ฿ {product.finalPriceText}
+                        </p>
+                      </div>
+                    ) : (
+                      <p className="font-bold text-base">
                         ฿ {product.priceText}
                       </p>
-                      <p className="font-semibold text-red-600">
-                        ฿ {product.finalPriceText}
-                      </p>
-                    </div>
-                  ) : (
-                    <p className="font-semibold">฿ {product.priceText}</p>
-                  )}
-                </div>
+                    )}
+                  </div>
 
-                <p className="text-sm text-gray-600 mt-1">
-                  Brand: {product.brand}
-                </p>
+                  <p className="text-sm text-gray-600 mt-2">
+                    Brand: {product.brand}
+                  </p>
+                </div>
               </div>
             </Link>
           ))}
         </div>
 
         <button
-          onClick={handleNext}
-          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-gray-300 hover:bg-gray-400 px-3 py-2 rounded-r"
+          onClick={handlePrev}
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 
+             w-12 h-12 flex items-center justify-center
+             rounded-full bg-gray-300 hover:text-[rgb(255,215,0)]
+      hover:[text-shadow:0_0_6px_rgb(255,215,0),0_0_12px_rgb(255,215,0),0_0_20px_rgb(212,175,55)] hover:bg-black/70
+             text-xl font-bold shadow-md  transition"
         >
           ›
         </button>
       </div>
 
-      <div className="flex justify-center gap-2 mt-4">
+      {/* <div className="flex justify-center gap-2 mt-4">
         {Array.from({ length: totalPages }).map((_, i) => (
           <button
             key={i}
             onClick={() => setPage(i)}
             className={`w-3 h-3 rounded-full ${
-              i === page ? "bg-blue-600" : "bg-gray-300"
+              i === page ? "bg-gray-400" : "bg-gray-300"
             }`}
           />
         ))}
-      </div>
+      </div> */}
     </div>
   );
 }

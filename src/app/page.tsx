@@ -32,22 +32,26 @@ export default function Home() {
               </section>
 
             </div>
-            <section className="IntroWeb pt-4">
+            {/* <section className="IntroWeb pt-4">
               <IntroWeb />
-            </section>
+            </section> */}
 
-            <section className="BrandSupport py-6">
-              <BrandSupport />
-            </section>
-
-            <section className="Achievement">
+            <section className="BrandSupport py-4">
               <Achievement />
             </section>
 
+            <section className="IntroWeb py-1">
+              <Mostsell />
+            </section>
+
+            <section className="Achievement py-2">
+              <BrandSupport />
+            </section>
+
             <div>
-              <section className="MostSeller">
+              {/* <section className="MostSeller">
                 <Mostsell />
-              </section>
+              </section> */}
               <section className="Normalproducts">
                 <Normalproducts />
               </section>
