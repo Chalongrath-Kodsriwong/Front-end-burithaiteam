@@ -497,7 +497,7 @@ export default function TopNavbar() {
 
           {/* Dropdown ของ All Categories */}
           {isDropdownOpenCategories && (
-            <div className="categories-dropdown absolute top-[52px] z-50 bg-gray-800 border border-gray-600 rounded-s-lg divide-y divide-gray-100 rounded-lg shadow-sm w-[125px] h-[74px] overflow-y-auto">
+            <div className="categories-dropdown absolute top-[52px] z-50 bg-gray-800 border border-gray-600 rounded-s-lg divide-y divide-gray-100 rounded-lg shadow-sm w-[125px] h-auto overflow-y-auto">
               <ul className="text-sm text-yellow-500 ">
                 {/* ⭐ NEW: ปุ่ม All แสดงสินค้าทั้งหมด */}
                 <li>

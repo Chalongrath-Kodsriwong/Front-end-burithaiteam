@@ -17,62 +17,75 @@ export default function Achievement() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchAchievements = async () => {
-      try {
-        const res = await fetch(`${API_URL}/api/archive/`, {
-          method: "GET",
-          credentials: "include", // ✅ สำคัญมาก
-        });
+  const fetchAchievements = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/archive/`, {
+        method: "GET",
+        credentials: "include",
+      });
 
-        const data = await res.json();
+      const json = await res.json();
 
-        if (res.ok) {
-          setAchievementList(data.data.data);
-        }
-      } catch (error) {
-        console.error("Fetch achievement error:", error);
-      } finally {
-        setLoading(false);
+      if (res.ok && Array.isArray(json?.data?.data)) {
+
+        const rawData = json.data.data as AchievementItem[];
+
+        const uniqueItems = Array.from(
+          new Map(rawData.map((item) => [item.id, item])).values()
+        );
+
+        setAchievementList(uniqueItems);
       }
-    };
 
-    fetchAchievements();
-  }, []);
+    } catch (error) {
+      console.error("Fetch achievement error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchAchievements();
+}, []);
 
   return (
-    <div className="container mx-auto px-4 py-6 bg-gray-100 rounded-lg shadow-md mb-6">
-      <h2 className="text-2xl font-bold flex items-center justify-center gap-2 ">
-        <div className="">Achievement</div>
-      </h2>
+    <div className="relative container mx-auto px-6 py-16 rounded-[60px] overflow-hidden bg-[#0f172a]">
 
-      <h2 className="text-xl font-bold flex items-center justify-center gap-2">
-        <div className="">(ผลงานของเรา)</div>
-      </h2>
+      {/* 🌟 Dark Gold Fade Background */}
+      <div
+        className="absolute inset-0 pointer-events-none
+        bg-[linear-gradient(to_top,_rgba(120,90,20,0.20),_rgba(15,23,42,1)_90%)]"
+      ></div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4 mx-auto mt-4">
+      <div className="relative z-10 text-yellow-400">
+        <div className="text-center mb-14">
+          <h2 className="text-3xl font-bold">Achievement</h2>
+          <h3 className="text-xl font-semibold mt-2">(ผลงานของเรา)</h3>
+        </div>
+
         {loading ? (
-          <div className="col-span-full text-center py-10">
-            Loading...
-          </div>
+          <div className="text-center py-10">Loading...</div>
+        ) : achievementList.length === 0 ? (
+          <div className="text-center py-10">No Data</div>
         ) : (
-          achievementList.map((item) => (
-            <div
-              key={item.id}
-              className="flex flex-col items-center justify-center p-4 border-0 rounded bg-gray-100"
-            >
-              <img
-                className="rounded-full w-40 h-40"
-                src={item.url?.[0] || "/image/logo_black.jpg"}
-                alt={item.name}
-              />
-
-              <div className="text-center mt-2">
-                <h3 className="text-lg font-semibold">
-                  {item.name}
-                </h3>
-              </div>
+          <div className="overflow-hidden">
+            <div className="flex gap-16 animate-marquee w-max">
+              {[...achievementList, ...achievementList].map((item, index) => (
+                <div
+                  key={`${item.id}-${index}`}
+                  className="flex flex-col items-center text-center min-w-[220px]"
+                >
+                  <img
+                    className="rounded-full w-44 h-44 sm:w-52 sm:h-52 object-cover border-2 border-yellow-500 shadow-lg"
+                    src={item.url?.[0] || "/image/logo_black.jpg"}
+                    alt={item.name}
+                  />
+                  <h3 className="mt-5 text-lg sm:text-xl font-semibold">
+                    {item.name}
+                  </h3>
+                </div>
+              ))}
             </div>
-          ))
+          </div>
         )}
       </div>
     </div>
