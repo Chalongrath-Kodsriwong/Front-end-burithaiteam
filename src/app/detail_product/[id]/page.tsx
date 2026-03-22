@@ -7,7 +7,7 @@ import DetailOfProductFull from "../section_detailproduct/detailOfproductFull";
 import ImageProduct from "../section_detailproduct/ImageProduct";
 import SimilarProduct from "../section_detailproduct/similar_product";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function ProductDetailPage() {
   const { id } = useParams();

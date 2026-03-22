@@ -4,19 +4,10 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-const ITEMS_PER_PAGE = 20; // แสดง 20 ชิ้นต่อหน้า
+import { Product } from "@/types/Productdisplay"
 
-interface Product {
-  id: number;
-  name: string;
-  price: string;
-  brand: string;
-  avatar: string;
-  category?: string;
-  quality?: string; // ⭐ เพิ่มตรงนี้
-  numericPrices?: number[];
-}
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const ITEMS_PER_PAGE = 20; // แสดง 20 ชิ้นต่อหน้า
 
 // ฟังก์ชันเช็คความใกล้เคียงแบบง่าย ๆ จากตัวอักษรที่ซ้ำกัน
 function charOverlapScore(query: string, target: string): number {

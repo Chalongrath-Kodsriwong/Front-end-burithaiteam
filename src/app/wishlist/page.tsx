@@ -4,19 +4,9 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+import { WishlistItem } from "@/types/Wishlist_home"
 
-type WishlistItem = {
-  id: number; // user_id (จาก backend map)
-  product: {
-    id: number;
-    name: string;
-    description?: string | null;
-    variant?: string | null;
-    inventory?: string | null;
-    imageUrl?: string | null;
-  };
-};
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function WishlistPage() {
   const router = useRouter();

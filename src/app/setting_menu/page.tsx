@@ -7,9 +7,9 @@ import EditAccount from "./section_settingmenu/edit_account";
 import EditAddress from "./section_settingmenu/edit_address";
 import HistoryPayment from "./section_settingmenu/history_payment";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+import { MenuKey } from "@/types/Setting_menuhome"
 
-type MenuKey = "account" | "address" | "history";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function SettingMenuPage() {
   const [user, setUser] = useState<any>(null);

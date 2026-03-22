@@ -2,13 +2,7 @@
 import "flowbite";
 import { useEffect, useState } from "react";
 
-interface AchievementItem {
-  id: number;
-  name: string;
-  url: string[];
-  description: string;
-  category_name: string;
-}
+import { AchievementItem } from "@/types/Achievement" 
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 

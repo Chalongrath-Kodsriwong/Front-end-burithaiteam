@@ -4,7 +4,7 @@
 import "flowbite";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
-type MediaItem = { url: string; kind: "image" | "video" };
+import { MediaItem } from "@/types/Imageproduct"
 
 export default function ImageProduct({ product }: any) {
   if (!product) return <div>กำลังโหลดรูปสินค้า...</div>;

@@ -3,7 +3,7 @@ import "flowbite";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 function normalizeProducts(json: any) {
   if (!json) return [];

@@ -1,0 +1,1 @@
+export type MediaItem = { url: string; kind: "image" | "video" };

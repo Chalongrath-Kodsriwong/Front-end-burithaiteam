@@ -97,8 +97,10 @@
           "content": "context",
           "id": 1773999685541,
           "level": "default",
-          "done": false,
-          "start": 1773999685541
+          "done": true,
+          "start": 1773999685541,
+          "focus": false,
+          "end": 1774206738616
         }
       },
       {
@@ -108,8 +110,10 @@
           "content": "detail_product",
           "id": 1773999692744,
           "level": "default",
-          "done": false,
-          "start": 1773999692744
+          "done": true,
+          "start": 1773999692744,
+          "focus": false,
+          "end": 1774207456150
         }
       },
       {
@@ -119,8 +123,10 @@
           "content": "historry_payment",
           "id": 1773999700733,
           "level": "default",
-          "done": false,
-          "start": 1773999700733
+          "done": true,
+          "start": 1773999700733,
+          "focus": false,
+          "end": 1774207427165
         }
       },
       {
@@ -141,8 +147,10 @@
           "content": "orderbuy",
           "id": 1773999714338,
           "level": "default",
-          "done": false,
-          "start": 1773999714338
+          "done": true,
+          "start": 1773999714338,
+          "focus": false,
+          "end": 1774207409213
         }
       },
       {
@@ -152,8 +160,10 @@
           "content": "payment",
           "id": 1773999718312,
           "level": "default",
-          "done": false,
-          "start": 1773999718312
+          "done": true,
+          "start": 1773999718312,
+          "focus": false,
+          "end": 1774207371774
         }
       },
       {
@@ -163,8 +173,10 @@
           "content": "product",
           "id": 1773999722863,
           "level": "default",
-          "done": false,
-          "start": 1773999722863
+          "done": true,
+          "start": 1773999722863,
+          "focus": false,
+          "end": 1774207718780
         }
       },
       {
@@ -174,8 +186,10 @@
           "content": "register",
           "id": 1773999726675,
           "level": "default",
-          "done": false,
-          "start": 1773999726675
+          "done": true,
+          "start": 1773999726675,
+          "focus": false,
+          "end": 1774207724102
         }
       },
       {
@@ -185,8 +199,10 @@
           "content": "request-password",
           "id": 1773999730463,
           "level": "default",
-          "done": false,
-          "start": 1773999730463
+          "done": true,
+          "start": 1773999730463,
+          "focus": false,
+          "end": 1774207983030
         }
       },
       {
@@ -196,8 +212,10 @@
           "content": "reset-password",
           "id": 1773999738600,
           "level": "default",
-          "done": false,
-          "start": 1773999738600
+          "done": true,
+          "start": 1773999738600,
+          "focus": false,
+          "end": 1774207983984
         }
       },
       {
@@ -207,8 +225,10 @@
           "content": "setting_menu",
           "id": 1773999744348,
           "level": "default",
-          "done": false,
-          "start": 1773999744348
+          "done": true,
+          "start": 1773999744348,
+          "focus": false,
+          "end": 1774207995162
         }
       },
       {
@@ -218,8 +238,10 @@
           "content": "shopping_cart",
           "id": 1773999752832,
           "level": "default",
-          "done": false,
-          "start": 1773999752832
+          "done": true,
+          "start": 1773999752832,
+          "focus": false,
+          "end": 1774207995896
         }
       },
       {
@@ -229,8 +251,10 @@
           "content": "verify-email",
           "id": 1773999758180,
           "level": "default",
-          "done": false,
-          "start": 1773999758180
+          "done": true,
+          "start": 1773999758180,
+          "focus": false,
+          "end": 1774208045663
         }
       },
       {
@@ -240,8 +264,10 @@
           "content": "wishlist",
           "id": 1773999764089,
           "level": "default",
-          "done": false,
-          "start": 1773999764089
+          "done": true,
+          "start": 1773999764089,
+          "focus": false,
+          "end": 1774208151410
         }
       }
     ],
@@ -259,6 +285,6 @@
     "simpleMode": false,
     "lang": "en",
     "desc": "Factor move identify on code move identify on folder types",
-    "version": "1774206327937"
+    "version": "1774208151460"
   }
 }

@@ -7,26 +7,10 @@ import Link from "next/link";
 
 import { useRouter } from "next/navigation"; // นำเข้า useRouter สำหรับการทำการ redirect
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-const DEFAULT_TTL_SECONDS = 30 * 60; // 30 นาที (fallback)
+import { CreatePaymentResponse } from "@/types/Paymentclient"
 
-type CreatePaymentResponse =
-  | {
-      success: true;
-      message?: string;
-      data?: {
-        payment_id?: string;
-        qrDataUrl?: string | null;
-        expires_at?: string | null;
-      };
-    }
-  | {
-      status?: string;
-      message?: string;
-      error?: string;
-      data?: any;
-    }
-  | any;
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const DEFAULT_TTL_SECONDS = 30 * 60; // 30 นาที (fallback)
 
 function formatMMSS(totalSeconds: number) {
   const s = Math.max(0, Math.floor(totalSeconds));

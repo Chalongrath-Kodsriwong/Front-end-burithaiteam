@@ -1,0 +1,1 @@
+export type MenuKey = "account" | "address" | "history";

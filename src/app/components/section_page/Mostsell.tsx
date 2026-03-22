@@ -5,7 +5,7 @@ import Link from "next/link";
 
 import { ApiProduct, ProductUI } from "@/types/Mostseller";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const ITEMS_PER_PAGE = 4;
 
 function formatPriceRange(prices?: number[]) {

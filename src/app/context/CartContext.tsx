@@ -2,29 +2,9 @@
 
 import { createContext, useContext, useState, ReactNode, useEffect } from "react";
 
+import { CartItem, CartContextType} from "@/types/Cartcontext"
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-interface CartItem {
-  cartItemId: number;
-  id: number;
-  variantId: number;
-  inventoryId: number;
-  quantity: number;
-}
-
-interface CartContextType {
-  cartItems: CartItem[];
-  refreshCart: () => Promise<void>;
-  addToCart: (
-    productId: number,
-    qty: number,
-    variantId: number,
-    inventoryId: number
-  ) => Promise<void>;
-  increaseQuantity: (cartItemId: number) => Promise<void>;
-  decreaseQuantity: (cartItemId: number) => Promise<void>;
-  clearCart: () => void;   // ⭐ เพิ่มตรงนี้
-}
 
 
 const CartContext = createContext<CartContextType | undefined>(undefined);

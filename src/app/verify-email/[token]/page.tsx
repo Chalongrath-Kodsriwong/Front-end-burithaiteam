@@ -3,6 +3,9 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+
 export default function VerifyEmailPage() {
   const { token } = useParams();  // ใช้ useParams() ในการดึง token จาก URL params
   const router = useRouter();  // เรียกใช้ useRouter ก่อนเพื่อใช้ใน setTimeout
@@ -16,7 +19,7 @@ export default function VerifyEmailPage() {
     }
 
     // ส่งคำขอไปยัง Backend เพื่อทำการยืนยันอีเมล
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/verify-email/${token}`)
+    fetch(`${API_URL}/api/verify-email/${token}`)
       .then((res) => res.json())
       .then((data) => {
         if (data.status === "success") {

@@ -5,18 +5,9 @@ import { useEffect, useState } from "react";
 import { useCart } from "@/app/context/CartContext";
 import { useRouter } from "next/navigation";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+import { Product } from "@/types/DisplayItemCart"
 
-interface Product {
-  cartItemId: number;
-  id: number;
-  name: string;
-  branch: string;
-  price: number;
-  description: string;
-  avatar: string;
-  quantity: number;
-}
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function DisplayItemCart() {
   const [products, setProducts] = useState<Product[]>([]);
