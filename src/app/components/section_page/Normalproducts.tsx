@@ -3,16 +3,10 @@ import "flowbite";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-const ITEMS_PER_PAGE = 20; // แสดง 20 ชิ้นต่อหน้า
+import { Product } from "@/types/Normalproducts";
 
-interface Product {
-  id: number;
-  name: string;
-  price: string; // string เพื่อรองรับ "300 - 310"
-  brand: string;
-  avatar: string;
-}
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const ITEMS_PER_PAGE = 20;
 
 export default function Productdisplay() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -29,11 +23,9 @@ export default function Productdisplay() {
           cache: "no-store",
         });
         const json = await res.json();
-        console.log("Fetched products (Productdisplay):", json);
 
         const productData = Array.isArray(json.data) ? json.data : [];
 
-        // ⭐ map ข้อมูลให้ตรงกับ UI (ใช้ logic เดียวกับ Newproducts)
         const mapped: Product[] = productData.map((p: any) => {
           let price = "0";
 
@@ -64,7 +56,6 @@ export default function Productdisplay() {
           };
         });
 
-        // ⭐ ลบซ้ำแบบใช้ Set (ไม่ใช้ findIndex แล้ว)
         const seen = new Set<number>();
         const unique: Product[] = mapped.filter((item) => {
           if (seen.has(item.id)) return false;
@@ -72,7 +63,6 @@ export default function Productdisplay() {
           return true;
         });
 
-        // ⭐ เอาเฉพาะ 100 ชิ้นแรก
         const trimmed = unique.slice(0, 100);
 
         setProducts(trimmed);
@@ -106,29 +96,46 @@ export default function Productdisplay() {
     return <div className="p-4 text-center">ไม่มีข้อมูลสินค้า</div>;
 
   return (
-    <div className="container mx-auto px-4 py-6 bg-gray-100 rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold flex items-center justify-center gap-2 mb-4">
-        <div>Products</div>
+    <div className="container mx-auto px-4 py-6 rounded-xl shadow-xl">
+      <div className="flex item-center text-center p-4 gap-2 mb-4">
+      <h2 className="text-2xl font-bold">
+        <div>Product</div>
       </h2>
+      <h2 className="text-[20px] font-bold mt-0.5">สินค้าทั้งหมดของเรา</h2>
+      </div>
 
-      {/* Grid สินค้าแบบตาราง */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 mx-12 mt-4">
+      {/* Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 mx-12 mt-4">
         {visibleItems.map((product) => (
           <Link key={product.id} href={`/detail_product/${product.id}`}>
-            <div className="border p-4 rounded-lg bg-white shadow-sm cursor-pointer hover:shadow-md transition">
+            <div
+              className="w-[220px] p-2 border border-gray-300 rounded-md bg-white cursor-pointer 
+              hover:border-yellow-500
+              hover:shadow-[0_0_4px_rgba(212,175,55,0.5),0_0_8px_rgba(184,134,11,0.4)]
+              transition-all duration-300"
+            >
               <img
                 src={product.avatar}
                 alt={product.name}
                 onError={(e) =>
                   (e.currentTarget.src = "/image/logo_white.jpeg")
                 }
-                className="w-full h-32 object-cover mb-2 rounded"
+                className="w-full h-[200px] object-cover rounded-md"
               />
-              <h3 className="text-lg font-semibold line-clamp-2">
-                {product.name}
-              </h3>
-              <p className="text-gray-700 font-medium">฿ {product.price}</p>
-              <p className="text-sm text-gray-500">Brand: {product.brand}</p>
+
+              <div className="p-1">
+                <h3 className="font-semibold text-lg leading-snug line-clamp-2">
+                  {product.name}
+                </h3>
+
+                <div className="mt-2">
+                  <p className="font-bold text-base">฿ {product.price}</p>
+                </div>
+
+                <p className="text-sm text-gray-600 mt-2">
+                  Brand: {product.brand}
+                </p>
+              </div>
             </div>
           </Link>
         ))}

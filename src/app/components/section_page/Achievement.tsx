@@ -53,7 +53,7 @@ export default function Achievement() {
       {/* 🌟 Dark Gold Fade Background */}
       <div
         className="absolute inset-0 pointer-events-none
-        bg-[linear-gradient(to_top,_rgba(120,90,20,0.20),_rgba(15,23,42,1)_90%)]"
+        bg-[linear-gradient(to_top,_rgba(120,90,20,0.20),_rgba(15,23,42,1)_100%)]"
       ></div>
 
       <div className="relative z-10 text-yellow-400">

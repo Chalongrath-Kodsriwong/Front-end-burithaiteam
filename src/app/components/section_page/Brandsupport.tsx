@@ -1,44 +1,51 @@
 "use client";
 import "flowbite";
-import { useEffect, useState } from "react";
 
-// For Section Brand Support
-// 🔸 Mock data แบรนด์ 6 แบรนด์
+// 🔸 Mock data แบรนด์
 const brandList = [
-  { name: "Novastar", img: "/image/logo_black.jpg" },
-  { name: "Linsn", img: "/image/logo_white.jpeg" },
-  { name: "Colorlight", img: "/image/logo_black.jpg" },
-  { name: "Kystar", img: "/image/logo_white.jpeg" },
-  // { name: "Panasonic", img: "/image/logo_black.jpg" },
-  // { name: "Sharp", img: "/image/logo_white.jpeg" },
+  { name: "Novastar", img: "/image/brandsupport/NovaStar.jpg" },
+  { name: "Linsn", img: "/image/brandsupport/Linsn.png" },
+  { name: "Colorlight", img: "/image/brandsupport/Colorlight.jpg" },
+  { name: "Kystar", img: "/image/brandsupport/Kystar.jpg" },
+  { name: "Mooncell", img: "/image/brandsupport/Mooncell.png" },
 ];
 
 export default function BrandSupport() {
   return (
-    <div className="container mx-auto px-4 py-6 bg-gray-100 rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold flex items-center justify-center gap-2 ">
-        <div className="">
-            Brandsupport
-        </div>
-      </h2>
-      <h2 className="text-xl font-bold flex items-center justify-center gap-2">
-        <div className="">
-          (แบรนด์ที่เราสนับสนุน)
-        </div>
-      </h2>
+    <div className="relative container mx-auto px-6 py-16 rounded-[60px] overflow-hidden bg-[#0f172a]">
+      
+      {/* 🌟 Dark Gold Fade Background */}
+      <div
+        className="absolute inset-0 pointer-events-none
+        bg-[linear-gradient(to_top,_rgba(120,90,20,0.20),_rgba(15,23,42,1)_100%)]"
+      ></div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4 mx-auto mt-4">
-        {brandList.map((brand, index) => (
-          <div
-            key={index}
-            className="flex flex-col items-center justify-center p-4 border-0 rounded bg-gray-100"
-          >
-            <img className="rounded-full w-40 h-40" src={brand.img} alt={brand.name} />
-            <div className="text-center mt-2">
-              <h3 className="text-lg font-semibold">{brand.name}</h3>
+      <div className="relative z-10 text-yellow-400">
+        <div className="text-center mb-14">
+          <h2 className="text-3xl font-bold">Brandsupport</h2>
+          <h3 className="text-xl font-semibold mt-2">
+            (แบรนด์ที่เราสนับสนุน)
+          </h3>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-10 mx-auto">
+          {brandList.map((brand, index) => (
+            <div
+              key={index}
+              className="flex flex-col items-center text-center"
+            >
+              <img
+                className="rounded-full w-44 h-44 sm:w-52 sm:h-52 object-cover border-2 border-yellow-500 shadow-lg"
+                src={brand.img}
+                alt={brand.name}
+              />
+
+              <h3 className="mt-5 text-lg sm:text-xl font-semibold">
+                {brand.name}
+              </h3>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );

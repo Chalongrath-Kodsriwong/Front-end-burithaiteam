@@ -4,31 +4,10 @@ import { useEffect, useMemo, useState } from "react";
 import { BookmarkIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+import { ApiProduct, ProductUI } from "@/types/Newproduct";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL ;
 const ITEMS_PER_PAGE = 4;
-
-type ApiProduct = {
-  id_products: number;
-  name: string;
-  brand?: string | null;
-  images?: { url: string }[];
-  prices?: number[];
-  discount?: null | {
-    name: string;
-    discountType: string;
-    discountValue: number;
-    finalPrices?: number[];
-  };
-};
-
-interface ProductUI {
-  id: number;
-  name: string;
-  brand: string;
-  avatar: string;
-  priceText: string;
-  finalPriceText?: string;
-}
 
 function formatPriceRange(prices?: number[]) {
   if (!Array.isArray(prices) || prices.length === 0) return "0";
