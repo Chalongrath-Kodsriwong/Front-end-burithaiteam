@@ -21,7 +21,7 @@ export default function DetailOfProductShort({ product }: any) {
     if (prices.length === 1) return prices[0].toLocaleString();
 
     return `${Math.min(...prices).toLocaleString()} - ${Math.max(
-      ...prices
+      ...prices,
     ).toLocaleString()}`;
   };
 
@@ -41,7 +41,7 @@ export default function DetailOfProductShort({ product }: any) {
         ...inv,
         variant_name: v.variant_name,
         variant_id: v.variant_id,
-      }))
+      })),
     ) || [];
 
   // ❌ ไม่มี default แล้ว
@@ -66,6 +66,15 @@ export default function DetailOfProductShort({ product }: any) {
       alert("กรุณาเลือกสินค้า");
       return;
     }
+
+    const username = localStorage.getItem("username");
+
+    // 🔥 ถ้ายังไม่ได้ login → เด้งไปหน้า login
+    if (!username) {
+      router.replace(`/login?redirect=/detail_product/${id}`);
+      return;
+    }
+
     addToCart(Number(product.id_products), quantity, variantId, inventoryId);
   };
 
@@ -74,8 +83,15 @@ export default function DetailOfProductShort({ product }: any) {
       alert("กรุณาเลือกสินค้า");
       return;
     }
+
+    const username = localStorage.getItem("username");
+
+    if (!username) {
+      router.push("/shoppingcart");
+      return;
+    }
+    
     addToCart(Number(product.id_products), quantity, variantId, inventoryId);
-    router.push("/shoppingcart");
   };
 
   const handleAddWishlist = async () => {

@@ -86,7 +86,7 @@ export default function LoginPage() {
     if (lockedUntil && lockedUntil > Date.now()) {
       window.localStorage.setItem(
         "login_lock",
-        JSON.stringify({ lockedUntil })
+        JSON.stringify({ lockedUntil }),
       );
     } else {
       window.localStorage.removeItem("login_lock");
@@ -147,7 +147,7 @@ export default function LoginPage() {
     if (rememberMe) {
       window.localStorage.setItem(
         REMEMBER_KEY,
-        JSON.stringify({ identifier, password })
+        JSON.stringify({ identifier, password }),
       );
     } else {
       window.localStorage.removeItem(REMEMBER_KEY);
@@ -234,7 +234,7 @@ export default function LoginPage() {
     if (lockedUntil && lockedUntil > Date.now()) {
       const remainSec = Math.ceil((lockedUntil - Date.now()) / 1000);
       setError(
-        `คุณพยายามเข้าสู่ระบบผิดหลายครั้ง โปรดลองใหม่ในอีก ${remainSec} วินาที`
+        `คุณพยายามเข้าสู่ระบบผิดหลายครั้ง โปรดลองใหม่ในอีก ${remainSec} วินาที`,
       );
       return;
     }
@@ -269,7 +269,7 @@ export default function LoginPage() {
             const lockTime = Date.now() + 60 * 1000;
             setLockedUntil(lockTime);
             setError(
-              "คุณพยายามเข้าสู่ระบบผิดหลายครั้ง ระบบขอล็อกชั่วคราว 1 นาที"
+              "คุณพยายามเข้าสู่ระบบผิดหลายครั้ง ระบบขอล็อกชั่วคราว 1 นาที",
             );
           } else {
             // ข้อความ error แบบควบคุมเอง
@@ -322,15 +322,44 @@ export default function LoginPage() {
 
   const isGoogleDisabled = isGoogleLoading; // (จะเพิ่มเงื่อนไขอื่นก็ได้)
 
+  // useEffect(() => {
+  //   if (typeof window === "undefined") return;
+
+  //   const username = localStorage.getItem("username");
+
+  //   if (username) {
+  //     router.replace("/");
+  //   }
+  // }, []);
+
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    const checkAuth = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/auth/me`, {
+          credentials: "include",
+        });
 
-    const username = localStorage.getItem("username");
+        if (res.ok) {
+          // 🔥 login อยู่ → ห้ามเข้า login
+          router.replace("/");
+          return;
+        }
 
-    if (username) {
-      router.replace("/");
-    }
-  }, []);
+        if (res.status === 401) {
+          // 🔥 token หมด → ลบ user
+          localStorage.removeItem("username");
+          localStorage.removeItem("first_name");
+        }
+      } catch {}
+
+      setCheckingAuth(false);
+    };
+
+    checkAuth();
+  }, [router]);
+  if (checkingAuth) return null;
 
   return (
     <div className="container px-0 mx-auto p-2">

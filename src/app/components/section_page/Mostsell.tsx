@@ -3,33 +3,11 @@ import "flowbite";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 
+import { ApiProduct, ProductUI } from "@/types/Mostseller"
+
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 const ITEMS_PER_PAGE = 4;
-
-type ApiProduct = {
-  id_products: number;
-  name: string;
-  brand?: string | null;
-  images?: { url: string }[];
-  prices?: number[];
-  discount?: null | {
-    name: string;
-    discountType: string;
-    discountValue: number;
-    finalPrices?: number[];
-  };
-  soldQuantity?: number;
-};
-
-interface ProductUI {
-  id: number;
-  name: string;
-  brand: string;
-  avatar: string;
-  priceText: string; // ราคาปกติ
-  finalPriceText?: string; // ราคาหลังลด (ถ้ามี)
-  soldQty?: number;
-}
 
 function formatPriceRange(prices?: number[]) {
   if (!Array.isArray(prices) || prices.length === 0) return "0";

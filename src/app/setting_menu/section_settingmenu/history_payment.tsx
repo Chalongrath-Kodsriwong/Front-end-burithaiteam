@@ -1,8 +1,3 @@
-// ✅ history_payment/page.tsx
-// เปลี่ยน API จาก /api/orders/users -> /api/account/orders
-// ✅ UI/โครงสร้าง state/ฟังก์ชัน/การ render เดิม "คงไว้เหมือนเดิม"
-// 👉 เราจะ map ข้อมูลจาก API ใหม่ ให้เป็น shape เดิมที่หน้านี้ใช้อยู่ (id_order, order_items, product_image, product_name ฯลฯ)
-
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
@@ -16,6 +11,7 @@ function thStatus(s?: string) {
   if (s === "success") return "เสร็จสิ้น";
   if (s === "pending") return "รอชำระเงิน";
   if (s === "canceled") return "ยกเลิก";
+  if (s === "confirmed") return "ยืนยันคำสั่งซื้อแล้ว";
   return s;
 }
 
@@ -24,7 +20,9 @@ export default function OrderHistoryPage({ user }: { user?: any }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // sort ล่าสุดขึ้นก่อน (คงเดิม)
+  // state สำหรับ cancel
+  const [cancelingId, setCancelingId] = useState<number | null>(null);
+
   const sortedOrders = useMemo(() => {
     return [...orders].sort((a, b) => {
       const ta = new Date(a?.created_at || 0).getTime();
@@ -39,21 +37,14 @@ export default function OrderHistoryPage({ user }: { user?: any }) {
       setError("");
 
       try {
-        // ✅ เปลี่ยนมาใช้ API ใหม่
         const res = await fetch(`${API_URL}/api/account/orders`, {
           method: "GET",
-          credentials: "include", // ✅ Beer Token cookie
+          credentials: "include",
         });
-
-        // if (!res.ok) {
-        //   const txt = await res.text().catch(() => "");
-        //   throw new Error(txt || `โหลดประวัติไม่สำเร็จ (${res.status})`);
-        // }
 
         const json = await res.json();
         const rawOrders = Array.isArray(json?.data) ? json.data : [];
 
-        // ✅ map โครงสร้างใหม่ -> ให้เหมือนโครงสร้างเดิมที่หน้าใช้อยู่
         const mappedOrders = rawOrders.map((o: any) => ({
           id_order: o?.id_order,
           shipping_address: o?.shipping_address,
@@ -63,16 +54,11 @@ export default function OrderHistoryPage({ user }: { user?: any }) {
           dynamic_total_price: o?.dynamic_total_price,
           created_at: o?.created_at,
           updated_at: o?.updated_at,
-
-          // เดิมหน้าใช้ o.order_items
           order_items: Array.isArray(o?.items)
             ? o.items.map((it: any) => ({
-                // เดิมหน้าใช้ it.id_orderitem เป็น key
                 id_orderitem:
                   it?.id_orderitems ??
                   `${o?.id_order}-${it?.name ?? "item"}-${it?.variant_name ?? ""}-${it?.inventory_name ?? ""}`,
-
-                // เดิมหน้าใช้ product_image/product_name/variant_name/inventory_name/quantity/dynamic_total
                 product_image: it?.imageUrl ?? null,
                 product_name: it?.name ?? null,
                 variant_name: it?.variant_name ?? null,
@@ -93,6 +79,39 @@ export default function OrderHistoryPage({ user }: { user?: any }) {
 
     fetchHistory();
   }, []);
+
+  // Cancel Function
+  const handleCancel = async (orderId: number) => {
+    if (!confirm("คุณต้องการยกเลิกคำสั่งซื้อนี้ใช่หรือไม่?")) return;
+
+    try {
+      setCancelingId(orderId);
+
+      const res = await fetch(
+        `${API_URL}/api/account/orders/${orderId}/cancel`,
+        {
+          method: "PUT",
+          credentials: "include",
+        }
+      );
+
+      const json = await res.json();
+
+      if (!res.ok) {
+        throw new Error(json?.message || "ยกเลิกไม่สำเร็จ");
+      }
+
+      setOrders((prev) =>
+        prev.map((o) =>
+          o.id_order === orderId ? { ...o, status: "canceled" } : o
+        )
+      );
+    } catch (err: any) {
+      alert(err.message || "เกิดข้อผิดพลาด");
+    } finally {
+      setCancelingId(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -130,7 +149,7 @@ export default function OrderHistoryPage({ user }: { user?: any }) {
               key={o.id_order}
               className="border border-gray-300 bg-gray-100 p-6"
             >
-              {/* Header Order */}
+              {/* Header */}
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="text-xl font-bold">Order #{o.id_order}</div>
 
@@ -143,6 +162,8 @@ export default function OrderHistoryPage({ user }: { user?: any }) {
                           ? "text-green-700"
                           : o.status === "checking"
                           ? "text-yellow-600"
+                          : o.status === "confirmed"
+                          ? "text-blue-600"
                           : o.status === "canceled"
                           ? "text-red-600"
                           : "text-gray-700"
@@ -152,7 +173,6 @@ export default function OrderHistoryPage({ user }: { user?: any }) {
                     </span>
                   </div>
 
-                  {/* ไปหน้าเช็คออเดอร์ (ใช้ของเดิม) */}
                   <Link href={`/check_order?order_id=${o.id_order}`}>
                     <button className="border border-gray-400 bg-gray-200 px-4 py-2 font-semibold">
                       ดูรายละเอียด
@@ -166,7 +186,9 @@ export default function OrderHistoryPage({ user }: { user?: any }) {
                 <div>
                   <div className="font-semibold">วันที่สั่งซื้อ</div>
                   <div>
-                    {o.created_at ? new Date(o.created_at).toLocaleString() : "-"}
+                    {o.created_at
+                      ? new Date(o.created_at).toLocaleString()
+                      : "-"}
                   </div>
                 </div>
 
@@ -202,7 +224,9 @@ export default function OrderHistoryPage({ user }: { user?: any }) {
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <span className="text-xs text-gray-600">no image</span>
+                          <span className="text-xs text-gray-600">
+                            no image
+                          </span>
                         )}
                       </div>
 
@@ -212,7 +236,9 @@ export default function OrderHistoryPage({ user }: { user?: any }) {
                         </div>
                         <div className="text-gray-700">
                           {it.variant_name || "-"}
-                          {it.inventory_name ? ` • ${it.inventory_name}` : ""}
+                          {it.inventory_name
+                            ? ` • ${it.inventory_name}`
+                            : ""}
                         </div>
 
                         <div className="mt-2 flex flex-wrap gap-6 font-semibold">
@@ -225,17 +251,32 @@ export default function OrderHistoryPage({ user }: { user?: any }) {
                 </div>
               </div>
 
-              {/* Tracking */}
+              {/* Tracking + Cancel */}
               <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
                 <div className="font-semibold">
                   หมายเลขพัสดุ: {o.tracking_number || "-"}
                 </div>
 
-                <Link href={`/check_order?order_id=${o.id_order}`}>
-                  <button className="border border-gray-400 bg-gray-200 px-5 py-2 font-semibold">
-                    ไปหน้าเช็คสถานะ
-                  </button>
-                </Link>
+                <div className="flex items-center gap-3">
+                  {(o.status === "pending" ||
+                    o.status === "checking") && (
+                    <button
+                      onClick={() => handleCancel(o.id_order)}
+                      disabled={cancelingId === o.id_order}
+                      className="border border-red-500 bg-red-100 text-red-700 px-5 py-2 font-semibold hover:bg-red-200 disabled:opacity-50"
+                    >
+                      {cancelingId === o.id_order
+                        ? "กำลังยกเลิก..."
+                        : "ยกเลิกคำสั่งซื้อ"}
+                    </button>
+                  )}
+
+                  <Link href={`/check_order?order_id=${o.id_order}`}>
+                    <button className="border border-gray-400 bg-gray-200 px-5 py-2 font-semibold">
+                      ไปหน้าเช็คสถานะ
+                    </button>
+                  </Link>
+                </div>
               </div>
             </div>
           ))}

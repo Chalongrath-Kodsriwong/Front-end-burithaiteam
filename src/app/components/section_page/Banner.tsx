@@ -4,14 +4,9 @@ import { Carousel } from "react-responsive-carousel";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+import {BannerItem} from "@/types/Banner"
 
-type BannerItem = {
-  banner_id: number;
-  url_banner: string;
-  order_banner: number;
-  is_active: boolean;
-};
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 export default function Promote() {
   const carouselRef = useRef<any>(null);
