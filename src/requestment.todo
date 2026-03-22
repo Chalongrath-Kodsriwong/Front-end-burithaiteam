@@ -34,9 +34,10 @@
           "content": "Achievement",
           "id": 1773999520120,
           "level": "default",
-          "done": false,
+          "done": true,
           "start": 1773999520120,
-          "focus": true
+          "focus": false,
+          "end": 1774206325832
         }
       },
       {
@@ -46,8 +47,10 @@
           "content": "Brandsupport",
           "id": 1773999530058,
           "level": "default",
-          "done": false,
-          "start": 1773999530058
+          "done": true,
+          "start": 1773999530058,
+          "focus": false,
+          "end": 1774206326457
         }
       },
       {
@@ -57,8 +60,10 @@
           "content": "Newproduct",
           "id": 1773999547798,
           "level": "default",
-          "done": false,
-          "start": 1773999547798
+          "done": true,
+          "start": 1773999547798,
+          "focus": false,
+          "end": 1774206327137
         }
       },
       {
@@ -68,8 +73,10 @@
           "content": "Normalproduct",
           "id": 1773999558335,
           "level": "default",
-          "done": false,
-          "start": 1773999558335
+          "done": true,
+          "start": 1773999558335,
+          "focus": false,
+          "end": 1774206327884
         }
       },
       {
@@ -252,6 +259,6 @@
     "simpleMode": false,
     "lang": "en",
     "desc": "Factor move identify on code move identify on folder types",
-    "version": "1774000114661"
+    "version": "1774206327937"
   }
 }
