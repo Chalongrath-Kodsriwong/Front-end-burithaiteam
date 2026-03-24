@@ -97,11 +97,11 @@ export default function Productdisplay() {
 
   return (
     <div className="container mx-auto px-4 py-6 rounded-xl shadow-xl">
-      <div className="flex item-center text-center p-4 gap-2 mb-4">
+      <div className="flex flex-col item-center justify-center text-center p-4 mb-4">
       <h2 className="text-2xl font-bold">
-        <div>Product</div>
+        <div>My Product</div>
       </h2>
-      <h2 className="text-[20px] font-bold mt-0.5">สินค้าทั้งหมดของเรา</h2>
+      <h2 className="text-[20px] font-bold mt-0.5">(สินค้าทั้งหมดของเรา)</h2>
       </div>
 
       {/* Grid */}
