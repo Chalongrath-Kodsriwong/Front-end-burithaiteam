@@ -2,7 +2,7 @@
 import "flowbite";
 import { useEffect, useState } from "react";
 
-import Promote from "./section_about/Promote";
+import Banner from "./section_about/Banner";
 import Ourservice from "./section_about/Ourservice";
 import Ourmission from "./section_about/Ourmission";
 
@@ -14,12 +14,12 @@ export default function AboutPage() {
     }, []);
 
     return (
-        <div className="container mx-auto px-4 py-6 my-2 rounded-lg">
-            <h1 className="text-3xl font-bold text-center mb-6">About Us</h1>
+        <div className="container mx-auto px-4 py-4 my-2 rounded-lg">
+            <h1 className="text-3xl font-bold text-center">About Us</h1>
             {isClient && (
                 <>
                     <div className="section_promote">
-                        <Promote />
+                        <Banner />
                     </div>
                     <div className="section_ourservice">
                         <Ourservice />
