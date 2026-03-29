@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 
 import { Product } from "@/types/Productdisplay"
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://158.173.159.107";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 const ITEMS_PER_PAGE = 20; // แสดง 20 ชิ้นต่อหน้า
 
 // ฟังก์ชันเช็คความใกล้เคียงแบบง่าย ๆ จากตัวอักษรที่ซ้ำกัน

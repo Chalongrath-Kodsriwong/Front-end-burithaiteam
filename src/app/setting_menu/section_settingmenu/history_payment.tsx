@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://158.173.159.107";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
 function thStatus(s?: string) {
   if (!s) return "-";

@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation"; // นำเข้า useRouter ส
 
 import { CreatePaymentResponse } from "@/types/Paymentclient"
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://158.173.159.107";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 const DEFAULT_TTL_SECONDS = 30 * 60; // 30 นาที (fallback)
 
 function formatMMSS(totalSeconds: number) {

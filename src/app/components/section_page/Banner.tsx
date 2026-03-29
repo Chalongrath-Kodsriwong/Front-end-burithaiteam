@@ -6,7 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import {BannerItem} from "@/types/Banner"
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://158.173.159.107";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
 export default function Promote() {
   const carouselRef = useRef<any>(null);

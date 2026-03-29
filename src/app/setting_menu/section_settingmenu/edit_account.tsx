@@ -2,7 +2,7 @@
 
 import React, { useRef, useState } from "react";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://158.173.159.107";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
 export default function EditAccount({ user }: { user: any }) {
   const [showPopup, setShowPopup] = useState(false);

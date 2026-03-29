@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 import { AchievementItem } from "@/types/Achievement" 
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://158.173.159.107";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
 export default function Achievement() {
   const [achievementList, setAchievementList] = useState<AchievementItem[]>([]);

@@ -6,7 +6,8 @@ services:
       args:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
         NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_CLIENT_ID}
-    image: papopsan02749/burithai_frontend:1.1
+        BACKEND_API_URL: ${BACKEND_API_URL}
+    image: papopsan02749/burithai_frontend:2.1.2
     container_name: burithai_frontend
     restart: always
     ports:
@@ -17,6 +18,7 @@ services:
       NODE_ENV: production
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
       NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_CLIENT_ID}
+      BACKEND_API_URL: ${BACKEND_API_URL}
 
 networks:
   app_net:

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://158.173.159.107";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
 interface TopicMenuProps {
   setSelectedCategory?: (category: string) => void;
