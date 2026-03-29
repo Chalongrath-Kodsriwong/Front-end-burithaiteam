@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { provinceList } from "@/data/provinces";
 import { labelOptions } from "@/data/addressLabels";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://158.173.159.107";
 
 // ✅ shared storage key/event (ใช้เหมือนกันทั้ง 2 หน้า)
 const SELECTED_ADDRESS_KEY = "selected_address_id_v1";

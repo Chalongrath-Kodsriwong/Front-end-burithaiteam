@@ -6,7 +6,7 @@ import DisplayItemCart from "../shoppingcart/section_shoppingcart/displayItemCar
 import Normalproducts from "../components/section_page/Normalproducts";
 import { Link } from "lucide-react";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://158.173.159.107";
 
 export default function ShoppingCartPage() {
   const router = useRouter();

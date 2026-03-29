@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { provinceList } from "@/data/provinces";
 import { labelOptions } from "@/data/addressLabels";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://158.173.159.107";
 
 // ✅ shared storage key/event (ต้องเหมือน edit_address)
 const SELECTED_ADDRESS_KEY = "selected_address_id_v1";

@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { WishlistItem } from "@/types/Wishlist_home"
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://158.173.159.107";
 
 export default function WishlistPage() {
   const router = useRouter();

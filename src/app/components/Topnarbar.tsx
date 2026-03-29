@@ -9,7 +9,7 @@ import { FaRegUserCircle } from "react-icons/fa";
 
 import { useRef } from "react";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://158.173.159.107";
 
 export default function TopNavbar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false); // Dropdown ของสินค้า

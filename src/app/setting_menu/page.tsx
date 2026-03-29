@@ -9,7 +9,7 @@ import HistoryPayment from "./section_settingmenu/history_payment";
 
 import { MenuKey } from "@/types/Setting_menuhome"
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://158.173.159.107";
 
 export default function SettingMenuPage() {
   const [user, setUser] = useState<any>(null);

@@ -4,7 +4,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useCart } from "@/app/context/CartContext";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://158.173.159.107";
 
 export default function PaymentSummary({ addressId }: { addressId: number | null }) {
   const searchParams = useSearchParams();

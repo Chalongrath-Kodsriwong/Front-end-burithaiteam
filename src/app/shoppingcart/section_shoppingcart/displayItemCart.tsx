@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 
 import { Product } from "@/types/DisplayItemCart"
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://158.173.159.107";
 
 export default function DisplayItemCart() {
   const [products, setProducts] = useState<Product[]>([]);

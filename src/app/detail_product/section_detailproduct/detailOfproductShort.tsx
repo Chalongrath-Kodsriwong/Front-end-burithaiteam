@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import { Heart } from "lucide-react";
 import { useCart } from "@/app/context/CartContext";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://158.173.159.107";
 
 export default function DetailOfProductShort({ product }: any) {
   if (!product) return <div>กำลังโหลดสินค้า...</div>;

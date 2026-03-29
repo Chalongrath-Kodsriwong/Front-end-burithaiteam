@@ -5,7 +5,7 @@ import Link from "next/link";
 
 import { Product } from "@/types/Normalproducts";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://158.173.159.107";
 const ITEMS_PER_PAGE = 20;
 
 export default function Productdisplay() {

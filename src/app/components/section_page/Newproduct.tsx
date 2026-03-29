@@ -6,7 +6,7 @@ import Link from "next/link";
 
 import { ApiProduct, ProductUI } from "@/types/Newproduct";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ;
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://158.173.159.107" ;
 const ITEMS_PER_PAGE = 4;
 
 function formatPriceRange(prices?: number[]) {

@@ -4,7 +4,7 @@ import { createContext, useContext, useState, ReactNode, useEffect } from "react
 
 import { CartItem, CartContextType} from "@/types/Cartcontext"
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://158.173.159.107";
 
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
