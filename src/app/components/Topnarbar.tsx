@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCart } from "@/app/context/CartContext";
 import { FaRegUserCircle } from "react-icons/fa";
+import { clearClientAuthData } from "@/app/utils/authClient";
 
 import { useRef } from "react";
 
@@ -440,9 +441,9 @@ export default function TopNavbar() {
                     await fetch(`${API_BASE_URL}/api/auth/logout`, {
                       method: "POST",
                       credentials: "include",
-                    });
+                    }).catch(() => null);
 
-                    localStorage.removeItem("username");
+                    clearClientAuthData();
                     clearCart();
                     setIsLoggedIn(false);
                     setUsername(null);

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"; // Next.js 13 App Router
 import Link from "next/link";
 
 import { useCart } from "@/app/context/CartContext";
+import { fetchAuthSession } from "@/app/utils/authClient";
 
 declare global {
   interface Window {
@@ -337,9 +338,7 @@ export default function LoginPage() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await fetch(`${API_URL}/api/auth/me`, {
-          credentials: "include",
-        });
+        const res = await fetchAuthSession(API_URL);
 
         if (res.ok) {
           // 🔥 login อยู่ → ห้ามเข้า login

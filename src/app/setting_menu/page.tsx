@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import EditAccount from "./section_settingmenu/edit_account";
 import EditAddress from "./section_settingmenu/edit_address";
 import HistoryPayment from "./section_settingmenu/history_payment";
+import { clearClientAuthData } from "@/app/utils/authClient";
 
 import { MenuKey } from "@/types/Setting_menuhome"
 
@@ -44,7 +45,11 @@ export default function SettingMenuPage() {
     await fetch(`${API_URL}/api/auth/logout`, {
       method: "POST",
       credentials: "include",
-    });
+    }).catch(() => null);
+
+    clearClientAuthData();
+    window.dispatchEvent(new Event("user-logout"));
+    window.dispatchEvent(new Event("login-success"));
 
     window.location.replace("/login"); // ✅ ไปหน้า login + refresh จริง
   };

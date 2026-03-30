@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import DisplayItemCart from "../shoppingcart/section_shoppingcart/displayItemCart";
 import Normalproducts from "../components/section_page/Normalproducts";
 import { Link } from "lucide-react";
+import { fetchAuthSession } from "@/app/utils/authClient";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
@@ -17,9 +18,7 @@ export default function ShoppingCartPage() {
   useEffect(() => {
     async function checkAuth() {
       try {
-        const res = await fetch(`${API_URL}/api/auth/me`, {
-          credentials: "include", // ส่ง cookie ไปกับ request
-        });
+        const res = await fetchAuthSession(API_URL);
 
         // ❌ ถ้าไม่มี token → ให้ redirect ไป Login
         if (res.status === 401) {

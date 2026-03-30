@@ -1,55 +1,51 @@
-// "use client";
-// import { useEffect } from "react";
-// import { useRouter, usePathname } from "next/navigation";
+"use client";
+import { useEffect } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import { clearClientAuthData, fetchAuthSession } from "@/app/utils/authClient";
 
-// const API_URL =
-//   process.env.NEXT_PUBLIC_API_URL || "" || "http://localhost:8080";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
-// export default function GlobalAuthGuard() {
-//   const router = useRouter();
-//   const pathname = usePathname();
+export default function GlobalAuthGuard() {
+  const router = useRouter();
+  const pathname = usePathname();
 
-//   useEffect(() => {
-//     const username = localStorage.getItem("username");
+  useEffect(() => {
+    let cancelled = false;
 
-//     // 🔥 ถ้าไม่ login → ไม่ต้องเช็คอะไรเลย
-//     if (!username) return;
+    const clearLocalAuth = () => {
+      clearClientAuthData();
+      window.dispatchEvent(new Event("login-success"));
+    };
 
-//     const checkAuth = async () => {
-//       try {
-//         const res = await fetch(`${API_URL}/api/auth/me`, {
-//           credentials: "include",
-//         });
+    const checkAuth = async () => {
+      try {
+        const res = await fetchAuthSession(API_URL);
 
-//         if (res.status === 401) {
-//           localStorage.removeItem("username");
-//           localStorage.removeItem("first_name");
+        if (cancelled) return;
 
-//           // window.location.href = "/login";
-//           window.location.reload(); // รีเฟรชหน้า
-          
-//           return;
-//         }
+        if (res.status === 401 || res.status === 403) {
+          clearLocalAuth();
+          return;
+        }
 
-//         // 🔥 login อยู่แต่พยายามเข้า /login
-//         if (res.ok && pathname === "/login") {
-//           router.replace("/");
-//         }
+        // Login อยู่แล้ว แต่เปิดหน้า login → เด้งกลับหน้าแรก
+        if (res.ok && pathname === "/login" && !cancelled) {
+          router.replace("/");
+        }
+      } catch {
+        // ไม่ต้อง log อะไร
+      }
+    };
 
-//       } catch {
-//         // ไม่ต้อง log อะไร
-//       }
-//     };
+    checkAuth();
 
-//     // 🔥 เช็คครั้งแรกตอน mount
-//     checkAuth();
+    const interval = setInterval(checkAuth, 600000);
 
-//     // 🔥 เช็คทุก 10 นาที (600,000 ms)
-//     const interval = setInterval(checkAuth, 600000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [pathname, router]);
 
-//     return () => clearInterval(interval);
-
-//   }, [pathname, router]);
-
-//   return null;
-// }
+  return null;
+}
