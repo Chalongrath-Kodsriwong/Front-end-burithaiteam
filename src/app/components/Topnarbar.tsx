@@ -504,7 +504,7 @@ export default function TopNavbar() {
                 <li>
                   <button
                     type="button"
-                    className="inline-flex w-full px-4 py-2 font-semibold hover:text-[rgb(255,215,0)]
+                    className="flex w-full justify-start text-left px-4 py-2 font-semibold hover:text-[rgb(255,215,0)]
       hover:[text-shadow:0_0_6px_rgb(255,215,0),0_0_12px_rgb(255,215,0),0_0_20px_rgb(212,175,55)] hover:bg-gray-900 focus:bg-gray-900 transition-colors duration-300"
                     onClick={() => {
                       router.push(`/product`);
@@ -520,7 +520,7 @@ export default function TopNavbar() {
                   <li key={cat}>
                     <button
                       type="button"
-                      className="inline-flex w-full px-4 py-2 font-semibold hover:text-[rgb(255,215,0)]
+                      className="flex w-full justify-start text-left px-4 py-2 font-semibold hover:text-[rgb(255,215,0)]
       hover:[text-shadow:0_0_6px_rgb(255,215,0),0_0_12px_rgb(255,215,0),0_0_20px_rgb(212,175,55)] hover:bg-gray-900 focus:bg-gray-900 transition-colors duration-300"
                       onClick={() => {
                         router.push(

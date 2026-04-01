@@ -105,26 +105,32 @@ export default function Productdisplay() {
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 mx-12 mt-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-4 mx-12 mt-4">
         {visibleItems.map((product) => (
-          <Link key={product.id} href={`/detail_product/${product.id}`}>
+          <Link
+            key={product.id}
+            href={`/detail_product/${product.id}`}
+            className="h-full"
+          >
             <div
-              className="w-[220px] p-2 border border-gray-300 rounded-md bg-white cursor-pointer 
+              className="h-full w-full p-2 border border-gray-300 rounded-md bg-white cursor-pointer flex flex-col
               hover:border-yellow-500
               hover:shadow-[0_0_4px_rgba(212,175,55,0.5),0_0_8px_rgba(184,134,11,0.4)]
               transition-all duration-300"
             >
-              <img
-                src={product.avatar}
-                alt={product.name}
-                onError={(e) =>
-                  (e.currentTarget.src = "/image/logo_white.jpeg")
-                }
-                className="w-full h-[200px] object-cover rounded-md"
-              />
+              <div className="w-full h-[200px] rounded-md overflow-hidden bg-gray-100">
+                <img
+                  src={product.avatar}
+                  alt={product.name}
+                  onError={(e) =>
+                    (e.currentTarget.src = "/image/logo_white.jpeg")
+                  }
+                  className="w-full h-full object-cover"
+                />
+              </div>
 
-              <div className="p-1">
-                <h3 className="font-semibold text-lg leading-snug line-clamp-2">
+              <div className="p-1 flex-1 flex flex-col">
+                <h3 className="font-semibold text-lg leading-snug line-clamp-2 min-h-[3.5rem]">
                   {product.name}
                 </h3>
 

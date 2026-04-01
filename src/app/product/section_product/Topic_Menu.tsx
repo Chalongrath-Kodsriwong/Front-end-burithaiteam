@@ -20,6 +20,14 @@ export default function TopicMenu({ setSelectedCategory }: TopicMenuProps) {
   const [minInput, setMinInput] = useState("");
   const [maxInput, setMaxInput] = useState("");
 
+  const getSelectedQuality = () => {
+    const raw = searchParams.get("quality") || "";
+    return raw
+      .split(",")
+      .map((q) => q.trim().toLowerCase())
+      .filter(Boolean);
+  };
+
   useEffect(() => {
     setIsClient(true);
 
@@ -48,40 +56,39 @@ export default function TopicMenu({ setSelectedCategory }: TopicMenuProps) {
 
   // ⭐ เลือก Category
   const handleCategoryClick = (category: string) => {
-    const quality = searchParams.get("quality") || "";
-
-    router.push(
-      `/product?category=${encodeURIComponent(category)}${
-        quality ? `&quality=${quality}` : ""
-      }`
-    );
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("category", category);
+    router.push(`/product?${params.toString()}`);
 
     setSelectedCategory?.(category);
   };
 
-  // ⭐ เลือกคุณภาพสินค้า
-  const handleQualityChange = (quality: string, checked: boolean) => {
-    const category = searchParams.get("category") || "All";
+  // ⭐ เลือกคุณภาพสินค้า (เลือกได้อย่างใดอย่างหนึ่ง)
+  const handleQualityChange = (
+    qualityKey: "new" | "used",
+    checked: boolean
+  ) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (!params.get("category")) params.set("category", "All");
 
     if (checked) {
-      router.push(
-        `/product?category=${encodeURIComponent(
-          category
-        )}&quality=${quality.toLowerCase()}`
-      );
+      params.set("quality", qualityKey);
     } else {
-      router.push(`/product?category=${encodeURIComponent(category)}`);
+      params.delete("quality");
     }
+
+    router.push(`/product?${params.toString()}`);
   };
 
   const isActive = (cat: string) => {
     const current = searchParams.get("category") || "All";
     return current === cat
-      ? "font-bold text-blue-700 border border-gray-300 rounded-full px-2 py-1.5 inline-block leading-none"
-      : "hover:font-bold hover:text-blue-700 cursor-pointer";
+      ? "font-bold text-yellow-500 bg-black border border-gray-300 rounded-full px-2 py-1.5 inline-block leading-none transition-colors duration-200 cursor-pointer"
+      : "hover:font-bold hover:text-yellow-500 transition-colors duration-200 cursor-pointer";
   };
 
-  const qualitySelected = searchParams.get("quality");
+  const qualitySelected = getSelectedQuality();
+  const selectedQuality = qualitySelected[0] || "";
 
   return (
     <>
@@ -126,7 +133,7 @@ export default function TopicMenu({ setSelectedCategory }: TopicMenuProps) {
                 <input
                   type="checkbox"
                   className="mr-2"
-                  checked={qualitySelected === "new"}
+                  checked={selectedQuality === "new"}
                   onChange={(e) => handleQualityChange("new", e.target.checked)}
                 />
                 มือ 1
@@ -136,10 +143,8 @@ export default function TopicMenu({ setSelectedCategory }: TopicMenuProps) {
                 <input
                   type="checkbox"
                   className="mr-2"
-                  checked={qualitySelected === "used"}
-                  onChange={(e) =>
-                    handleQualityChange("used", e.target.checked)
-                  }
+                  checked={selectedQuality === "used"}
+                  onChange={(e) => handleQualityChange("used", e.target.checked)}
                 />
                 มือ 2
               </div>

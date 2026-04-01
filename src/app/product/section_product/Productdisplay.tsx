@@ -37,6 +37,10 @@ export default function Productdisplay() {
   const categoryFilter = searchParams.get("category");
   const keywordSearch = searchParams.get("search");
   const qualityFilter = searchParams.get("quality");
+  const selectedQualities = (qualityFilter || "")
+    .split(",")
+    .map((q) => q.trim().toLowerCase())
+    .filter(Boolean);
 
   const minPrice = Number(searchParams.get("min"));
   const maxPrice = Number(searchParams.get("max"));
@@ -107,12 +111,18 @@ export default function Productdisplay() {
           );
         }
 
-        // ⭐ Filter by Quality
-        if (qualityFilter) {
-          filtered = filtered.filter(
-            (p) =>
-              (p.quality ?? "").toLowerCase() === qualityFilter.toLowerCase()
-          );
+        // ⭐ Filter by Quality (รองรับเลือกหลายค่า: new,used)
+        if (selectedQualities.length > 0) {
+          filtered = filtered.filter((p) => {
+            const qualityText = (p.quality ?? "").toLowerCase();
+            const hasNew = /มือ\s*1|new/.test(qualityText);
+            const hasUsed = /มือ\s*2|used/.test(qualityText);
+
+            return (
+              (selectedQualities.includes("new") && hasNew) ||
+              (selectedQualities.includes("used") && hasUsed)
+            );
+          });
         }
 
         // ⭐ Filter by Min Price
@@ -245,22 +255,31 @@ export default function Productdisplay() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mx-12 mt-4">
               {suggestions.map((product) => (
-                <Link key={product.id} href={`/detail_product/${product.id}`}>
-                  <div className="border p-4 rounded-lg bg-white shadow-sm cursor-pointer hover:shadow-md transition">
-                    <img
-                      src={product.avatar}
-                      alt={product.name}
-                      className="w-full h-32 object-cover mb-2 rounded"
-                    />
-                    <h3 className="text-lg font-semibold line-clamp-2">
-                      {product.name}
-                    </h3>
-                    <p className="text-gray-700 font-medium">
-                      ฿ {product.price}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      Brand: {product.brand}
-                    </p>
+                <Link
+                  key={product.id}
+                  href={`/detail_product/${product.id}`}
+                  className="h-full"
+                >
+                  <div
+                    className="h-full border p-4 rounded-lg bg-white shadow-sm cursor-pointer flex flex-col
+                    hover:border-yellow-500
+                    hover:shadow-[0_0_4px_rgba(212,175,55,0.5),0_0_8px_rgba(184,134,11,0.4)]
+                    transition-all duration-300"
+                  >
+                    <div className="w-full h-40 rounded mb-2 overflow-hidden bg-gray-100">
+                      <img
+                        src={product.avatar}
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="flex-1 flex flex-col">
+                      <h3 className="text-lg font-semibold line-clamp-2 min-h-[3.5rem]">
+                        {product.name}
+                      </h3>
+                      <p className="text-gray-700 font-medium">฿ {product.price}</p>
+                      <p className="text-sm text-gray-500 mt-1">Brand: {product.brand}</p>
+                    </div>
                   </div>
                 </Link>
               ))}
@@ -281,29 +300,42 @@ export default function Productdisplay() {
       ⭐ UI: แสดงรายการสินค้า
   ============================================ */
   return (
-    <div className="container mx-auto px-4 py-6 bg-gray-100 rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold flex items-center justify-center gap-2 mb-4">
+    <div className="container mx-auto px-4 py-6 rounded-lg shadow-md">
+      {/* <h2 className="text-2xl font-bold flex items-center justify-center gap-2 mb-4">
         <div>Products</div>
-      </h2>
+      </h2> */}
 
       {/* Grid สินค้าแบบตาราง */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 mx-12 mt-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-4 mx-12 mt-4">
         {visibleItems.map((product) => (
-          <Link key={product.id} href={`/detail_product/${product.id}`}>
-            <div className="border p-4 rounded-lg bg-white shadow-sm cursor-pointer hover:shadow-md transition">
-              <img
-                src={product.avatar}
-                alt={product.name}
-                onError={(e) =>
-                  (e.currentTarget.src = "/image/logo_white.jpeg")
-                }
-                className="w-full h-32 object-cover mb-2 rounded"
-              />
-              <h3 className="text-lg font-semibold line-clamp-2">
-                {product.name}
-              </h3>
-              <p className="text-gray-700 font-medium">฿ {product.price}</p>
-              <p className="text-sm text-gray-500">Brand: {product.brand}</p>
+          <Link
+            key={product.id}
+            href={`/detail_product/${product.id}`}
+            className="h-full"
+          >
+            <div
+              className="h-full border p-4 rounded-lg bg-white shadow-sm cursor-pointer flex flex-col
+              hover:border-yellow-500
+              hover:shadow-[0_0_4px_rgba(212,175,55,0.5),0_0_8px_rgba(184,134,11,0.4)]
+              transition-all duration-300"
+            >
+              <div className="w-full h-40 rounded mb-2 overflow-hidden bg-gray-100">
+                <img
+                  src={product.avatar}
+                  alt={product.name}
+                  onError={(e) =>
+                    (e.currentTarget.src = "/image/logo_white.jpeg")
+                  }
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="flex-1 flex flex-col">
+                <h3 className="text-lg font-semibold line-clamp-2 min-h-[3.5rem]">
+                  {product.name}
+                </h3>
+                <p className="text-gray-700 font-medium">฿ {product.price}</p>
+                <p className="text-sm text-gray-500 mt-1">Brand: {product.brand}</p>
+              </div>
             </div>
           </Link>
         ))}
