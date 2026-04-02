@@ -283,7 +283,7 @@ export default function OrderHistoryPage({ user }: { user?: any }) {
 
               {/* Tracking + Cancel */}
               <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-center gap-3 font-semibold">
+                <div className="flex items-center gap-1 font-semibold">
                   <span>หมายเลขพัสดุ: {o.tracking_number || "-"}</span>
                   {o.tracking_number && (
                     <button
@@ -291,7 +291,7 @@ export default function OrderHistoryPage({ user }: { user?: any }) {
                       onClick={() =>
                         handleCopyTracking(o.id_order, o.tracking_number)
                       }
-                      className="inline-flex items-center gap-1 rounded border border-gray-400 bg-gray-200 px-3 py-1 text-sm font-semibold text-black hover:bg-gray-300"
+                      className="keep-original-btn inline-flex items-center gap-1 rounded-2xl text-gray-600 border-0 p-1 text-sm font-semibold hover:bg-black hover:text-yellow-500 transition-all duration-500 ease-out"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -315,7 +315,7 @@ export default function OrderHistoryPage({ user }: { user?: any }) {
                     <button
                       onClick={() => handleCancel(o.id_order)}
                       disabled={cancelingId === o.id_order}
-                      className="border border-gray-400 bg-gray-200 text-black px-5 py-2 font-semibold hover:bg-gray-300 disabled:opacity-50"
+                      className="keep-original-btn border border-red-400 bg-red-100 text-red-600 rounded rounded-lg px-5 py-2 font-semibold hover:bg-red-200 disabled:opacity-50"
                     >
                       {cancelingId === o.id_order
                         ? "กำลังยกเลิก..."
