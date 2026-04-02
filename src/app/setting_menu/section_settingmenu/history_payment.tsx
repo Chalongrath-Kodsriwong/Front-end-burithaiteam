@@ -19,6 +19,7 @@ export default function OrderHistoryPage({ user }: { user?: any }) {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [copiedTrackingId, setCopiedTrackingId] = useState<number | null>(null);
 
   // state สำหรับ cancel
   const [cancelingId, setCancelingId] = useState<number | null>(null);
@@ -126,6 +127,19 @@ export default function OrderHistoryPage({ user }: { user?: any }) {
       alert(err.message || "เกิดข้อผิดพลาด");
     } finally {
       setCancelingId(null);
+    }
+  };
+
+  const handleCopyTracking = async (orderId: number, trackingNumber?: string) => {
+    if (!trackingNumber) return;
+    try {
+      await navigator.clipboard.writeText(trackingNumber);
+      setCopiedTrackingId(orderId);
+      window.setTimeout(() => {
+        setCopiedTrackingId((prev) => (prev === orderId ? null : prev));
+      }, 1500);
+    } catch {
+      alert("คัดลอกหมายเลขพัสดุไม่สำเร็จ");
     }
   };
 
@@ -269,8 +283,30 @@ export default function OrderHistoryPage({ user }: { user?: any }) {
 
               {/* Tracking + Cancel */}
               <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-                <div className="font-semibold">
-                  หมายเลขพัสดุ: {o.tracking_number || "-"}
+                <div className="flex items-center gap-3 font-semibold">
+                  <span>หมายเลขพัสดุ: {o.tracking_number || "-"}</span>
+                  {o.tracking_number && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleCopyTracking(o.id_order, o.tracking_number)
+                      }
+                      className="inline-flex items-center gap-1 rounded border border-gray-400 bg-gray-200 px-3 py-1 text-sm font-semibold text-black hover:bg-gray-300"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        className="h-4 w-4"
+                      >
+                        <rect x="9" y="9" width="13" height="13" rx="2" />
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                      </svg>
+                      {copiedTrackingId === o.id_order ? "copied" : "copy"}
+                    </button>
+                  )}
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -279,7 +315,7 @@ export default function OrderHistoryPage({ user }: { user?: any }) {
                     <button
                       onClick={() => handleCancel(o.id_order)}
                       disabled={cancelingId === o.id_order}
-                      className="keep-original-btn border border-red-500 bg-red-100 text-red-700 px-5 py-2 font-semibold hover:bg-red-200 disabled:opacity-50"
+                      className="border border-gray-400 bg-gray-200 text-black px-5 py-2 font-semibold hover:bg-gray-300 disabled:opacity-50"
                     >
                       {cancelingId === o.id_order
                         ? "กำลังยกเลิก..."
@@ -287,11 +323,11 @@ export default function OrderHistoryPage({ user }: { user?: any }) {
                     </button>
                   )}
 
-                  <Link href={`/check_order?order_id=${o.id_order}`}>
+                  {/* <Link href={`/check_order?order_id=${o.id_order}`}>
                     <button className="border border-gray-400 bg-gray-200 px-5 py-2 font-semibold">
                       ไปหน้าเช็คสถานะ
                     </button>
-                  </Link>
+                  </Link> */}
                 </div>
               </div>
             </div>
