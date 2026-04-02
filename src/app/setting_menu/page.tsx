@@ -20,6 +20,14 @@ export default function SettingMenuPage() {
   const router = useRouter();
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const menuParam = (params.get("menu") || "").toLowerCase();
+    if (menuParam === "history") setActiveMenu("history");
+    else if (menuParam === "address") setActiveMenu("address");
+    else if (menuParam === "account") setActiveMenu("account");
+  }, []);
+
+  useEffect(() => {
     const fetchUserData = async () => {
       try {
         const response = await fetch(`${API_URL}/api/account/profile`, {
@@ -54,10 +62,15 @@ export default function SettingMenuPage() {
     window.location.replace("/login"); // ✅ ไปหน้า login + refresh จริง
   };
 
+  const handleMenuChange = (menu: MenuKey) => {
+    setActiveMenu(menu);
+    router.replace(`/setting_menu?menu=${menu}`);
+  };
+
   if (loading) return <div>กำลังโหลดข้อมูล...</div>;
 
   return (
-    <div className="min-h-screen flex bg-gray-100">
+    <div className="setting-menu-theme min-h-screen flex bg-gray-100">
       {/* Sidebar */}
       <div className="w-64 bg-gray-200 p-5">
         <h2 className="text-xl font-semibold mb-4">ตั้งค่า</h2>
@@ -65,7 +78,7 @@ export default function SettingMenuPage() {
         <ul className="space-y-2">
           <li>
             <button
-              onClick={() => setActiveMenu("account")}
+              onClick={() => handleMenuChange("account")}
               className={`w-full text-left px-3 py-2 rounded ${
                 activeMenu === "account"
                   ? "bg-white font-semibold"
@@ -78,7 +91,7 @@ export default function SettingMenuPage() {
 
           <li>
             <button
-              onClick={() => setActiveMenu("address")}
+              onClick={() => handleMenuChange("address")}
               className={`w-full text-left px-3 py-2 rounded ${
                 activeMenu === "address"
                   ? "bg-white font-semibold"
@@ -91,8 +104,7 @@ export default function SettingMenuPage() {
 
           <li>
             <button
-              onClick={() => setActiveMenu("history")}
-              // onClick={() => router.push("/history_payment")}
+              onClick={() => handleMenuChange("history")}
               className={`w-full text-left px-3 py-2 rounded ${
                 activeMenu === "history"
                   ? "bg-white font-semibold"

@@ -1,7 +1,3 @@
-// ✅ /check_order/page.tsx
-// เปลี่ยน API จาก /api/orders/users -> /api/account/orders
-// ✅ โครงสร้างหน้า + state + UI เดิม (order, items, status, progress, layout) ไว้เหมือนเดิม
-
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
@@ -19,28 +15,32 @@ const CheckOrderPage = () => {
   const [status, setStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const statusText = useMemo(() => {
-    if (status === "checking") return "กำลังดำเนินการ";
+    if (status === "checking") return "กําลังดําเนินการ";
     if (status === "success") return "เสร็จสิ้น";
+    if (status === "pending") return "รอชําระเงิน";
+    if (status === "canceled") return "ยกเลิก";
+    if (status === "confirmed") return "ยืนยันคําสั่งซื้อแล้ว";
     return "-";
   }, [status]);
 
   const progressPercent = useMemo(() => {
     if (status === "success") return 100;
-    if (status === "checking") return 10;
+    if (status === "confirmed") return 70;
+    if (status === "checking") return 40;
+    if (status === "pending") return 20;
     return 0;
   }, [status]);
 
   useEffect(() => {
     if (!orderId) return;
 
-    const fetchOrder = async () => {
-      setLoading(true);
-      setError(null);
+    const fetchOrder = async (showLoader = false) => {
+      if (showLoader) setLoading(true);
 
       try {
-        // ✅ เปลี่ยนมาใช้ API ใหม่
         const res = await fetch(`${API_URL}/api/account/orders`, {
           method: "GET",
           credentials: "include",
@@ -53,24 +53,19 @@ const CheckOrderPage = () => {
 
         const json = await res.json();
 
-        // ✅ โครงสร้างใหม่: data[].id_order
         const foundOrder = json?.data?.find(
           (o: any) => o.id_order === Number(orderId)
         );
 
-        if (!foundOrder) throw new Error("ไม่พบคำสั่งซื้อที่ต้องการ");
+        if (!foundOrder) throw new Error("ไม่พบคําสั่งซื้อที่ต้องการ");
 
-        // ✅ คง state เดิม: order, items, status
-        // - API ใหม่ใช้ items (แทน order_items)
-        // - item ใหม่ใช้ imageUrl, name, id_orderitems
-        // - แต่ UI เดิมอ้าง product_image, product_name, id_orderitem
-        // 👉 จึง "map แปลงชื่อ field" ให้หน้าเดิมใช้ได้เหมือนเดิม
         setOrder(foundOrder);
 
         const mappedItems = Array.isArray(foundOrder.items)
           ? foundOrder.items.map((it: any) => ({
-              // ให้ key เดิมยังทำงาน: it.id_orderitem
-              id_orderitem: it?.id_orderitems ?? `${foundOrder.id_order}-${it?.name ?? "item"}`,
+              id_orderitem:
+                it?.id_orderitems ??
+                `${foundOrder.id_order}-${it?.name ?? "item"}`,
               product_image: it?.imageUrl ?? null,
               product_name: it?.name ?? null,
               variant_name: it?.variant_name ?? null,
@@ -82,136 +77,165 @@ const CheckOrderPage = () => {
 
         setItems(mappedItems);
         setStatus(foundOrder.status || null);
+        setError(null);
       } catch (err: any) {
         setError(err?.message || "เกิดข้อผิดพลาด");
       } finally {
-        setLoading(false);
+        if (showLoader) setLoading(false);
       }
     };
 
-    fetchOrder();
+    fetchOrder(true);
+
+    // Auto-refresh every 5s so tracking number and status update from management.
+    const pollingId = window.setInterval(() => {
+      fetchOrder(false);
+    }, 5000);
+
+    // Also refresh when user returns to this tab/window.
+    const refreshNow = () => fetchOrder(false);
+    window.addEventListener("focus", refreshNow);
+    document.addEventListener("visibilitychange", refreshNow);
+
+    return () => {
+      window.clearInterval(pollingId);
+      window.removeEventListener("focus", refreshNow);
+      document.removeEventListener("visibilitychange", refreshNow);
+    };
   }, [orderId]);
 
+  const actionButtonClass =
+    "relative inline-flex items-center justify-center px-6 py-3 text-base font-semibold text-yellow-500 rounded overflow-hidden bg-black [text-shadow:0_0_0_rgba(255,215,0,0)] hover:text-[rgb(255,215,0)] hover:[text-shadow:0_0_6px_rgba(255,215,0,0.45),0_0_12px_rgba(255,215,0,0.30),0_0_20px_rgba(212,175,55,0.20)] hover:bg-gray-900 focus:bg-gray-900 transition-all duration-500 ease-out";
+
+  const handleCopyTracking = async () => {
+    if (!order?.tracking_number) return;
+    try {
+      await navigator.clipboard.writeText(String(order.tracking_number));
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1200);
+    } catch (err) {
+      console.error("Copy tracking failed:", err);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-5xl mx-auto px-6 py-8">
-        {/* ================= ที่อยู่การจัดส่ง ================= */}
-        <div className="border border-gray-300 bg-gray-200 p-6">
-          <h1 className="text-4xl font-bold">ที่อยู่การจัดส่ง</h1>
-          <div className="mt-6 text-xl text-gray-700">
-            {loading ? "กำลังโหลด..." : order?.shipping_address || "-"}
+    <div className="min-h-screen bg-slate-50">
+      <div className="max-w-5xl mx-auto px-4 md:px-6 py-8">
+        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+          <h1 className="text-2xl md:text-3xl font-bold">ที่อยู่การจัดส่ง</h1>
+          <div className="mt-4 text-base md:text-lg text-gray-700 whitespace-pre-wrap">
+            {loading ? "กําลังโหลด..." : order?.shipping_address || "-"}
           </div>
         </div>
 
-        {/* ================= สถานะสินค้า ================= */}
-        <div className="mt-10 border border-gray-300 bg-gray-200 p-10">
+        <div className="mt-8 rounded-xl border border-gray-200 bg-white p-6 md:p-8 shadow-sm">
           <div className="text-center">
-            <div className="text-4xl font-bold">สถานะสินค้า...</div>
-            <div className="mt-3 text-xl font-semibold text-yellow-500">
-              {loading ? "กำลังโหลด..." : statusText}
+            <div className="text-2xl md:text-3xl font-bold">สถานะสินค้า</div>
+            <div className="mt-3 text-lg md:text-xl font-semibold text-yellow-600">
+              {loading ? "กําลังโหลด..." : statusText}
             </div>
-            {error && (
-              <div className="mt-4 text-red-600 font-semibold">{error}</div>
-            )}
+            {error && <div className="mt-4 text-red-600 font-semibold">{error}</div>}
           </div>
 
-          {/* Progress */}
           <div className="mt-8">
-            <div className="h-4 w-full rounded-full border border-black bg-gray-100 overflow-hidden">
+            <div className="h-3 w-full rounded-full border border-gray-300 bg-gray-100 overflow-hidden">
               <div
-                className="h-full bg-yellow-400 transition-all"
+                className="h-full bg-yellow-500 transition-all duration-500"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
-            <div className="mt-3 flex justify-between text-xl font-semibold">
-              <span>กำลังดำเนินการ</span>
+            <div className="mt-3 flex justify-between text-sm md:text-base font-semibold text-gray-700">
+              <span>เริ่มดําเนินการ</span>
               <span>เสร็จสิ้น</span>
             </div>
           </div>
 
-          {/* ================= รายการสินค้า: เพิ่มบล็อกตามจำนวนสินค้า ================= */}
-          <div className="mt-10 space-y-10">
+          <div className="mt-8 space-y-4">
             {items.length === 0 ? (
               <div className="text-center text-gray-600 text-lg">
-                {loading ? "กำลังโหลดรายการสินค้า..." : "ไม่พบรายการสินค้า"}
+                {loading ? "กําลังโหลดรายการสินค้า..." : "ไม่พบรายการสินค้า"}
               </div>
             ) : (
               items.map((it: any) => (
-                <div key={it.id_orderitem} className="flex items-start gap-10">
-                  {/* รูปสินค้า */}
-                  <div className="w-56 h-56 bg-gray-300 border border-gray-500 overflow-hidden flex items-center justify-center">
-                    {it?.product_image ? (
-                      <img
-                        src={it.product_image}
-                        alt={it.product_name || "product"}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-xl font-semibold">รูปสินค้า</span>
-                    )}
-                  </div>
-
-                  {/* ชื่อและรายละเอียด + จำนวน/ราคา */}
-                  <div className="flex-1">
-                    <div className="text-2xl font-semibold">
-                      ชื่อและรายละเอียดสินค้า
+                <div
+                  key={it.id_orderitem}
+                  className="rounded-lg border border-gray-200 bg-gray-50 p-4 md:p-5"
+                >
+                  <div className="flex flex-col md:flex-row md:items-start gap-4 md:gap-6">
+                    <div className="w-full md:w-40 h-40 bg-white border border-gray-300 overflow-hidden flex items-center justify-center rounded">
+                      {it?.product_image ? (
+                        <img
+                          src={it.product_image}
+                          alt={it.product_name || "product"}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-base font-semibold text-gray-600">รูปสินค้า</span>
+                      )}
                     </div>
 
-                    <div className="mt-4 text-lg text-gray-700 space-y-1">
-                      <div className="font-semibold">
+                    <div className="flex-1">
+                      <div className="text-lg md:text-xl font-semibold">
                         {it?.product_name || "-"}
                       </div>
-                      <div className="text-gray-600">
+                      <div className="mt-1 text-sm md:text-base text-gray-600">
                         {it?.variant_name || "-"}
                         {it?.inventory_name ? ` • ${it.inventory_name}` : ""}
                       </div>
-                    </div>
 
-                    <div className="mt-16 flex justify-end gap-24 text-xl font-semibold">
-                      <div>จำนวน: {it?.quantity ?? "-"}</div>
-                      <div>ราคา: {it?.dynamic_total ?? "-"}</div>
+                      <div className="mt-4 grid grid-cols-2 gap-3 text-sm md:text-base">
+                        <div className="font-semibold text-gray-700">
+                          จํานวน: {it?.quantity ?? "-"}
+                        </div>
+                        <div className="font-semibold text-gray-700 text-right">
+                          ราคา: {it?.dynamic_total ?? "-"}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
               ))
             )}
 
-            {/* เส้นคั่น + ราคารวม */}
-            <div className="border-t border-gray-500 pt-6 flex justify-end text-xl font-semibold">
+            <div className="border-t border-gray-300 pt-6 flex justify-end text-lg md:text-xl font-semibold">
               ราคารวมทั้งหมด: {order?.dynamic_total_price ?? "-"}
             </div>
           </div>
         </div>
 
-        {/* ================= ข้อมูลการจัดส่ง ================= */}
-        <div className="mt-10 border border-gray-300 bg-gray-200 p-10">
-          <div className="text-center text-4xl font-bold">ข้อมูลการจัดส่ง</div>
+        <div className="mt-8 rounded-xl border border-gray-200 bg-white p-6 md:p-8 shadow-sm">
+          <div className="text-center text-2xl md:text-3xl font-bold">ข้อมูลการจัดส่ง</div>
 
-          <div className="mt-10 text-2xl">
+          <div className="mt-6 text-base md:text-xl">
             <div>จัดส่งแบบธรรมดา (Standard International Delivery)</div>
 
-            <div className="mt-10 flex items-center gap-6">
-              <div className="font-semibold">
+            <div className="mt-6 flex flex-col md:flex-row md:items-center gap-3 md:gap-6">
+              <div className="font-semibold break-all">
                 หมายเลขพัสดุ: {order?.tracking_number || "xxxxxxxxxxx"}
               </div>
-              <button className="text-gray-500 underline">
-                คัดลอกหมายเลขพัสดุ
+              <button
+                onClick={handleCopyTracking}
+                disabled={!order?.tracking_number}
+                className="text-sm text-gray-600 underline disabled:opacity-50"
+              >
+                {copied ? "คัดลอกแล้ว" : "คัดลอกหมายเลขพัสดุ"}
               </button>
             </div>
           </div>
         </div>
 
-        {/* ================= ปุ่มล่าง ================= */}
-        <div className="mt-14 flex justify-end gap-10">
+        <div className="mt-10 flex flex-wrap justify-end gap-4">
           <Link href="/product">
-            <button className="border border-gray-400 bg-gray-200 px-10 py-4 text-xl font-semibold">
-              กลับไปหน้าสินค้า
+            <button className={actionButtonClass}>
+              <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(to_top,_rgba(212,175,55,0.16)_0%,_rgba(212,175,55,0.06)_25%,_rgba(212,175,55,0)_60%)]" />
+              <span className="relative z-10">กลับไปหน้าสินค้า</span>
             </button>
           </Link>
 
           <Link href="/shoppingcart">
-            <button className="border border-gray-400 bg-gray-200 px-10 py-4 text-xl font-semibold">
-              สั่งซื้ออีกครั้ง
+            <button className={actionButtonClass}>
+              <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(to_top,_rgba(212,175,55,0.16)_0%,_rgba(212,175,55,0.06)_25%,_rgba(212,175,55,0)_60%)]" />
+              <span className="relative z-10">สั่งซื้ออีกครั้ง</span>
             </button>
           </Link>
         </div>

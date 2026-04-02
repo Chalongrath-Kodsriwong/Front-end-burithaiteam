@@ -32,9 +32,8 @@ export default function OrderHistoryPage({ user }: { user?: any }) {
   }, [orders]);
 
   useEffect(() => {
-    const fetchHistory = async () => {
-      setLoading(true);
-      setError("");
+    const fetchHistory = async (showLoader = false) => {
+      if (showLoader) setLoading(true);
 
       try {
         const res = await fetch(`${API_URL}/api/account/orders`, {
@@ -70,14 +69,31 @@ export default function OrderHistoryPage({ user }: { user?: any }) {
         }));
 
         setOrders(mappedOrders);
+        setError(null);
       } catch (e: any) {
         setError(e?.message || "เกิดข้อผิดพลาด");
       } finally {
-        setLoading(false);
+        if (showLoader) setLoading(false);
       }
     };
 
-    fetchHistory();
+    fetchHistory(true);
+
+    // Auto-refresh every 5s so updates from management appear immediately.
+    const pollingId = window.setInterval(() => {
+      fetchHistory(false);
+    }, 5000);
+
+    // Refresh right away when returning to this tab.
+    const refreshNow = () => fetchHistory(false);
+    window.addEventListener("focus", refreshNow);
+    document.addEventListener("visibilitychange", refreshNow);
+
+    return () => {
+      window.clearInterval(pollingId);
+      window.removeEventListener("focus", refreshNow);
+      document.removeEventListener("visibilitychange", refreshNow);
+    };
   }, []);
 
   // Cancel Function
@@ -263,7 +279,7 @@ export default function OrderHistoryPage({ user }: { user?: any }) {
                     <button
                       onClick={() => handleCancel(o.id_order)}
                       disabled={cancelingId === o.id_order}
-                      className="border border-red-500 bg-red-100 text-red-700 px-5 py-2 font-semibold hover:bg-red-200 disabled:opacity-50"
+                      className="keep-original-btn border border-red-500 bg-red-100 text-red-700 px-5 py-2 font-semibold hover:bg-red-200 disabled:opacity-50"
                     >
                       {cancelingId === o.id_order
                         ? "กำลังยกเลิก..."

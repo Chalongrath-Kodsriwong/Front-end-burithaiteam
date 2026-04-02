@@ -51,3 +51,42 @@
   animation: slideLeft 0.9s cubic-bezier(0.22, 1, 0.36, 1);
   animation-delay: 0.05s; /* ให้ text ตามภาพนิดนึง */
 }
+
+/* Setting menu: unify all button styles to black-gold theme */
+.setting-menu-theme button:not(.keep-original-btn) {
+  position: relative;
+  overflow: hidden;
+  background: #000;
+  color: rgb(234 179 8);
+  border-radius: 0.375rem;
+  text-shadow: 0 0 0 rgba(255, 215, 0, 0);
+  transition: all 0.5s ease-out;
+}
+
+.setting-menu-theme button:not(.keep-original-btn)::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to top,
+    rgba(212, 175, 55, 0.16) 0%,
+    rgba(212, 175, 55, 0.06) 25%,
+    rgba(212, 175, 55, 0) 60%
+  );
+}
+
+.setting-menu-theme button:not(.keep-original-btn):hover:not(:disabled),
+.setting-menu-theme button:not(.keep-original-btn):focus-visible:not(:disabled) {
+  color: rgb(255 215 0);
+  background: rgb(17 24 39);
+  text-shadow: 0 0 6px rgba(255, 215, 0, 0.45),
+    0 0 12px rgba(255, 215, 0, 0.3), 0 0 20px rgba(212, 175, 55, 0.2);
+}
+
+.setting-menu-theme button:not(.keep-original-btn):disabled {
+  background: #9ca3af;
+  color: #f3f4f6;
+  text-shadow: none;
+  cursor: not-allowed;
+}

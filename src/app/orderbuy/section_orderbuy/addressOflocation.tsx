@@ -242,8 +242,15 @@ export default function AddressLocation({ onAddressSelect }: any) {
 
             <button
               onClick={() => setShowAddPopup(true)}
-              className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700"
+              className="relative w-full flex items-center justify-center gap-2 bg-black text-yellow-500 py-3 rounded-lg overflow-hidden [text-shadow:0_0_0_rgba(255,215,0,0)] hover:text-[rgb(255,215,0)]
+      hover:[text-shadow:0_0_6px_rgba(255,215,0,0.45),0_0_12px_rgba(255,215,0,0.30),0_0_20px_rgba(212,175,55,0.20)]
+      hover:bg-gray-900 focus:bg-gray-900 transition-all duration-500 ease-out"
             >
+              {/* 🌟 Dark Gold Fade Background */}
+                <div
+                  className="absolute inset-0 pointer-events-none
+        bg-[linear-gradient(to_top,_rgba(212,175,55,0.16)_0%,_rgba(212,175,55,0.06)_25%,_rgba(212,175,55,0)_60%)]"
+                ></div>
               <span className="text-xl font-bold">＋</span>
               เพิ่มที่อยู่ใหม่
             </button>

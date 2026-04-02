@@ -78,7 +78,7 @@ export default function DetailOfProductShort({ product }: any) {
     addToCart(Number(product.id_products), quantity, variantId, inventoryId);
   };
 
-  const handleBuyNow = () => {
+  const handleBuyNow = async () => {
     if (!selectedInventory) {
       alert("กรุณาเลือกสินค้า");
       return;
@@ -90,8 +90,19 @@ export default function DetailOfProductShort({ product }: any) {
       router.push("/shoppingcart");
       return;
     }
-    
-    addToCart(Number(product.id_products), quantity, variantId, inventoryId);
+
+    try {
+      await addToCart(
+        Number(product.id_products),
+        quantity,
+        variantId,
+        inventoryId
+      );
+      router.push("/shoppingcart");
+    } catch (error) {
+      console.error("Buy now error:", error);
+      alert("ไม่สามารถเพิ่มสินค้าลงตะกร้าได้");
+    }
   };
 
   const handleAddWishlist = async () => {

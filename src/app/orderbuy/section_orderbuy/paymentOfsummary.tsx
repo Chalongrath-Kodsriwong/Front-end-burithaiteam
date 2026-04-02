@@ -112,25 +112,35 @@ export default function PaymentSummary({ addressId }: { addressId: number | null
   return (
     <div className="text-right mt-6">
       <h2 className="text-lg font-semibold">
-        รวมสินค้า: <span className="text-blue-600">{total} THB</span>
+        รวมสินค้า: <span className="text-yellow-600">{total} THB</span>
       </h2>
 
       <h2 className="text-lg font-semibold">
-        ค่าจัดส่ง: <span className="text-blue-600">{shippingFee} THB</span>
+        ค่าจัดส่ง: <span className="text-yellow-600">{shippingFee} THB</span>
       </h2>
 
       <h2 className="text-xl font-bold">
-        ยอดสุทธิ: <span className="text-blue-600">{grandTotal.toFixed(2)} THB</span>
+        ยอดสุทธิ: <span className="text-yellow-600">{grandTotal.toFixed(2)} THB</span>
       </h2>
 
       <button
         onClick={handleOrder}
         disabled={loading}
-        className={`mt-4 px-4 py-2 text-white rounded ${
-          loading ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"
+        className={`relative inline-block mt-4 px-4 py-2 rounded overflow-hidden transition-all duration-500 ease-out ${
+          loading
+            ? "bg-gray-400 text-gray-100 cursor-not-allowed"
+            : "bg-black text-yellow-500 [text-shadow:0_0_0_rgba(255,215,0,0)] hover:text-[rgb(255,215,0)] hover:[text-shadow:0_0_6px_rgba(255,215,0,0.45),0_0_12px_rgba(255,215,0,0.30),0_0_20px_rgba(212,175,55,0.20)] hover:bg-gray-900 focus:bg-gray-900"
         }`}
       >
-        {loading ? "กำลังดำเนินการ..." : "ยืนยันการสั่งซื้อ"}
+        {!loading && (
+          <div
+            className="absolute inset-0 pointer-events-none
+        bg-[linear-gradient(to_top,_rgba(212,175,55,0.16)_0%,_rgba(212,175,55,0.06)_25%,_rgba(212,175,55,0)_60%)]"
+          ></div>
+        )}
+        <span className="relative z-10">
+          {loading ? "กำลังดำเนินการ..." : "ยืนยันการสั่งซื้อ"}
+        </span>
       </button>
     </div>
   );

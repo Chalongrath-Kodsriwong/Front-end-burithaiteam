@@ -6,6 +6,35 @@ import { AchievementItem } from "@/types/Achievement"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
+function resolveClientApiBaseUrl() {
+  if (typeof window === "undefined") return API_URL;
+
+  const envUrl = API_URL.trim();
+  if (!envUrl) return window.location.origin;
+
+  try {
+    const configured = new URL(envUrl);
+    const current = new URL(window.location.origin);
+
+    const isLocalConfiguredHost =
+      configured.hostname === "localhost" ||
+      configured.hostname === "127.0.0.1";
+
+    if (
+      isLocalConfiguredHost &&
+      configured.hostname === current.hostname &&
+      configured.port !== current.port
+    ) {
+      // If FE is running on another local port (e.g. 3001), follow current origin.
+      return window.location.origin;
+    }
+  } catch {
+    return envUrl;
+  }
+
+  return envUrl;
+}
+
 export default function Achievement() {
   const [achievementList, setAchievementList] = useState<AchievementItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -13,7 +42,8 @@ export default function Achievement() {
   useEffect(() => {
   const fetchAchievements = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/archive/`, {
+      const apiBaseUrl = resolveClientApiBaseUrl();
+      const res = await fetch(`${apiBaseUrl}/api/archive/`, {
         method: "GET",
         credentials: "include",
       });

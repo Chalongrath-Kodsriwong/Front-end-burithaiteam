@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useCart } from "@/app/context/CartContext";
 import { useRouter } from "next/navigation";
 
-import { Product } from "@/types/DisplayItemCart"
+import { Product } from "@/types/DisplayItemCart";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
@@ -146,7 +146,7 @@ export default function DisplayItemCart() {
     setSelectedIds((prev) =>
       prev.includes(cartItemId)
         ? prev.filter((id) => id !== cartItemId)
-        : [...prev, cartItemId]
+        : [...prev, cartItemId],
     );
   };
 
@@ -157,17 +157,17 @@ export default function DisplayItemCart() {
   };
 
   const selectedItems = products.filter((p) =>
-    selectedIds.includes(p.cartItemId)
+    selectedIds.includes(p.cartItemId),
   );
 
   const selectedSummary = selectedItems.reduce(
     (acc, p) => acc + p.price * p.quantity,
-    0
+    0,
   );
 
   const totalSelectedQuantity = selectedItems.reduce(
     (acc, p) => acc + p.quantity,
-    0
+    0,
   );
 
   useEffect(() => {
@@ -328,42 +328,67 @@ export default function DisplayItemCart() {
 
             <div className="col-span-2 flex justify-end">
               <Link
-  href={{
-    pathname: "/orderbuy",
-    query: {
-      items: JSON.stringify(
-        selectedItems.map((c) => ({
-          cartItemId: c.cartItemId,   // สำคัญมาก!
-          id: c.id,
-          quantity: c.quantity,
-          price: c.price,
-          name: c.name,
-          avatar: c.avatar,
-        }))
-      ),
-      itemcart_ids: JSON.stringify(selectedItems.map((c) => c.cartItemId)),
-      total: selectedSummary,
-      totalQuantity: totalSelectedQuantity,
-    },
-  }}
-  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
->
-  Order Selected
-</Link>
-
-
+                href={{
+                  pathname: "/orderbuy",
+                  query: {
+                    items: JSON.stringify(
+                      selectedItems.map((c) => ({
+                        cartItemId: c.cartItemId, // สำคัญมาก!
+                        id: c.id,
+                        quantity: c.quantity,
+                        price: c.price,
+                        name: c.name,
+                        avatar: c.avatar,
+                      })),
+                    ),
+                    itemcart_ids: JSON.stringify(
+                      selectedItems.map((c) => c.cartItemId),
+                    ),
+                    total: selectedSummary,
+                    totalQuantity: totalSelectedQuantity,
+                  },
+                }}
+                className="relative inline-block mt-4 px-4 py-2 text-yellow-500 rounded overflow-hidden bg-black
+      [text-shadow:0_0_0_rgba(255,215,0,0)] hover:text-[rgb(255,215,0)]
+      hover:[text-shadow:0_0_6px_rgba(255,215,0,0.45),0_0_12px_rgba(255,215,0,0.30),0_0_20px_rgba(212,175,55,0.20)]
+      hover:bg-gray-900 focus:bg-gray-900 transition-all duration-500 ease-out"
+              >
+                {/* 🌟 Dark Gold Fade Background */}
+                <div
+                  className="absolute inset-0 pointer-events-none
+        bg-[linear-gradient(to_top,_rgba(212,175,55,0.16)_0%,_rgba(212,175,55,0.06)_25%,_rgba(212,175,55,0)_60%)]"
+                ></div>
+                <span className="relative z-10">Order Selected</span>
+              </Link>
             </div>
           </div>
 
-          <div className="text-right mt-6 space-x-4">
+          <div className="mt-6 flex justify-end items-center gap-4">
             <Link
               href="/product"
-              className="inline-block mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              className="relative inline-block px-4 py-2 text-yellow-500 rounded overflow-hidden bg-black
+      [text-shadow:0_0_0_rgba(255,215,0,0)] hover:text-[rgb(255,215,0)]
+      hover:[text-shadow:0_0_6px_rgba(255,215,0,0.45),0_0_12px_rgba(255,215,0,0.30),0_0_20px_rgba(212,175,55,0.20)]
+      hover:bg-gray-900 focus:bg-gray-900 transition-all duration-500 ease-out"
             >
-              Browse Products
+              <div
+                className="absolute inset-0 pointer-events-none
+        bg-[linear-gradient(to_top,_rgba(212,175,55,0.16)_0%,_rgba(212,175,55,0.06)_25%,_rgba(212,175,55,0)_60%)]"
+              ></div>
+              <span className="relative z-10">Browse Products</span>
             </Link>
-            <button className="inline-block mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-              Proceed to Checkout
+            
+            <button
+              className="relative inline-block px-4 py-2 text-yellow-500 rounded overflow-hidden bg-black
+      [text-shadow:0_0_0_rgba(255,215,0,0)] hover:text-[rgb(255,215,0)]
+      hover:[text-shadow:0_0_6px_rgba(255,215,0,0.45),0_0_12px_rgba(255,215,0,0.30),0_0_20px_rgba(212,175,55,0.20)]
+      hover:bg-gray-900 focus:bg-gray-900 transition-all duration-500 ease-out"
+            >
+              <div
+                className="absolute inset-0 pointer-events-none
+        bg-[linear-gradient(to_top,_rgba(212,175,55,0.16)_0%,_rgba(212,175,55,0.06)_25%,_rgba(212,175,55,0)_60%)]"
+              ></div>
+              <span className="relative z-10">Proceed to Checkout</span>
             </button>
           </div>
         </div>

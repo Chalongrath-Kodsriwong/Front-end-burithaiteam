@@ -421,20 +421,24 @@ export default function TopNavbar() {
           }
         `}
               >
-                <Link href="/history_payment">
-                  <button
-                    className="block w-full text-left px-6 py-1 text-[rgba(212,175,55)] hover:bg-[rgba(212,175,55,0.25)]
+                <button
+                  onClick={() => {
+                    window.location.href = "/setting_menu?menu=history";
+                  }}
+                  className="block w-full text-left px-6 py-1 text-[rgba(212,175,55)] hover:bg-[rgba(212,175,55,0.25)]
                   text-sm transition-colors duration-200"
-                  >
-                    Payment
-                  </button>
-                </Link>
+                >
+                  Payment
+                </button>
 
-                <Link href="/setting_menu">
-                  <button className="block w-full text-left px-6 py-1 text-[rgba(212,175,55)] hover:bg-[rgba(212,175,55,0.25)] text-sm transition-colors duration-200">
-                    Settings
-                  </button>
-                </Link>
+                <button
+                  onClick={() => {
+                    window.location.href = "/setting_menu?menu=account";
+                  }}
+                  className="block w-full text-left px-6 py-1 text-[rgba(212,175,55)] hover:bg-[rgba(212,175,55,0.25)] text-sm transition-colors duration-200"
+                >
+                  Settings
+                </button>
 
                 <button
                   onClick={async () => {
