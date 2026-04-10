@@ -9,6 +9,28 @@ import { Product } from "@/types/Productdisplay"
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 const ITEMS_PER_PAGE = 20; // แสดง 20 ชิ้นต่อหน้า
 
+function toNumberArrayFromUnknown(value: unknown): number[] {
+  if (Array.isArray(value)) {
+    return value
+      .map((x) => Number(x))
+      .filter((n) => Number.isFinite(n));
+  }
+
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return [value];
+  }
+
+  if (typeof value === "string") {
+    const nums = value.match(/\d+(?:\.\d+)?/g);
+    if (!nums) return [];
+    return nums
+      .map((x) => Number(x))
+      .filter((n) => Number.isFinite(n));
+  }
+
+  return [];
+}
+
 // ฟังก์ชันเช็คความใกล้เคียงแบบง่าย ๆ จากตัวอักษรที่ซ้ำกัน
 function charOverlapScore(query: string, target: string): number {
   if (!query || !target) return 0;
@@ -63,12 +85,25 @@ export default function Productdisplay() {
         const mapped: Product[] = productData.map((p: any) => {
           let price = "0";
 
-          // ป้องกัน p.prices ไม่ใช่ array
-          const prices = Array.isArray(p.prices)
-            ? p.prices
-                .map((x: any) => Number(x))
-                .filter((n: number) => !isNaN(n))
-            : [];
+          // รองรับหลายรูปแบบจาก backend: prices[], price, min/max
+          let prices = toNumberArrayFromUnknown(p.prices);
+          if (prices.length === 0) prices = toNumberArrayFromUnknown(p.price);
+
+          if (prices.length === 0) {
+            const minCandidates = [
+              Number(p.min_price),
+              Number(p.price_min),
+              Number(p.low_price),
+            ].filter((n) => Number.isFinite(n));
+            const maxCandidates = [
+              Number(p.max_price),
+              Number(p.price_max),
+              Number(p.high_price),
+            ].filter((n) => Number.isFinite(n));
+
+            if (minCandidates.length > 0) prices.push(minCandidates[0]);
+            if (maxCandidates.length > 0) prices.push(maxCandidates[0]);
+          }
 
           if (prices.length === 1) {
             price = prices[0].toLocaleString();
@@ -220,6 +255,8 @@ export default function Productdisplay() {
     qualityFilter,
     minPrice,
     maxPrice,
+    sortPrice,
+    sortName,
   ]);
 
   const totalPages = Math.ceil(products.length / ITEMS_PER_PAGE);
@@ -242,8 +279,8 @@ export default function Productdisplay() {
   ============================================ */
   if (!loading && products.length === 0 && keywordSearch) {
     return (
-      <div className="p-6 text-center bg-white rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold text-red-600 mb-4">
+      <div className="p-4 sm:p-6 text-center bg-white rounded-lg shadow-md">
+        <h2 className="text-lg sm:text-2xl font-bold text-red-600 mb-4">
           ไม่พบสินค้าที่คุณค้นหา: “{keywordSearch}”
         </h2>
 
@@ -253,7 +290,7 @@ export default function Productdisplay() {
               สินค้าใกล้เคียงที่อาจตรงกับที่คุณต้องการ:
             </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mx-12 mt-4">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 mx-1 sm:mx-4 md:mx-12 mt-4">
               {suggestions.map((product) => (
                 <Link
                   key={product.id}
@@ -261,12 +298,12 @@ export default function Productdisplay() {
                   className="h-full"
                 >
                   <div
-                    className="h-full border p-4 rounded-lg bg-white shadow-sm cursor-pointer flex flex-col
+                    className="h-full border p-2 sm:p-4 rounded-lg bg-white shadow-sm cursor-pointer flex flex-col
                     hover:border-yellow-500
                     hover:shadow-[0_0_4px_rgba(212,175,55,0.5),0_0_8px_rgba(184,134,11,0.4)]
                     transition-all duration-300"
                   >
-                    <div className="w-full h-40 rounded mb-2 overflow-hidden bg-gray-100">
+                    <div className="w-full h-24 sm:h-40 rounded mb-2 overflow-hidden bg-gray-100">
                       <img
                         src={product.avatar}
                         alt={product.name}
@@ -274,11 +311,11 @@ export default function Productdisplay() {
                       />
                     </div>
                     <div className="flex-1 flex flex-col">
-                      <h3 className="text-lg font-semibold line-clamp-2 min-h-[3.5rem]">
+                      <h3 className="text-sm sm:text-lg font-semibold line-clamp-2 min-h-[2.3rem] sm:min-h-[3.5rem]">
                         {product.name}
                       </h3>
-                      <p className="text-gray-700 font-medium">฿ {product.price}</p>
-                      <p className="text-sm text-gray-500 mt-1">Brand: {product.brand}</p>
+                      <p className="text-gray-700 font-medium text-xs sm:text-base">฿ {product.price}</p>
+                      <p className="text-[10px] sm:text-sm text-gray-500 mt-1 break-words">Brand: {product.brand}</p>
                     </div>
                   </div>
                 </Link>
@@ -300,13 +337,13 @@ export default function Productdisplay() {
       ⭐ UI: แสดงรายการสินค้า
   ============================================ */
   return (
-    <div className="container mx-auto px-4 py-6 rounded-lg shadow-md">
+    <div className="container mx-auto px-1 sm:px-3 py-3 sm:py-6 rounded-lg shadow-md">
       {/* <h2 className="text-2xl font-bold flex items-center justify-center gap-2 mb-4">
         <div>Products</div>
       </h2> */}
 
       {/* Grid สินค้าแบบตาราง */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-4 mx-12 mt-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-6 gap-1.5 sm:gap-4 mt-3 sm:mt-4">
         {visibleItems.map((product) => (
           <Link
             key={product.id}
@@ -314,12 +351,12 @@ export default function Productdisplay() {
             className="h-full"
           >
             <div
-              className="h-full border p-4 rounded-lg bg-white shadow-sm cursor-pointer flex flex-col
+              className="h-full border p-1.5 sm:p-4 rounded-lg bg-white shadow-sm cursor-pointer flex flex-col
               hover:border-yellow-500
               hover:shadow-[0_0_4px_rgba(212,175,55,0.5),0_0_8px_rgba(184,134,11,0.4)]
               transition-all duration-300"
             >
-              <div className="w-full h-40 rounded mb-2 overflow-hidden bg-gray-100">
+              <div className="w-full h-20 sm:h-40 rounded mb-1.5 sm:mb-2 overflow-hidden bg-gray-100">
                 <img
                   src={product.avatar}
                   alt={product.name}
@@ -330,11 +367,11 @@ export default function Productdisplay() {
                 />
               </div>
               <div className="flex-1 flex flex-col">
-                <h3 className="text-lg font-semibold line-clamp-2 min-h-[3.5rem]">
+                <h3 className="text-xs sm:text-lg font-semibold line-clamp-2 min-h-[2rem] sm:min-h-[3.5rem] leading-snug">
                   {product.name}
                 </h3>
-                <p className="text-gray-700 font-medium">฿ {product.price}</p>
-                <p className="text-sm text-gray-500 mt-1">Brand: {product.brand}</p>
+                <p className="text-gray-700 font-medium text-[11px] sm:text-base">฿ {product.price}</p>
+                <p className="text-[10px] sm:text-sm text-gray-500 mt-0.5 sm:mt-1 break-words">Brand: {product.brand}</p>
               </div>
             </div>
           </Link>
@@ -343,23 +380,23 @@ export default function Productdisplay() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex justify-center items-center gap-4 mt-6">
+        <div className="flex justify-center items-center gap-2 sm:gap-4 mt-6">
           <button
             onClick={handlePrevPage}
             disabled={page === 0}
-            className="px-4 py-2 bg-gray-300 hover:bg-gray-400 disabled:opacity-50 rounded"
+            className="px-2.5 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base bg-gray-300 hover:bg-gray-400 disabled:opacity-50 rounded"
           >
             ย้อนกลับ
           </button>
 
-          <span className="font-semibold">
+          <span className="font-semibold text-sm sm:text-base">
             Page {page + 1} / {totalPages}
           </span>
 
           <button
             onClick={handleNextPage}
             disabled={page === totalPages - 1}
-            className="px-4 py-2 bg-gray-300 hover:bg-gray-400 disabled:opacity-50 rounded"
+            className="px-2.5 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base bg-gray-300 hover:bg-gray-400 disabled:opacity-50 rounded"
           >
             ถัดไป
           </button>

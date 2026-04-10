@@ -161,7 +161,7 @@ export default function Ourmission() {
                 </motion.div>
 
                 {/* 🔥 TEXT */}
-                <div className="w-full md:w-[45%] flex flex-col items-center justify-center px-6 ml-10">
+                <div className="w-full md:w-[45%] flex flex-col items-center justify-center px-2 sm:px-4 md:px-6 md:ml-10">
                   <h2 className="text-2xl font-bold mb-2">{group.category}</h2>
                   <div className="relative w-full h-10 overflow-hidden">
                     <AnimatePresence mode="wait">

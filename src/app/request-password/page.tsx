@@ -56,7 +56,7 @@ export default function ResetPasswordRequestPage() {
       {/* ---------------- Success Popup ---------------- */}
       {successPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-xl shadow-lg w-80 text-center">
+          <div className="bg-white p-6 rounded-xl shadow-lg w-80 max-w-[92vw] text-center">
             <h2 className="text-xl font-bold mb-3 text-green-700">
               ส่งลิงก์รีเซ็ตรหัสผ่านแล้ว!
             </h2>

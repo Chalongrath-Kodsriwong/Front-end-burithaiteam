@@ -205,10 +205,10 @@ export default function EditAccount({ user }: { user: any }) {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Profile Settings</h1>
+      <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Profile Settings</h1>
 
-      <div className="flex gap-8">
-        <div className="w-48 h-48 bg-gray-300 rounded-full flex items-center justify-center text-white font-bold overflow-hidden">
+      <div className="flex flex-col sm:flex-row gap-4 sm:gap-8">
+        <div className="w-28 h-28 sm:w-48 sm:h-48 bg-gray-300 rounded-full flex items-center justify-center text-white text-xs sm:text-base font-bold overflow-hidden mx-auto sm:mx-0">
           {user?.avatar ? (
             <img
               src={user.avatar}
@@ -220,18 +220,18 @@ export default function EditAccount({ user }: { user: any }) {
           )}
         </div>
 
-        <div className="flex-1">
-          <h3 className="text-xl font-semibold mb-2">User Information</h3>
-          <p>
+        <div className="flex-1 text-sm sm:text-base">
+          <h3 className="text-lg sm:text-xl font-semibold mb-2">User Information</h3>
+          <p className="break-words">
             <strong>ชื่อ:</strong> {user?.firstName} {user?.lastName}
           </p>
-          <p>
+          <p className="break-words">
             <strong>ชื่อผู้ใช้:</strong> {user?.username}
           </p>
-          <p>
+          <p className="break-words">
             <strong>Email:</strong> {user?.email}
           </p>
-          <p>
+          <p className="break-words">
             <strong>โทรศัพท์:</strong> {user?.phone}
           </p>
           <p>
@@ -245,21 +245,22 @@ export default function EditAccount({ user }: { user: any }) {
           </p>
 
           {/* ✅ ปุ่มแก้ไข */}
-          <button
-            onClick={() => setShowPopup(true)}
-            className="mt-4 bg-blue-600 text-white px-4 py-2 rounded"
-          >
-            แก้ไขข้อมูลส่วนตัว
-          </button>
+          <div className="mt-4 flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-3">
+            <button
+              onClick={() => setShowPopup(true)}
+              className="bg-blue-600 text-white px-4 py-2 rounded text-sm sm:text-base"
+            >
+              แก้ไขข้อมูลส่วนตัว
+            </button>
 
-          {/* ✅ เพิ่มปุ่ม Upload (เพิ่มอย่างเดียว) */}
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            disabled={loading}
-            className="mt-3 ml-3 bg-purple-600 text-white px-4 py-2 rounded"
-          >
-            {loading ? "กำลังอัปโหลด..." : "อัปโหลดรูปโปรไฟล์"}
-          </button>
+            {/* ✅ เพิ่มปุ่ม Upload (เพิ่มอย่างเดียว) */}
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={loading}
+              className="bg-purple-600 text-white px-4 py-2 rounded text-sm sm:text-base"
+            >
+              {loading ? "กำลังอัปโหลด..." : "อัปโหลดรูปโปรไฟล์"}
+            </button>
 
           <input
             ref={fileInputRef}
@@ -269,22 +270,23 @@ export default function EditAccount({ user }: { user: any }) {
             className="hidden"
           />
 
-          {/* ✅ เพิ่ม: ปุ่มเปลี่ยนรหัสผ่าน */}
-          <button
-            onClick={() => setShowPasswordPopup(true)}
-            disabled={passwordLoading}
-            className="mt-3 ml-3 bg-orange-600 text-white px-4 py-2 rounded"
-          >
-            เปลี่ยนรหัสผ่าน
-          </button>
+            {/* ✅ เพิ่ม: ปุ่มเปลี่ยนรหัสผ่าน */}
+            <button
+              onClick={() => setShowPasswordPopup(true)}
+              disabled={passwordLoading}
+              className="bg-orange-600 text-white px-4 py-2 rounded text-sm sm:text-base"
+            >
+              เปลี่ยนรหัสผ่าน
+            </button>
+          </div>
         </div>
       </div>
 
       {/* ---------------- Popup แก้ไขข้อมูล ---------------- */}
       {showPopup && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-xl shadow-lg w-96">
-            <h2 className="text-xl font-bold mb-4">แก้ไขข้อมูลส่วนตัว</h2>
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50 px-3">
+          <div className="bg-white p-4 sm:p-6 rounded-xl shadow-lg w-full max-w-md max-h-[85vh] overflow-y-auto">
+            <h2 className="text-lg sm:text-xl font-bold mb-4">แก้ไขข้อมูลส่วนตัว</h2>
 
             <div className="space-y-3">
               <input
@@ -383,10 +385,10 @@ export default function EditAccount({ user }: { user: any }) {
               />
             </div>
 
-            <div className="flex justify-end gap-3 mt-5">
+            <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 mt-5">
               <button
                 onClick={() => setShowPopup(false)}
-                className="px-4 py-2 bg-gray-300 rounded"
+                className="w-full sm:w-auto px-4 py-2 bg-gray-300 rounded text-sm sm:text-base"
               >
                 ยกเลิก
               </button>
@@ -394,7 +396,7 @@ export default function EditAccount({ user }: { user: any }) {
               <button
                 onClick={handleSubmit}
                 disabled={loading}
-                className="px-4 py-2 bg-green-600 text-white rounded"
+                className="w-full sm:w-auto px-4 py-2 bg-green-600 text-white rounded text-sm sm:text-base"
               >
                 {loading ? "กำลังบันทึก..." : "บันทึก"}
               </button>
@@ -405,9 +407,9 @@ export default function EditAccount({ user }: { user: any }) {
 
       {/* ---------------- Popup เปลี่ยนรหัสผ่าน ---------------- */}
       {showPasswordPopup && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-xl shadow-lg w-96">
-            <h2 className="text-xl font-bold mb-4">เปลี่ยนรหัสผ่าน</h2>
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50 px-3">
+          <div className="bg-white p-4 sm:p-6 rounded-xl shadow-lg w-full max-w-md max-h-[85vh] overflow-y-auto">
+            <h2 className="text-lg sm:text-xl font-bold mb-4">เปลี่ยนรหัสผ่าน</h2>
 
             <div className="space-y-3">
               <input
@@ -436,10 +438,10 @@ export default function EditAccount({ user }: { user: any }) {
               />
             </div>
 
-            <div className="flex justify-end gap-3 mt-5">
+            <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 mt-5">
               <button
                 onClick={() => setShowPasswordPopup(false)}
-                className="px-4 py-2 bg-gray-300 rounded"
+                className="w-full sm:w-auto px-4 py-2 bg-gray-300 rounded text-sm sm:text-base"
               >
                 ยกเลิก
               </button>
@@ -447,7 +449,7 @@ export default function EditAccount({ user }: { user: any }) {
               <button
                 onClick={handleChangePasswordSubmit}
                 disabled={passwordLoading}
-                className="px-4 py-2 bg-blue-600 text-white rounded"
+                className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded text-sm sm:text-base"
               >
                 {passwordLoading ? "กำลังเปลี่ยน..." : "บันทึก"}
               </button>

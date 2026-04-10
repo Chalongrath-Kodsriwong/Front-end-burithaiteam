@@ -60,22 +60,22 @@ export default function ProductDetailPage() {
   if (!product) return <p className="p-4">ไม่พบสินค้า</p>;
 
   return (
-    <div className="w-full p-5">
-      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+    <div className="w-full p-3 sm:p-4 md:p-5">
+      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
 
         <div className="col-span-1 flex justify-center md:justify-start">
           <ImageProduct product={product} />
         </div>
 
-        <div className="col-span-2 space-y-3">
+        <div className="col-span-1 md:col-span-2 space-y-3">
           <DetailOfProductShort product={product} />
         </div>
 
-        <div className="col-span-3 space-y-3">
+        <div className="col-span-1 md:col-span-3 space-y-3">
           <DetailOfProductFull product={product} />
         </div>
 
-        <div className="col-span-4 mt-12">
+        <div className="col-span-1 md:col-span-3 mt-6 md:mt-12">
           <SimilarProduct
             currentProductId={id}
             currentCategory={product.category?.name ?? ""}

@@ -573,7 +573,7 @@ export default function PaymentPage() {
                     <img
                       src={qrCodeUrl}
                       alt="PromptPay QR"
-                      className="w-64 h-64 object-contain"
+                      className="h-56 w-56 sm:h-64 sm:w-64 object-contain"
                     />
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                       <div className="bg-white rounded-lg shadow-md">
@@ -690,13 +690,15 @@ export default function PaymentPage() {
         {/* // **Popup** เมื่อ QR หมดอายุ */}
         {isPopupOpen && (
           <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-            <div className="bg-white p-6 rounded-lg w-1/3">
-              <h2 className="text-xl font-semibold mb-4">{popupMessage}</h2>
-              <div className="flex justify-center gap-4">
+            <div className="mx-4 w-full max-w-md bg-white p-4 sm:p-6 rounded-xl shadow-xl">
+              <h2 className="text-base sm:text-xl font-semibold mb-4 break-words">
+                {popupMessage}
+              </h2>
+              <div className="flex flex-col-reverse sm:flex-row justify-center gap-2 sm:gap-4">
                 <Link href="/shoppingcart">
                   <button
                     onClick={closePopup}
-                    className="px-4 py-2 bg-gray-300 rounded-lg"
+                    className="w-full sm:w-auto px-4 py-2 bg-gray-300 rounded-lg text-sm sm:text-base"
                   >
                     Back to basket
                   </button>
@@ -706,7 +708,7 @@ export default function PaymentPage() {
                     generateQRCode(); // กดปุ่มนี้จะ Regenerate QR Code ใหม่
                     closePopup(); // ปิด Popup
                   }}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+                  className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg text-sm sm:text-base"
                 >
                   สร้าง Order ใหม่
                 </button>
@@ -720,11 +722,11 @@ export default function PaymentPage() {
           <div className="fixed inset-0 flex items-center justify-center z-40 bg-black bg-opacity-50">
             {" "}
             {/* z-40 */}
-            <div className="bg-white p-6 rounded-lg w-1/3">
-              <h2 className="text-xl font-semibold mb-4">อัปโหลดสลิป</h2>
+            <div className="mx-4 w-full max-w-md bg-white p-4 sm:p-6 rounded-xl shadow-xl">
+              <h2 className="text-lg sm:text-xl font-semibold mb-4">อัปโหลดสลิป</h2>
 
               {uploadError && (
-                <div className="text-red-500 text-sm mb-4">{uploadError}</div>
+                <div className="text-red-500 text-sm mb-4 break-words">{uploadError}</div>
               )}
 
               <div className="relative w-full">
@@ -732,29 +734,29 @@ export default function PaymentPage() {
                   type="file"
                   onChange={handleFileChange}
                   accept="image/*,application/pdf"
-                  className="mb-4 border-2 border-gray-400 rounded-lg p-2 pr-10 w-full hover:bg-gray-200 cursor-pointer"
+                  className="mb-4 border-2 border-gray-400 rounded-lg p-2 pr-10 w-full text-sm hover:bg-gray-200 cursor-pointer"
                 />
 
                 <MdDriveFolderUpload
-                  className="absolute right-3 top-1/4 -translate-y-1/4 text-gray-500 pointer-events-none"
-                  size={22}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none"
+                  size={20}
                 />
               </div>
 
               {uploading ? (
-                <div>กำลังอัปโหลด...</div>
+                <div className="text-sm">กำลังอัปโหลด...</div>
               ) : (
-                <div className="flex justify-between">
+                <div className="flex flex-col-reverse sm:flex-row justify-between gap-2">
                   <button
                     onClick={closeModal}
-                    className="px-4 py-2 bg-gray-300 rounded-lg"
+                    className="w-full sm:w-auto px-4 py-2 bg-gray-300 rounded-lg text-sm sm:text-base"
                   >
                     ยกเลิก
                   </button>
                   <button
                     onClick={handleUploadSlip}
                     disabled={!file}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+                    className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg text-sm sm:text-base disabled:opacity-60"
                   >
                     อัปโหลด
                   </button>
@@ -769,9 +771,11 @@ export default function PaymentPage() {
           <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
             {" "}
             {/* z-50 */}
-            <div className="bg-white p-6 rounded-lg w-1/3">
-              <h2 className="text-xl font-semibold mb-4">กำลังประมวลผล...</h2>
-              <p>กำลังอัปโหลดสลิปและตรวจสอบข้อมูล กรุณารอสักครู่</p>
+            <div className="mx-4 w-full max-w-sm bg-white p-4 sm:p-6 rounded-xl shadow-xl">
+              <h2 className="text-lg sm:text-xl font-semibold mb-3">กำลังประมวลผล...</h2>
+              <p className="text-sm sm:text-base leading-relaxed">
+                กำลังอัปโหลดสลิปและตรวจสอบข้อมูล กรุณารอสักครู่
+              </p>
             </div>
           </div>
         )}

@@ -83,7 +83,7 @@ export default function TopicMenu({ setSelectedCategory }: TopicMenuProps) {
   const isActive = (cat: string) => {
     const current = searchParams.get("category") || "All";
     return current === cat
-      ? "font-bold text-yellow-500 bg-black border border-gray-300 rounded-full px-2 py-1.5 inline-block leading-none transition-colors duration-200 cursor-pointer"
+      ? "font-bold text-yellow-500 bg-black border border-gray-300 rounded-full px-1.5 sm:px-2 py-1 inline-block leading-none transition-colors duration-200 cursor-pointer"
       : "hover:font-bold hover:text-yellow-500 transition-colors duration-200 cursor-pointer";
   };
 
@@ -94,12 +94,12 @@ export default function TopicMenu({ setSelectedCategory }: TopicMenuProps) {
     <>
       {isClient && (
         <div className="col-span-1 grid grid-cols-1 gap-1">
-          <div className="outline outline-1 outline-gray-500 rounded p-1 h-full p-3">
-            <div className="text-center font-bold text-lg mb-3 border-b-2 border-gray-500 pb-2">
+          <div className="outline outline-1 outline-gray-500 rounded p-1.5 sm:p-3 h-full">
+            <div className="text-center font-bold text-sm sm:text-lg mb-2 sm:mb-3 border-b-2 border-gray-500 pb-1.5 sm:pb-2">
               <h1>Topic</h1>
             </div>
 
-            <div className="space-y-2 mt-2">
+            <div className="space-y-1 sm:space-y-2 mt-1.5 sm:mt-2 text-xs sm:text-base">
               {/* All */}
               <div
                 className={`cursor-pointer ${isActive("All")}`}
@@ -128,7 +128,7 @@ export default function TopicMenu({ setSelectedCategory }: TopicMenuProps) {
             </div>
 
             {/* Quality Filter */}
-            <div className="space-y-2 py-3 ">
+            <div className="space-y-1.5 sm:space-y-2 py-2 sm:py-3 text-xs sm:text-base">
               <div>
                 <input
                   type="checkbox"
@@ -151,28 +151,28 @@ export default function TopicMenu({ setSelectedCategory }: TopicMenuProps) {
             </div>
 
             {/* ⭐ Filter ราคา */}
-            <div className="space-y-2 mt-5 py-3">
+            <div className="space-y-1.5 sm:space-y-2 mt-3 sm:mt-5 py-2 sm:py-3">
               <div>
-                <h2>ต่ำที่สุด</h2>
+                <h2 className="text-xs sm:text-base">ต่ำที่สุด</h2>
                 <input
                   type="text"
                   value={minInput}
                   onChange={(e) => setMinInput(e.target.value)}
                   placeholder="lower price"
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-1"
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-xs sm:text-sm rounded-lg block w-full p-1"
                 />
               </div>
 
               <div className="border-b-2 border-gray-500 pb-2"></div>
 
               <div>
-                <h2>สูงสุด</h2>
+                <h2 className="text-xs sm:text-base">สูงสุด</h2>
                 <input
                   type="text"
                   value={maxInput}
                   onChange={(e) => setMaxInput(e.target.value)}
                   placeholder="upper price"
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-1"
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-xs sm:text-sm rounded-lg block w-full p-1"
                 />
               </div>
 
@@ -193,7 +193,7 @@ export default function TopicMenu({ setSelectedCategory }: TopicMenuProps) {
 
                     router.push(`/product?${params.toString()}`);
                   }}
-                  className="text-white bg-blue-700 hover:bg-blue-800 rounded-lg text-sm w-full px-5 py-2.5"
+                  className="text-white bg-blue-700 hover:bg-blue-800 rounded-lg text-xs sm:text-sm w-full px-2 sm:px-5 py-1.5 sm:py-2.5"
                 >
                   Submit
                 </button>
@@ -215,7 +215,7 @@ export default function TopicMenu({ setSelectedCategory }: TopicMenuProps) {
 
                       router.push(`/product?${params.toString()}`);
                     }}
-                    className="text-white bg-red-600 hover:bg-red-700 rounded-lg text-sm w-full px-5 py-2.5 mt-2"
+                    className="text-white bg-red-600 hover:bg-red-700 rounded-lg text-xs sm:text-sm w-full px-2 sm:px-5 py-1.5 sm:py-2.5 mt-2"
                   >
                     Clear
                   </button>

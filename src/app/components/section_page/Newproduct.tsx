@@ -92,53 +92,59 @@ export default function Newproducts() {
 
   return (
     <div className="pb-3">
-      <h2 className="text-2xl font-bold flex items-center gap-4 mb-4">
-        <div className="relative w-14 h-14">
-          <BookmarkIcon className="w-20 h-16 text-red-600 rotate-[4.70rad] -translate-y-[1px]" />
-          <span className="absolute inset-0 flex items-center justify-center text-white text-xl font-bold ml-4">
+      <h2 className="text-2xl font-bold flex items-center mb-4">
+        <div className="relative w-28 h-16">
+          <BookmarkIcon className="w-full h-full text-red-600 rotate-[4.71rad]" />
+          <span className="absolute inset-0 flex items-center justify-center text-white text-xl font-bold -translate-x-1">
             New
           </span>
         </div>
-        <p>สินค้าใหม่</p>
+        <p className="-ml-6">สินค้าใหม่</p>
       </h2>
 
       <div className="relative">
         <button
           onClick={handlePrev}
           className="absolute left-0 top-1/2 -translate-y-1/2 z-10 
-             w-12 h-12 flex items-center justify-center
+             w-9 h-9 md:w-12 md:h-12 flex items-center justify-center
             rounded-full bg-gray-300 hover:text-[rgb(255,215,0)]
       hover:[text-shadow:0_0_6px_rgb(255,215,0),0_0_12px_rgb(255,215,0),0_0_20px_rgb(212,175,55)] hover:bg-black/70
-             text-xl font-bold shadow-md  transition"
+             text-base md:text-xl font-bold shadow-md  transition"
         >
           ‹
         </button>
 
-        <div className="grid grid-cols-[repeat(auto-fit,220px)] gap-5 mx-20">
+        <div className="grid grid-cols-2 gap-4 px-10 sm:grid-cols-2 sm:gap-5 sm:px-12 md:grid-cols-4 md:px-16 lg:px-20">
           {paginatedItems.map((product) => (
-            <Link key={product.id} href={`/detail_product/${product.id}`}>
+            <Link
+              key={product.id}
+              href={`/detail_product/${product.id}`}
+              className="h-full"
+            >
               <div
-                className="w-[220px] p-2 border border-gray-300 rounded-md bg-white cursor-pointer 
+                className="w-full h-full p-2 border border-gray-300 rounded-md bg-white cursor-pointer flex flex-col
                   hover:border-yellow-500
                   hover:shadow-[0_0_4px_rgba(212,175,55,0.5),0_0_8px_rgba(184,134,11,0.4)]
                   transition-all duration-300"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={product.avatar}
-                  alt={product.name}
-                  onError={(e) =>
-                    (e.currentTarget.src = "/image/logo_white.jpeg")
-                  }
-                  className="w-full h-[200px] object-cover rounded-md"
-                />
+                <div className="relative w-full aspect-square rounded-md overflow-hidden bg-gray-100">
+                  <img
+                    src={product.avatar}
+                    alt={product.name}
+                    onError={(e) =>
+                      (e.currentTarget.src = "/image/logo_white.jpeg")
+                    }
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                </div>
 
-                <div className="p-1">
-                  <h3 className="font-semibold text-lg leading-snug line-clamp-2">
+                <div className="p-1 flex-1 flex flex-col">
+                  <h3 className="font-semibold text-base md:text-lg leading-snug line-clamp-2 min-h-[2.75rem] md:min-h-0">
                     {product.name}
                   </h3>
 
-                  <div className="mt-2">
+                  <div className="mt-1.5 md:mt-1 min-h-[2.6rem] md:min-h-0">
                     {product.finalPriceText ? (
                       <div className="space-y-1">
                         <p className="text-sm text-gray-500 line-through">
@@ -155,7 +161,7 @@ export default function Newproducts() {
                     )}
                   </div>
 
-                  <p className="text-sm text-gray-600 mt-2">
+                  <p className="text-[11px] sm:text-xs md:text-sm text-gray-600 mt-1 break-words">
                     Brand: {product.brand}
                   </p>
                 </div>
@@ -165,12 +171,12 @@ export default function Newproducts() {
         </div>
 
         <button
-          onClick={handlePrev}
+          onClick={handleNext}
           className="absolute right-0 top-1/2 -translate-y-1/2 z-10 
-             w-12 h-12 flex items-center justify-center
+             w-9 h-9 md:w-12 md:h-12 flex items-center justify-center
              rounded-full bg-gray-300 hover:text-[rgb(255,215,0)]
       hover:[text-shadow:0_0_6px_rgb(255,215,0),0_0_12px_rgb(255,215,0),0_0_20px_rgb(212,175,55)] hover:bg-black/70
-             text-xl font-bold shadow-md  transition"
+             text-base md:text-xl font-bold shadow-md  transition"
         >
           ›
         </button>

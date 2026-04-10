@@ -24,11 +24,11 @@ export default function ContactAddress() {
               </p>
               <p className="flex items-center">
                 <FaEnvelope className="w-8 h-auto mr-5" />
-                BurithaiTeam@gmail.co.th
+                burithiateamstore.info@gmail.com
               </p>
               <p className="flex items-center">
                 <FaPhone className="w-8 h-auto mr-5" />
-                +66 87-945-5478
+                +66 087-945-5478
               </p>
             </div>
           </div>

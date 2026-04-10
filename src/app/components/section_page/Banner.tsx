@@ -3,6 +3,7 @@
 import { Carousel } from "react-responsive-carousel";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 
 import {BannerItem} from "@/types/Banner"
 
@@ -95,12 +96,16 @@ export default function Promote() {
           </p>
 
           <div className="flex gap-4">
+            <Link href="/login">
             <button className="bg-yellow-400 text-black px-6 py-2 rounded-full font-semibold hover:bg-yellow-300 transition">
               Get Start →
             </button>
+            </Link>
+            <Link href="/contact">
             <button className="bg-red-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-red-500 transition">
               Contact Us →
             </button>
+            </Link>
           </div>
 
           {/* 🔥 Gold Glow Background */}

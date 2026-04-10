@@ -96,16 +96,16 @@ export default function Productdisplay() {
     return <div className="p-4 text-center">ไม่มีข้อมูลสินค้า</div>;
 
   return (
-    <div className="container mx-auto px-4 py-6 rounded-xl shadow-xl">
-      <div className="flex flex-col item-center justify-center text-center p-4 mb-4">
-      <h2 className="text-2xl font-bold">
+    <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-6 rounded-xl shadow-xl">
+      <div className="flex flex-col item-center justify-center text-center p-2 sm:p-4 mb-4">
+      <h2 className="text-lg sm:text-2xl font-bold">
         <div>My Product</div>
       </h2>
-      <h2 className="text-[20px] font-bold mt-0.5">(สินค้าทั้งหมดของเรา)</h2>
+      <h2 className="text-sm sm:text-[20px] font-bold mt-0.5">(สินค้าทั้งหมดของเรา)</h2>
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-4 mx-12 mt-4">
+      <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 mx-1 sm:mx-4 md:mx-12 mt-4">
         {visibleItems.map((product) => (
           <Link
             key={product.id}
@@ -113,12 +113,12 @@ export default function Productdisplay() {
             className="h-full"
           >
             <div
-              className="h-full w-full p-2 border border-gray-300 rounded-md bg-white cursor-pointer flex flex-col
+              className="h-full w-full p-1.5 sm:p-2 border border-gray-300 rounded-md bg-white cursor-pointer flex flex-col
               hover:border-yellow-500
               hover:shadow-[0_0_4px_rgba(212,175,55,0.5),0_0_8px_rgba(184,134,11,0.4)]
               transition-all duration-300"
             >
-              <div className="w-full h-[200px] rounded-md overflow-hidden bg-gray-100">
+              <div className="w-full h-24 sm:h-32 md:h-[200px] rounded-md overflow-hidden bg-gray-100">
                 <img
                   src={product.avatar}
                   alt={product.name}
@@ -130,15 +130,15 @@ export default function Productdisplay() {
               </div>
 
               <div className="p-1 flex-1 flex flex-col">
-                <h3 className="font-semibold text-lg leading-snug line-clamp-2 min-h-[3.5rem]">
+                <h3 className="font-semibold text-[10px] sm:text-xs md:text-base leading-snug line-clamp-3 min-h-[2.7rem] sm:min-h-[3rem] md:min-h-[3.5rem]">
                   {product.name}
                 </h3>
 
-                <div className="mt-2">
-                  <p className="font-bold text-base">฿ {product.price}</p>
+                <div className="mt-1 sm:mt-2">
+                  <p className="font-bold text-[10px] sm:text-xs md:text-base">฿ {product.price}</p>
                 </div>
 
-                <p className="text-sm text-gray-600 mt-2">
+                <p className="text-[10px] sm:text-xs md:text-sm text-gray-600 mt-1 sm:mt-2 break-words">
                   Brand: {product.brand}
                 </p>
               </div>

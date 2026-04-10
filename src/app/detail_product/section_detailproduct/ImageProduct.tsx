@@ -43,7 +43,7 @@ export default function ImageProduct({ product }: any) {
   }, [selected]);
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="w-full max-w-[520px] flex flex-col items-center">
       {/* ✅ Main viewer */}
       {selected.kind === "video" ? (
         <video
@@ -53,14 +53,14 @@ export default function ImageProduct({ product }: any) {
           controls
           // muted // ปิดเสียง default ผู้ใช้เปิดเองได้จาก controls
           playsInline
-          className="w-full h-[350px] object-cover rounded-lg shadow mb-4 bg-black"
+          className="w-full h-64 sm:h-72 md:h-[350px] object-cover rounded-lg shadow mb-4 bg-black"
         />
       ) : (
         <img
           src={selected.url}
           alt={product.name}
           onError={(e) => (e.currentTarget.src = "/image/logo_white.jpeg")}
-          className="w-full h-[350px] object-cover rounded-lg shadow mb-4"
+          className="w-full h-64 sm:h-72 md:h-[350px] object-cover rounded-lg shadow mb-4"
         />
       )}
 
@@ -71,7 +71,7 @@ export default function ImageProduct({ product }: any) {
             key={`${m.url}-${idx}`}
             type="button"
             onClick={() => setSelected(m)}
-            className={`w-20 h-20 rounded cursor-pointer border overflow-hidden flex items-center justify-center ${
+            className={`w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded cursor-pointer border overflow-hidden flex items-center justify-center ${
               selected.url === m.url ? "border-blue-500" : "border-gray-300"
             }`}
             title={m.kind === "video" ? "วิดีโอ" : "รูปภาพ"}

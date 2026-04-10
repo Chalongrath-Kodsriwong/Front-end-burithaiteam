@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { MdContentCopy } from "react-icons/md";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
@@ -216,8 +217,9 @@ const CheckOrderPage = () => {
               <button
                 onClick={handleCopyTracking}
                 disabled={!order?.tracking_number}
-                className="text-sm text-gray-600 underline disabled:opacity-50"
+                className="inline-flex items-center gap-1 whitespace-nowrap text-sm text-gray-600 underline disabled:opacity-50"
               >
+               <MdContentCopy className="shrink-0" size={16} />
                 {copied ? "คัดลอกแล้ว" : "คัดลอกหมายเลขพัสดุ"}
               </button>
             </div>

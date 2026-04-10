@@ -77,10 +77,10 @@ export default function SimilarProduct({ currentProductId, currentCategory }: an
   };
 
   return (
-    <div className="p-4 bg-gray-50 rounded-lg shadow">
-      <h3 className="text-xl font-bold mb-3">สินค้าที่ใกล้เคียง</h3>
+    <div className="p-3 sm:p-4 bg-gray-50 rounded-lg shadow">
+      <h3 className="text-lg sm:text-xl font-bold mb-3">สินค้าที่ใกล้เคียง</h3>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
         {similarProducts.map((p) => {
           const image =
             p.images?.length > 0 ? p.images[0].url : "/image/logo_white.jpeg";
@@ -91,18 +91,19 @@ export default function SimilarProduct({ currentProductId, currentCategory }: an
             <Link
               key={p.id_products ?? p.id}
               href={`/detail_product/${p.id_products ?? p.id}`}
+              className="h-full"
             >
-              <div className="p-3 bg-white rounded hover:shadow-md cursor-pointer transition">
+              <div className="h-full p-2 sm:p-3 bg-white rounded hover:shadow-md cursor-pointer transition flex flex-col">
                 <img
                   src={image}
                   alt={p.name}
-                  className="w-full h-[150px] object-cover rounded"
+                  className="w-full h-28 sm:h-[150px] object-cover rounded"
                 />
-                <h4 className="font-semibold mt-2 text-sm">{p.name}</h4>
-                <p className="text-black-100 text-sm">
+                <h4 className="font-semibold mt-2 text-xs sm:text-sm line-clamp-2 min-h-[2.25rem]">{p.name}</h4>
+                <p className="text-black-100 text-xs sm:text-sm mt-1">
                   ฿ {priceText}
                 </p>
-                <p className="text-gray-500 text-sm">{p.brand}</p>
+                <p className="text-gray-500 text-xs sm:text-sm break-words">{p.brand}</p>
               </div>
             </Link>
           );

@@ -296,11 +296,11 @@ export default function EditAddress({ user }: { user: any }) {
     }
   }
 
-  if (loading) return <div>กำลังโหลดที่อยู่...</div>;
+  if (loading) return <div className="text-sm md:text-base">กำลังโหลดที่อยู่...</div>;
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-2">My Address</h1>
+      <h1 className="text-xl sm:text-2xl font-bold mb-2">My Address</h1>
       {/* <p className="text-gray-700 mb-4">จัดการที่อยู่ของคุณ (user_id: {user?.user_id})</p> */}
 
       {errorMsg && (
@@ -329,14 +329,14 @@ export default function EditAddress({ user }: { user: any }) {
               <div className="mb-2">{formatAddress(selectedAddress)}</div>
 
               <button
-                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+                className="bg-blue-500 text-white text-sm px-3 py-2 rounded-md hover:bg-blue-600"
                 onClick={() => setShowPopup(true)}
               >
                 เปลี่ยนที่อยู่
               </button>
 
               <button
-                className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 ml-2"
+                className="bg-green-500 text-white text-sm px-3 py-2 rounded-md hover:bg-green-600 ml-2"
                 onClick={() => setShowAddPopup(true)}
               >
                 เพิ่มที่อยู่ใหม่
@@ -344,7 +344,7 @@ export default function EditAddress({ user }: { user: any }) {
 
               {/* ✅ ไปหน้า orderbuy ได้จากมือถือด้วย (ถ้าต้องการคลิกเลือกแล้วไปเลยให้ใส่ใน popup) */}
               <button
-                className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 ml-2 mt-2 w-full"
+                className="bg-black text-white text-sm px-4 py-2 rounded-md hover:bg-gray-800 ml-0 mt-2 w-full"
                 onClick={() => router.push("/orderbuy")}
               >
                 ไปหน้าสั่งซื้อ (ใช้ที่อยู่ที่เลือก)
@@ -354,9 +354,9 @@ export default function EditAddress({ user }: { user: any }) {
 
           {/* Popup เลือกที่อยู่ (Mobile) */}
           {showPopup && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <div className="bg-white p-6 rounded-md shadow-md w-80 max-w-[92vw]">
-                <h3 className="text-lg font-semibold mb-4">เลือกที่อยู่ใหม่</h3>
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-3">
+              <div className="bg-white p-4 rounded-md shadow-md w-full max-w-sm max-h-[85vh] overflow-y-auto">
+                <h3 className="text-base font-semibold mb-4">เลือกที่อยู่ใหม่</h3>
 
                 {addresses.map((addr) => (
                   <div key={addr.id_address} className="border p-2 rounded-md mb-2">
@@ -375,14 +375,14 @@ export default function EditAddress({ user }: { user: any }) {
 
                     <div className="flex gap-2 mt-2">
                       <button
-                        className="bg-yellow-500 text-white px-3 py-1 rounded-md"
+                        className="bg-yellow-500 text-white text-sm px-3 py-1 rounded-md"
                         onClick={() => openEditPopup(addr)}
                       >
                         แก้ไข
                       </button>
 
                       <button
-                        className="bg-red-500 text-white px-3 py-1 rounded-md"
+                        className="bg-red-500 text-white text-sm px-3 py-1 rounded-md"
                         onClick={() => handleDelete(addr.id_address)}
                       >
                         ลบ
@@ -393,14 +393,14 @@ export default function EditAddress({ user }: { user: any }) {
 
                 <div className="flex justify-end mt-4">
                   <button
-                    className="bg-gray-300 px-4 py-2 rounded-md mr-2"
+                    className="bg-gray-300 text-sm px-4 py-2 rounded-md mr-2"
                     onClick={() => setShowPopup(false)}
                   >
                     ยกเลิก
                   </button>
 
                   <button
-                    className="bg-blue-500 text-white px-4 py-2 rounded-md"
+                    className="bg-blue-500 text-white text-sm px-4 py-2 rounded-md"
                     onClick={() => {
                       // ✅ ยืนยันแล้วไปหน้า orderbuy เลยตาม requirement
                       if (selectedId) setSelectedAddressId(selectedId);
@@ -523,9 +523,9 @@ export default function EditAddress({ user }: { user: any }) {
 
       {/* ========================= POPUP ADD ========================= */}
       {showAddPopup && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-md shadow-md w-96 max-w-[92vw]">
-            <h3 className="text-lg font-semibold mb-4">เพิ่มที่อยู่ใหม่</h3>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-3">
+          <div className="bg-white p-4 sm:p-6 rounded-md shadow-md w-full max-w-md max-h-[85vh] overflow-y-auto">
+            <h3 className="text-base sm:text-lg font-semibold mb-4">เพิ่มที่อยู่ใหม่</h3>
 
             {/* Label Autocomplete */}
             <div className="relative mb-4">
@@ -647,16 +647,16 @@ export default function EditAddress({ user }: { user: any }) {
               onChange={(e) => setNewAddress({ ...newAddress, phone: e.target.value })}
             />
 
-            <div className="flex justify-end mt-4">
+            <div className="flex flex-col-reverse sm:flex-row justify-end mt-4 gap-2">
               <button
-                className="bg-gray-300 px-4 py-2 rounded-md mr-2"
+                className="w-full sm:w-auto bg-gray-300 text-sm px-4 py-2 rounded-md sm:mr-2"
                 onClick={() => setShowAddPopup(false)}
               >
                 ยกเลิก
               </button>
 
               <button
-                className="bg-green-500 text-white px-4 py-2 rounded-md"
+                className="w-full sm:w-auto bg-green-500 text-white text-sm px-4 py-2 rounded-md"
                 onClick={handleAdd}
               >
                 บันทึก
@@ -668,9 +668,9 @@ export default function EditAddress({ user }: { user: any }) {
 
       {/* ========================= POPUP EDIT ========================= */}
       {showEditPopup && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-md shadow-md w-96 max-w-[92vw]">
-            <h3 className="text-lg font-semibold mb-4">แก้ไขที่อยู่</h3>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-3">
+          <div className="bg-white p-4 sm:p-6 rounded-md shadow-md w-full max-w-md max-h-[85vh] overflow-y-auto">
+            <h3 className="text-base sm:text-lg font-semibold mb-4">แก้ไขที่อยู่</h3>
 
             <label className="block mb-2 font-medium">ป้ายกำกับ</label>
             <input
@@ -724,16 +724,16 @@ export default function EditAddress({ user }: { user: any }) {
               }
             />
 
-            <div className="flex justify-end">
+            <div className="flex flex-col-reverse sm:flex-row justify-end gap-2">
               <button
-                className="bg-gray-300 px-4 py-2 rounded-md mr-2"
+                className="w-full sm:w-auto bg-gray-300 text-sm px-4 py-2 rounded-md sm:mr-2"
                 onClick={() => setShowEditPopup(false)}
               >
                 ยกเลิก
               </button>
 
               <button
-                className="bg-yellow-500 text-white px-4 py-2 rounded-md"
+                className="w-full sm:w-auto bg-yellow-500 text-white text-sm px-4 py-2 rounded-md"
                 onClick={handleUpdate}
               >
                 อัปเดต

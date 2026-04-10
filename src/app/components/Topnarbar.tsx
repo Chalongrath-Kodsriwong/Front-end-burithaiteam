@@ -34,6 +34,7 @@ export default function TopNavbar() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navItems = [
     { label: "Home", href: "/" },
@@ -289,6 +290,25 @@ export default function TopNavbar() {
   }, []);
 
   useEffect(() => {
+    function handleClickOutsideMobile(e: MouseEvent) {
+      if (
+        e.target instanceof HTMLElement &&
+        !e.target.closest(".mobile-menu-area") &&
+        !e.target.closest(".mobile-nav-dropdown")
+      ) {
+        setIsMobileMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutsideMobile);
+    return () =>
+      document.removeEventListener("mousedown", handleClickOutsideMobile);
+  }, []);
+
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
     if (isLoggedIn) {
       fetchProfileAvatar();
       setIsUserMenuOpen(false); // ปิด dropdown เมื่อสถานะ login เปลี่ยน
@@ -309,18 +329,18 @@ export default function TopNavbar() {
   return (
     // <nav className="bg-gray-900 border-gray-200 dark:bg-gray-900">
     <nav className="bg-[rgb(26,26,26)] border-gray-200">
-      <div className="w-full flex flex-wrap items-center justify-between p-4">
+      <div className="w-full flex items-center justify-between gap-2 p-3 md:p-4">
         {/* LEFT LOGO */}
         <Link
           href="/"
-          className="flex items-center space-x-3 rtl:space-x-reverse"
+          className="min-w-0 flex items-center space-x-2 sm:space-x-3 rtl:space-x-reverse"
         >
           <img
             src="/image/logo_black-removebg-preview.png"
-            className="h-[70px]"
+            className="h-9 sm:h-14 md:h-[70px]"
             alt="Logo"
           />
-          <span className="self-center text-2xl font-semibold text-yellow-500 whitespace-nowrap">
+          <span className="self-center max-w-[130px] sm:max-w-none text-xs sm:text-xl md:text-2xl font-semibold text-yellow-500 whitespace-nowrap truncate">
             Burithai team
           </span>
         </Link>
@@ -365,10 +385,44 @@ export default function TopNavbar() {
         </div>
 
         {/* RIGHT LOGIN / USER */}
-        <div className="flex items-center gap-4">
+        <div className="shrink-0 flex items-center gap-2 sm:gap-4">
+          <div className="relative md:hidden mobile-menu-area">
+            <button
+              type="button"
+              onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+              className={`inline-flex h-9 w-9 items-center justify-center rounded-md border bg-gray-800 text-yellow-500 transition-all duration-300 ease-out hover:bg-gray-900 hover:text-[rgb(255,215,0)] ${
+                isMobileMenuOpen
+                  ? "border-[rgb(255,215,0)] shadow-[0_0_10px_rgba(255,215,0,0.18)]"
+                  : "border-gray-600"
+              }`}
+              aria-label="Toggle navigation menu"
+              aria-expanded={isMobileMenuOpen}
+            >
+              <svg
+                className={`h-5 w-5 transition-all duration-300 ease-out ${
+                  isMobileMenuOpen ? "rotate-90 scale-95" : "rotate-0 scale-100"
+                }`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d={
+                    isMobileMenuOpen
+                      ? "M6 18L18 6M6 6l12 12"
+                      : "M4 7h16M4 12h16M4 17h16"
+                  }
+                />
+              </svg>
+            </button>
+          </div>
+
           {!isLoggedIn ? (
             <Link href="/login">
-              <button className="block bg-[rgb(212,175,55)] py-2 px-4 text-black rounded-md transition-all duration-300 hover:scale-105 hover:bg-[rgb(255,215,0)] hover:[box-shadow:0_0_10px_rgb(255,215,0),0_0_20px_rgb(255,215,0)]">
+              <button className="block bg-[rgb(212,175,55)] py-1.5 px-2.5 text-xs sm:text-base sm:py-2 sm:px-4 text-black rounded-md transition-all duration-300 hover:scale-105 hover:bg-[rgb(255,215,0)] hover:[box-shadow:0_0_10px_rgb(255,215,0),0_0_20px_rgb(255,215,0)]">
                 Login
               </button>
             </Link>
@@ -391,8 +445,10 @@ export default function TopNavbar() {
                 <FaRegUserCircle size={28} className="text-[rgb(212,175,55)]" />
               )}
 
-              <div className="flex items-center gap-1 mt-1">
-                <span className="text-[15px] text-white">{username}</span>
+              <div className="flex items-center gap-1 mt-1 max-w-[120px] sm:max-w-[160px]">
+                <span className="inline text-xs sm:text-[15px] text-white truncate">
+                  {username}
+                </span>
                 <svg
                   className={`w-3 h-3 text-white transition-transform duration-200 ${
                     isUserMenuOpen ? "rotate-180" : ""
@@ -412,7 +468,7 @@ export default function TopNavbar() {
 
               <div
                 className={`
-          absolute top-[55px] right-0 bg-[rgb(30,30,30)] shadow-md rounded-md overflow-hidden
+          absolute top-[55px] right-0 min-w-[140px] bg-[rgb(30,30,30)] shadow-md rounded-md overflow-hidden
           transition-all duration-300 z-50
           ${
             isUserMenuOpen
@@ -468,18 +524,56 @@ export default function TopNavbar() {
         </div>
       </div>
 
+      {/* MOBILE NAV ITEMS */}
+      <div
+        className={`mobile-nav-dropdown md:hidden w-full px-3 overflow-hidden transition-all duration-500 ease-out ${
+          isMobileMenuOpen
+            ? "max-h-72 opacity-100 pb-2 translate-y-0"
+            : "max-h-0 opacity-0 pb-0 -translate-y-2 pointer-events-none"
+        }`}
+      >
+        <div className="rounded-lg border border-gray-700 bg-gray-900/95 shadow-lg backdrop-blur-sm">
+          <div
+            className={`transition-all duration-500 ease-out ${
+              isMobileMenuOpen
+                ? "opacity-100 translate-y-0 scale-100"
+                : "opacity-0 -translate-y-2 scale-95"
+            }`}
+          >
+            <ul className="py-1">
+              {navItems.map(({ label, href }) => (
+                <li key={`mobile-${href}`}>
+                  <Link
+                    href={href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    aria-current={isActive(href) ? "page" : undefined}
+                    className={`block px-4 py-2.5 text-sm font-medium transition-colors duration-300 ${
+                      isActive(href)
+                        ? "bg-[rgb(212,175,55)] text-black"
+                        : "text-yellow-500 hover:bg-gray-800 hover:text-[rgb(255,215,0)]"
+                    }`}
+                  >
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+
       {/* Search Form */}
       <form
         className="relative z-40 p-2 border-t border-solid"
         onSubmit={handleSubmit}
       >
-        <div className="flex items-center justify-between max-w-screen-md mx-auto">
+        <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2 max-w-screen-md mx-auto">
           <button
             type="button"
             onClick={() =>
               setIsDropdownOpenCategories(!isDropdownOpenCategories)
             }
-            className="categories-button shrink-0 z-10 inline-flex items-center py-2.5 px-4 text-sm font-medium text-yellow-500 bg-gray-800 border border-gray-600 rounded-s-lg hover:border-[rgb(255,215,0)] hover:text-[rgb(255,215,0)]
+            className="categories-button order-1 shrink-0 z-10 inline-flex h-10 items-center py-2 px-2.5 sm:px-4 text-xs sm:text-sm font-medium text-yellow-500 bg-gray-800 border border-gray-600 rounded-lg sm:rounded-s-lg hover:border-[rgb(255,215,0)] hover:text-[rgb(255,215,0)]
       hover:[text-shadow:0_0_6px_rgb(255,215,0),0_0_12px_rgb(255,215,0),0_0_20px_rgb(212,175,55)] hover:bg-gray-900 focus:bg-gray-900 focus:border-[rgb(255,215,0)] transition-colors duration-300
     "
           >
@@ -502,7 +596,7 @@ export default function TopNavbar() {
 
           {/* Dropdown ของ All Categories */}
           {isDropdownOpenCategories && (
-            <div className="categories-dropdown absolute top-[52px] z-50 bg-gray-800 border border-gray-600 rounded-s-lg divide-y divide-gray-100 rounded-lg shadow-sm w-[125px] h-auto overflow-y-auto">
+            <div className="categories-dropdown absolute left-2 sm:left-auto top-[52px] z-50 bg-gray-800 border border-gray-600 rounded-lg divide-y divide-gray-100 shadow-sm w-40 sm:w-[125px] h-auto overflow-y-auto">
               <ul className="text-sm text-yellow-500 ">
                 {/* ⭐ NEW: ปุ่ม All แสดงสินค้าทั้งหมด */}
                 <li>
@@ -541,10 +635,10 @@ export default function TopNavbar() {
             </div>
           )}
 
-          <div className="relative w-full">
+          <div className="relative order-2 w-full min-w-0">
             <input
               type="search"
-              className="search-bar block p-2.5 w-full z-10 text-sm  rounded-e-lg border-s-2 border border-gray-700 focus:border-yellow-500 bg-gray-800 border-gray-600 placeholder-yellow-500 text-white hover:bg-gray-900 focus:bg-gray-900  transition-colors duration-300"
+              className="search-bar block p-2.5 w-full z-10 text-sm  rounded-lg border-s-2 border border-gray-700 focus:border-yellow-500 bg-gray-800 border-gray-600 placeholder-yellow-500 text-white hover:bg-gray-900 focus:bg-gray-900  transition-colors duration-300"
               placeholder="Search products..."
               value={searchProductName}
               onChange={handleSearchChange}
@@ -613,9 +707,9 @@ export default function TopNavbar() {
           </div>
 
           {/* Basket Icon And Wishlist Icon */}
-          <div className="relative ml-4 flex items-center gap-4">
+          <div className="relative order-3 ml-0 flex items-center gap-1.5 sm:gap-3">
             <Link href="/shoppingcart">
-              <button className="relative p-2.5 text-black
+              <button className="relative p-2 text-black
                 bg-yellow-400 rounded-e-lg border border-gray-700
 
                 transition-all duration-300 ease-out
@@ -631,7 +725,7 @@ export default function TopNavbar() {
                 hover:text-blue-500
                 rounded-lg transition duration-300">
                 <svg
-                  className="w-6 h-6"
+                  className="w-5 h-5 sm:w-6 sm:h-6"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -658,7 +752,7 @@ export default function TopNavbar() {
               </button>
             </Link>
             <Link href="/wishlist">
-              <button className="relative p-2.5 text-black
+              <button className="relative p-2 text-black
                 bg-yellow-400 rounded-e-lg border border-gray-700
 
                 transition-all duration-300 ease-out
@@ -673,7 +767,7 @@ export default function TopNavbar() {
                 hover:scale-105 rounded-lg 
                 hover:text-pink-500 transition duration-300">
                 <svg
-                  className="w-6 h-6"
+                  className="w-5 h-5 sm:w-6 sm:h-6"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"

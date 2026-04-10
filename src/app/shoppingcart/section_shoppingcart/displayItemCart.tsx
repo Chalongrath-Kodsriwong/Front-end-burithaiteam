@@ -263,7 +263,7 @@ export default function DisplayItemCart() {
 
               <button
                 onClick={() => handleDelete(product.cartItemId)}
-                className="ml-4 text-red-600 hover:text-red-800"
+                className="absolute right-3 top-[58%] -translate-y-1/2 md:top-12 md:translate-y-0 text-red-600 hover:text-red-800"
                 title="Delete Item"
               >
                 <svg
@@ -310,8 +310,8 @@ export default function DisplayItemCart() {
             </div>
           ))}
 
-          <div className="grid grid-cols-9 gap-4 items-center border-t-2 border-b-2 pt-4 font-bold pb-4">
-            <div className="col-span-2 flex items-center gap-2 justify-start">
+          <div className="grid grid-cols-1 md:grid-cols-9 gap-4 items-center border-t-2 border-b-2 pt-4 font-bold pb-4">
+            <div className="md:col-span-2 flex items-center gap-2 justify-start">
               <input
                 type="checkbox"
                 checked={selectAll}
@@ -320,13 +320,13 @@ export default function DisplayItemCart() {
               <label className="text-sm">Select All Items</label>
             </div>
 
-            <div className="col-span-5 flex justify-end">
+            <div className="md:col-span-5 flex justify-start md:justify-end">
               <h3>
                 Total: {selectedSummary} THB | Selected: {totalSelectedQuantity}
               </h3>
             </div>
 
-            <div className="col-span-2 flex justify-end">
+            <div className="md:col-span-2 flex justify-start md:justify-end">
               <Link
                 href={{
                   pathname: "/orderbuy",
@@ -363,7 +363,7 @@ export default function DisplayItemCart() {
             </div>
           </div>
 
-          <div className="mt-6 flex justify-end items-center gap-4">
+          <div className="mt-6 flex flex-col sm:flex-row justify-end items-end sm:items-center gap-3 sm:gap-4">
             <Link
               href="/product"
               className="relative inline-block px-4 py-2 text-yellow-500 rounded overflow-hidden bg-black

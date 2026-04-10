@@ -145,46 +145,46 @@ export default function OrderHistoryPage({ user }: { user?: any }) {
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="max-w-5xl mx-auto px-6 py-8">
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-extrabold">ประวัติการสั่งซื้อ</h1>
+      <div className="max-w-5xl mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <h1 className="text-2xl md:text-3xl font-extrabold">ประวัติการสั่งซื้อ</h1>
           <Link href="/product">
-            <button className="border border-gray-400 bg-gray-200 px-5 py-2 font-semibold">
+            <button className="border border-gray-400 bg-gray-200 px-4 md:px-5 py-2 text-sm md:text-base font-semibold">
               กลับไปหน้าสินค้า
             </button>
           </Link>
         </div>
 
         {loading && (
-          <div className="mt-6 border border-gray-300 bg-gray-100 p-4">
+          <div className="mt-4 sm:mt-6 border border-gray-300 bg-gray-100 p-3 sm:p-4 text-sm sm:text-base">
             กำลังโหลด...
           </div>
         )}
 
         {error && (
-          <div className="mt-6 border border-red-300 bg-red-50 p-4 text-red-700 font-semibold">
+          <div className="mt-4 sm:mt-6 border border-red-300 bg-red-50 p-3 sm:p-4 text-sm sm:text-base text-red-700 font-semibold">
             {error}
           </div>
         )}
 
         {!loading && !error && sortedOrders.length === 0 && (
-          <div className="mt-6 border border-gray-300 bg-gray-100 p-6 text-gray-700">
+          <div className="mt-4 sm:mt-6 border border-gray-300 bg-gray-100 p-4 sm:p-6 text-sm sm:text-base text-gray-700">
             ยังไม่มีประวัติการสั่งซื้อ
           </div>
         )}
 
-        <div className="mt-6 space-y-6">
+        <div className="mt-4 sm:mt-6 space-y-4 sm:space-y-6">
           {sortedOrders.map((o) => (
             <div
               key={o.id_order}
-              className="border border-gray-300 bg-gray-100 p-6"
+              className="border border-gray-300 bg-gray-100 p-3 sm:p-4 md:p-6"
             >
               {/* Header */}
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="text-xl font-bold">Order #{o.id_order}</div>
+              <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3">
+                <div className="text-lg sm:text-xl font-bold">Order #{o.id_order}</div>
 
-                <div className="flex items-center gap-4">
-                  <div className="text-lg font-semibold">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+                  <div className="text-sm sm:text-base md:text-lg font-semibold">
                     สถานะ:{" "}
                     <span
                       className={
@@ -204,7 +204,7 @@ export default function OrderHistoryPage({ user }: { user?: any }) {
                   </div>
 
                   <Link href={`/check_order?order_id=${o.id_order}`}>
-                    <button className="border border-gray-400 bg-gray-200 px-4 py-2 font-semibold">
+                    <button className="border border-gray-400 bg-gray-200 px-3 sm:px-4 py-2 text-sm sm:text-base font-semibold">
                       ดูรายละเอียด
                     </button>
                   </Link>
@@ -212,7 +212,7 @@ export default function OrderHistoryPage({ user }: { user?: any }) {
               </div>
 
               {/* Meta */}
-              <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-800">
+              <div className="mt-3 sm:mt-4 grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 text-sm sm:text-base text-gray-800">
                 <div>
                   <div className="font-semibold">วันที่สั่งซื้อ</div>
                   <div>
@@ -229,24 +229,24 @@ export default function OrderHistoryPage({ user }: { user?: any }) {
               </div>
 
               {/* Shipping */}
-              <div className="mt-4">
-                <div className="font-semibold">ที่อยู่จัดส่ง</div>
-                <pre className="whitespace-pre-wrap bg-white border border-gray-300 p-3 mt-2 text-sm">
+              <div className="mt-3 sm:mt-4">
+                <div className="font-semibold text-sm sm:text-base">ที่อยู่จัดส่ง</div>
+                <pre className="whitespace-pre-wrap break-words bg-white border border-gray-300 p-2.5 sm:p-3 mt-2 text-xs sm:text-sm">
                   {o.shipping_address || "-"}
                 </pre>
               </div>
 
               {/* Items */}
-              <div className="mt-6">
-                <div className="font-semibold text-lg">รายการสินค้า</div>
+              <div className="mt-4 sm:mt-6">
+                <div className="font-semibold text-base sm:text-lg">รายการสินค้า</div>
 
-                <div className="mt-3 space-y-4">
+                <div className="mt-3 space-y-3 sm:space-y-4">
                   {(o.order_items || []).map((it: any) => (
                     <div
                       key={it.id_orderitem}
-                      className="flex items-start gap-4 border border-gray-300 bg-white p-4"
+                      className="flex items-start gap-3 sm:gap-4 border border-gray-300 bg-white p-3 sm:p-4"
                     >
-                      <div className="w-20 h-20 bg-gray-200 border border-gray-300 overflow-hidden flex items-center justify-center">
+                      <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-200 border border-gray-300 overflow-hidden flex items-center justify-center shrink-0">
                         {it.product_image ? (
                           <img
                             src={it.product_image}
@@ -261,17 +261,17 @@ export default function OrderHistoryPage({ user }: { user?: any }) {
                       </div>
 
                       <div className="flex-1">
-                        <div className="font-bold text-lg">
+                        <div className="font-bold text-sm sm:text-lg">
                           {it.product_name || "-"}
                         </div>
-                        <div className="text-gray-700">
+                        <div className="text-xs sm:text-base text-gray-700">
                           {it.variant_name || "-"}
                           {it.inventory_name
                             ? ` • ${it.inventory_name}`
                             : ""}
                         </div>
 
-                        <div className="mt-2 flex flex-wrap gap-6 font-semibold">
+                        <div className="mt-2 flex flex-wrap gap-3 sm:gap-6 text-xs sm:text-base font-semibold">
                           <div>จำนวน: {it.quantity ?? "-"}</div>
                           <div>ราคา: {it.dynamic_total ?? "-"}</div>
                         </div>
@@ -282,8 +282,8 @@ export default function OrderHistoryPage({ user }: { user?: any }) {
               </div>
 
               {/* Tracking + Cancel */}
-              <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-center gap-1 font-semibold">
+              <div className="mt-4 sm:mt-6 flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-1 font-semibold text-sm sm:text-base">
                   <span>หมายเลขพัสดุ: {o.tracking_number || "-"}</span>
                   {o.tracking_number && (
                     <button
@@ -309,13 +309,13 @@ export default function OrderHistoryPage({ user }: { user?: any }) {
                   )}
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3">
                   {(o.status === "pending" ||
                     o.status === "checking") && (
                     <button
                       onClick={() => handleCancel(o.id_order)}
                       disabled={cancelingId === o.id_order}
-                      className="keep-original-btn border border-red-400 bg-red-100 text-red-600 rounded rounded-lg px-5 py-2 font-semibold hover:bg-red-200 disabled:opacity-50"
+                      className="keep-original-btn border border-red-400 bg-red-100 text-red-600 rounded rounded-lg px-3 sm:px-5 py-2 text-sm sm:text-base font-semibold hover:bg-red-200 disabled:opacity-50"
                     >
                       {cancelingId === o.id_order
                         ? "กำลังยกเลิก..."

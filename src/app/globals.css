@@ -4,6 +4,32 @@
 @tailwind components;
 @tailwind utilities;
 
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+img,
+video,
+canvas,
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
+pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 /* Function Slider Achive and Hover Pause And Play slider On Path src/app/components/Achievement.tsx */
 @keyframes marquee {
   0% {

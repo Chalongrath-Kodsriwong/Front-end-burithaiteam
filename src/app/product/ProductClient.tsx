@@ -20,15 +20,15 @@ export default function Product() {
   }, []);
 
   return (
-    <div className="container mx-auto px-0 py-2 my-2 rounded-lg">
+    <div className="container mx-auto px-1.5 sm:px-3 md:px-0 py-2 my-2 rounded-lg">
       {isClient && (
         <>
-          <div className="grid grid-cols-8 gap-1">
+          <div className="grid grid-cols-[112px_minmax(0,1fr)] sm:grid-cols-[124px_minmax(0,1fr)] md:grid-cols-8 gap-1.5 md:gap-1">
             {/* ฝั่งซ้าย Topic */}
             <TopicMenu />
 
             {/* ฝั่งขวา All / menu / Category */}
-            <div className="col-span-7 space-y-1">
+            <div className="min-w-0 md:col-span-7 space-y-1">
               <FilterProduct category={category} />
 
               <Productdisplay />
