@@ -96,7 +96,7 @@ export default function TopicMenu({ setSelectedCategory }: TopicMenuProps) {
         <div className="col-span-1 grid grid-cols-1 gap-1">
           <div className="outline outline-1 outline-gray-500 rounded p-1.5 sm:p-3 h-full">
             <div className="text-center font-bold text-sm sm:text-lg mb-2 sm:mb-3 border-b-2 border-gray-500 pb-1.5 sm:pb-2">
-              <h1>Topic</h1>
+              <h1>หมวดหมู่</h1>
             </div>
 
             <div className="space-y-1 sm:space-y-2 mt-1.5 sm:mt-2 text-xs sm:text-base">
@@ -112,7 +112,7 @@ export default function TopicMenu({ setSelectedCategory }: TopicMenuProps) {
                   );
                 }}
               >
-                All
+                ทั้งหมด
               </div>
 
               {/* Categories from DB */}
@@ -158,7 +158,7 @@ export default function TopicMenu({ setSelectedCategory }: TopicMenuProps) {
                   type="text"
                   value={minInput}
                   onChange={(e) => setMinInput(e.target.value)}
-                  placeholder="lower price"
+                  placeholder="ตั้งราคาเริ่มต้น"
                   className="bg-gray-50 border border-gray-300 text-gray-900 text-xs sm:text-sm rounded-lg block w-full p-1"
                 />
               </div>
@@ -171,7 +171,7 @@ export default function TopicMenu({ setSelectedCategory }: TopicMenuProps) {
                   type="text"
                   value={maxInput}
                   onChange={(e) => setMaxInput(e.target.value)}
-                  placeholder="upper price"
+                  placeholder="ตั้งราคาสูงสุด"
                   className="bg-gray-50 border border-gray-300 text-gray-900 text-xs sm:text-sm rounded-lg block w-full p-1"
                 />
               </div>
@@ -193,9 +193,9 @@ export default function TopicMenu({ setSelectedCategory }: TopicMenuProps) {
 
                     router.push(`/product?${params.toString()}`);
                   }}
-                  className="text-white bg-blue-700 hover:bg-blue-800 rounded-lg text-xs sm:text-sm w-full px-2 sm:px-5 py-1.5 sm:py-2.5"
+                  className="text-yellow-500 bg-black hover:bg-gray-800 rounded-lg text-xs sm:text-sm w-full px-2 sm:px-5 py-1.5 sm:py-2.5"
                 >
-                  Submit
+                  ยืนยัน
                 </button>
 
                 {/* ⭐ CLEAR FILTER → แสดงเฉพาะเมื่อมีค่าในช่องใดช่องหนึ่ง */}

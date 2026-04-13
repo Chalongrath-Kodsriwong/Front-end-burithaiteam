@@ -107,8 +107,8 @@ export default function FilterProduct({ category }: { category: string }) {
                   router.push(`/product?${params.toString()}`);
                 }}
               >
-                <option value="asc">Price Min to Max</option>
-                <option value="desc">Price Max to Min</option>
+                <option value="asc">ราคาต่ำสุดไปสูงสุด</option>
+                <option value="desc">ราคาสูงสุดไปต่ำสุด</option>
               </select>
             </div>
 
@@ -133,14 +133,14 @@ export default function FilterProduct({ category }: { category: string }) {
                     className="block w-full text-left px-2 py-1.5 text-[10px] text-gray-900 hover:bg-gray-100"
                     onClick={() => applyNameSort("az")}
                   >
-                    Sort A-Z
+                    เรียง A-Z
                   </button>
                   <button
                     type="button"
                     className="block w-full text-left px-2 py-1.5 text-[10px] text-gray-900 hover:bg-gray-100"
                     onClick={() => applyNameSort("za")}
                   >
-                    Sort Z-A
+                    เรียง Z-A
                   </button>
                 </div>
               )}
@@ -157,8 +157,8 @@ export default function FilterProduct({ category }: { category: string }) {
                   router.push(`/product?${params.toString()}`);
                 }}
               >
-                <option value="az">Sort A-Z</option>
-                <option value="za">Sort Z-A</option>
+                <option value="az">เรียง A-Z</option>
+                <option value="za">เรียง Z-A</option>
               </select>
             </div>
 

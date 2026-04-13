@@ -15,7 +15,7 @@ export default function AboutPage() {
 
     return (
         <div className="container mx-auto px-4 py-4 my-2 rounded-lg">
-            <h1 className="text-3xl font-bold text-center">About Us</h1>
+            <h1 className="text-3xl font-bold text-center">เกี่ยวกับเรา</h1>
             {isClient && (
                 <>
                     <div className="section_promote">

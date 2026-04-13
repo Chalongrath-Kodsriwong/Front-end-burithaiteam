@@ -317,7 +317,7 @@ export default function DetailOfProductShort({ product }: any) {
         }`}
       >
         <Heart className="w-4 h-4" />
-        {wishlistLoading ? "Adding..." : "Add Wishlist"}
+        {wishlistLoading ? "กำลังเพิ่มลงใน Wishlist..." : "เพิ่มใน Wishlist"}
       </button>
 
       {wishlistMsg && (

@@ -16,7 +16,7 @@ export default function ContactPage() {
         <div className="container px-0 mx-auto p-2">
         {isClient && (
             <div className="flex flex-col items-center justify-center">
-            <h1 className="text-3xl font-bold mb-4">Contact Us</h1>
+            <h1 className="text-3xl font-bold mb-4">ติดต่อเรา</h1>
             <div className="content flex flex-col md:flex-row gap-8 w-full max-w-1xl">
                 <div className="left md:w-1/2">
                     <div>

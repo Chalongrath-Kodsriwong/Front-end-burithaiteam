@@ -99,7 +99,7 @@ export default function Ourmission() {
 
   return (
     <div className="max-w-screen-2xl mx-auto px-4 py-6 my-3 shadow-lg rounded-lg">
-      <h1 className="text-3xl font-bold mb-6">Our Mission</h1>
+      <h1 className="text-3xl font-bold mb-6">ผลงานของเรา</h1>
 
       {isClient && (
         <div className="flex flex-col gap-8">

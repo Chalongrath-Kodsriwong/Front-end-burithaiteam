@@ -98,12 +98,12 @@ export default function Promote() {
           <div className="flex gap-4">
             <Link href="/login">
             <button className="bg-yellow-400 text-black px-6 py-2 rounded-full font-semibold hover:bg-yellow-300 transition">
-              Get Start →
+              เริ่มต้น →
             </button>
             </Link>
             <Link href="/contact">
             <button className="bg-red-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-red-500 transition">
-              Contact Us →
+              ติดต่อเรา →
             </button>
             </Link>
           </div>
