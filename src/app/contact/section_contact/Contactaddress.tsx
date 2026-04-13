@@ -20,7 +20,7 @@ export default function ContactAddress() {
             <div className="space-y-8 text-xl">
               <p className="flex items-center">
                 <FaMapMarkerAlt className="w-8 h-auto mr-5" />
-                หมู่บ้าน นราอิลิแกนซ์ 300/83 ซอย 3, หมู่ 6 ต.บ้านกรด อ.บางปะอิน จ.พระนครศรีอยุธยา 13160 Thailand
+                หมู่บ้าน นราอิลิแกนซ์ 300/81 ซอย 3, หมู่ 5 ต.บ้านกรด อ.บางปะอิน จ.พระนครศรีอยุธยา 13160 Thailand
               </p>
               <p className="flex items-center">
                 <FaEnvelope className="w-8 h-auto mr-5" />

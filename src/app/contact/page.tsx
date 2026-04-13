@@ -27,7 +27,7 @@ export default function ContactPage() {
                     </div>
                 </div>
                 <div className="right md:w-1/2">
-                    {/* <ContactForm /> */}
+                    <ContactForm />
                 </div>
             </div>
             </div>
