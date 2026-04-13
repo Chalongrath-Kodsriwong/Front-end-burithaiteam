@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation"; // Next.js 13 App Router
 import Link from "next/link";
 
@@ -14,7 +14,8 @@ declare global {
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
-const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+const GOOGLE_CLIENT_ID =
+  process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
 export default function LoginPage() {
   const [identifier, setIdentifier] = useState("");
@@ -27,6 +28,7 @@ export default function LoginPage() {
 
   // Google loading
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isGoogleReady, setIsGoogleReady] = useState(false);
 
   // ⭐ ใช้สำหรับกัน brute-force แบบฝั่ง client
   const [loginAttempts, setLoginAttempts] = useState(0);
@@ -34,7 +36,7 @@ export default function LoginPage() {
 
   const router = useRouter();
 
-  const [gsiReady, setGsiReady] = useState(false);
+  const googleInitRef = useRef(false);
 
   const { refreshCart } = useCart();
 
@@ -96,11 +98,28 @@ export default function LoginPage() {
 
   // ✅ Load Google Identity Services script + init
   useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const isLocalhost =
+      window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1" ||
+      window.location.hostname === "::1";
+
+    // Google GIS does not reliably work on insecure origins except localhost.
+    // Redirect plain-http IP/domain traffic to production HTTPS.
+    if (!isLocalhost && window.location.protocol === "http:") {
+      const target = `https://burithaiteam.com/login${window.location.search || ""}`;
+      window.location.replace(target);
+    }
+  }, []);
+
+  useEffect(() => {
     if (!GOOGLE_CLIENT_ID) return;
     if (typeof window === "undefined") return;
 
     function initGoogle() {
-      if (!window.google) return;
+      if (!window.google || googleInitRef.current) return;
+      googleInitRef.current = true;
 
       window.google.accounts.id.initialize({
         client_id: GOOGLE_CLIENT_ID,
@@ -117,6 +136,7 @@ export default function LoginPage() {
           size: "large",
           width: 320,
         });
+        setIsGoogleReady(true);
       }
     }
 
@@ -137,6 +157,21 @@ export default function LoginPage() {
 
     document.body.appendChild(script);
   }, []);
+
+  const handleGoogleFallbackClick = () => {
+    if (!window.google?.accounts?.id) {
+      setError(
+        "Google Sign-In ยังไม่พร้อม กรุณารีเฟรชหน้า หรือเข้าใช้งานผ่าน https://burithaiteam.com/login",
+      );
+      return;
+    }
+
+    try {
+      window.google.accounts.id.prompt();
+    } catch {
+      setError("ไม่สามารถเปิด Google Sign-In ได้ กรุณาลองใหม่");
+    }
+  };
 
   const afterLoginSuccess = async (user: any) => {
     await refreshCart();
@@ -201,23 +236,7 @@ export default function LoginPage() {
         return;
       }
 
-      // ✅ redirect เหมือน login ปกติ
       await afterLoginSuccess(data.user);
-
-      if (data?.user) {
-        localStorage.setItem("username", data.user.username || "");
-        localStorage.setItem("first_name", data.user.first_name || "");
-      }
-
-      setLoginAttempts(0);
-      setLockedUntil(null);
-
-      setTimeout(() => {
-        window.dispatchEvent(new Event("login-success"));
-        const params = new URLSearchParams(window.location.search);
-        const redirect = params.get("redirect") || "/";
-        router.push(redirect);
-      }, 50);
     } catch (err) {
       console.error("Google login error:", err);
       setError("ไม่สามารถ Login ด้วย Google ได้ กรุณาลองใหม่");
@@ -501,6 +520,41 @@ export default function LoginPage() {
 
           <div className="flex flex-col gap-3 text-center">
             <div id="googleBtn" className="w-full flex justify-center" />
+            {!isGoogleReady && (
+              <button
+                type="button"
+                onClick={handleGoogleFallbackClick}
+                disabled={isGoogleLoading}
+                className="w-full py-2 rounded-lg text-sm font-medium border border-gray-300 bg-white text-gray-800 hover:bg-gray-100 disabled:opacity-60"
+              >
+                <span className="inline-flex items-center justify-center gap-2">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 48 48"
+                    className="h-7 w-7"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fill="#FFC107"
+                      d="M43.611 20.083H42V20H24v8h11.303C33.656 32.657 29.249 36 24 36c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.84 1.154 7.957 3.043l5.657-5.657C34.046 6.053 29.27 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"
+                    />
+                    <path
+                      fill="#FF3D00"
+                      d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.84 1.154 7.957 3.043l5.657-5.657C34.046 6.053 29.27 4 24 4c-7.682 0-14.341 4.337-17.694 10.691z"
+                    />
+                    <path
+                      fill="#4CAF50"
+                      d="M24 44c5.169 0 9.86-1.977 13.409-5.191l-6.19-5.238C29.146 35.091 26.715 36 24 36c-5.231 0-9.626-3.317-11.287-7.946l-6.522 5.026C9.504 39.556 16.227 44 24 44z"
+                    />
+                    <path
+                      fill="#1976D2"
+                      d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.084 5.571l6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"
+                    />
+                  </svg>
+                  Continue with Google
+                </span>
+              </button>
+            )}
           </div>
         </div>
       </form>
