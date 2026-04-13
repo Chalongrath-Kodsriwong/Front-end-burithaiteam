@@ -15,9 +15,34 @@ declare global {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 const GOOGLE_CLIENT_ID =
-  process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+  process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
+  "605318578134-2qti7ltgark87qh080m15ta15bgbqdiq.apps.googleusercontent.com";
+
+function resolveApiBaseUrl() {
+  if (typeof window === "undefined") return API_URL;
+  if (!API_URL) return window.location.origin;
+
+  const isPageLocalhost =
+    window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1" ||
+    window.location.hostname === "::1";
+
+  const apiHost = API_URL.replace(/^https?:\/\//, "").split("/")[0] || "";
+  const isApiLocalhost =
+    apiHost.startsWith("localhost") ||
+    apiHost.startsWith("127.0.0.1") ||
+    apiHost.startsWith("[::1]") ||
+    apiHost.startsWith("::1");
+
+  if (isApiLocalhost && !isPageLocalhost) {
+    return window.location.origin;
+  }
+
+  return API_URL;
+}
 
 export default function LoginPage() {
+  const apiBaseUrl = resolveApiBaseUrl();
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -29,6 +54,9 @@ export default function LoginPage() {
   // Google loading
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [isGoogleReady, setIsGoogleReady] = useState(false);
+  const [googleError, setGoogleError] = useState("");
+  const [isGoogleScriptLoaded, setIsGoogleScriptLoaded] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
   // ⭐ ใช้สำหรับกัน brute-force แบบฝั่ง client
   const [loginAttempts, setLoginAttempts] = useState(0);
@@ -114,62 +142,180 @@ export default function LoginPage() {
   }, []);
 
   useEffect(() => {
+    if (checkingAuth) return;
     if (!GOOGLE_CLIENT_ID) return;
     if (typeof window === "undefined") return;
 
-    function initGoogle() {
-      if (!window.google || googleInitRef.current) return;
-      googleInitRef.current = true;
+    let cancelled = false;
 
-      window.google.accounts.id.initialize({
-        client_id: GOOGLE_CLIENT_ID,
-        callback: handleGoogleCredential,
-        ux_mode: "popup",
-        use_fedcm_for_prompt: false,
+    const waitForGoogle = async () => {
+      for (let i = 0; i < 80; i += 1) {
+        if (window.google?.accounts?.id) return true;
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+      return false;
+    };
+
+    const ensureScript = async () => {
+      if (window.google?.accounts?.id) return;
+
+      await new Promise<void>((resolve, reject) => {
+        const existing = document.getElementById(
+          "google-gsi",
+        ) as HTMLScriptElement | null;
+
+        const onLoad = () => resolve();
+        const onError = () => reject(new Error("Google script load failed"));
+
+        if (existing) {
+          if (
+            window.google?.accounts?.id ||
+            existing.getAttribute("data-loaded") === "1"
+          ) {
+            resolve();
+            return;
+          }
+
+          existing.addEventListener("load", onLoad, { once: true });
+          existing.addEventListener("error", onError, { once: true });
+
+          let tries = 0;
+          const intervalId = window.setInterval(() => {
+            tries += 1;
+            if (window.google?.accounts?.id) {
+              window.clearInterval(intervalId);
+              resolve();
+              return;
+            }
+
+            if (tries >= 80) {
+              window.clearInterval(intervalId);
+              reject(new Error("Google object timeout"));
+            }
+          }, 100);
+
+          return;
+        }
+
+        const script = document.createElement("script");
+        script.id = "google-gsi";
+        script.src = "https://accounts.google.com/gsi/client";
+        script.async = true;
+        script.defer = true;
+        script.onload = () => {
+          script.setAttribute("data-loaded", "1");
+          setIsGoogleScriptLoaded(true);
+          onLoad();
+        };
+        script.onerror = onError;
+        document.body.appendChild(script);
       });
+    };
+
+    const initGoogle = async () => {
+      setGoogleError("");
+      setIsGoogleReady(false);
+
+      try {
+        await ensureScript();
+        if (window.google?.accounts?.id) {
+          setIsGoogleScriptLoaded(true);
+        }
+        const ready = await waitForGoogle();
+        if (!ready || cancelled || googleInitRef.current) return;
+        window.google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID.trim(),
+          callback: handleGoogleCredential,
+          ux_mode: "popup",
+          use_fedcm_for_prompt: false,
+          use_fedcm_for_button: false,
+          auto_select: false,
+        });
+
+        const btn = document.getElementById("googleBtn");
+        if (!btn) return;
+        btn.innerHTML = "";
+        window.google.accounts.id.renderButton(btn, {
+          theme: "filled_blue",
+          size: "large",
+          width: 320,
+        });
+        googleInitRef.current = true;
+        if (!cancelled) {
+          setIsGoogleReady(true);
+        }
+      } catch (err) {
+        console.error("Google sign-in init failed:", err);
+        if (!cancelled) {
+          setGoogleError(
+            "ไม่สามารถโหลดปุ่ม Google ได้ กรุณารีเฟรชหน้าอีกครั้ง",
+          );
+        }
+      }
+    };
+
+    initGoogle();
+    return () => {
+      cancelled = true;
+    };
+  }, [checkingAuth]);
+
+  const handleGoogleFallbackClick = async () => {
+    setGoogleError("");
+    setIsGoogleLoading(true);
+    try {
+      const loaded = window.google?.accounts?.id || isGoogleScriptLoaded;
+      if (!loaded) {
+        const existing = document.getElementById("google-gsi");
+        if (!existing) {
+          const script = document.createElement("script");
+          script.id = "google-gsi";
+          script.src = "https://accounts.google.com/gsi/client";
+          script.async = true;
+          script.defer = true;
+          document.body.appendChild(script);
+        }
+
+        for (let i = 0; i < 80; i += 1) {
+          if (window.google?.accounts?.id) break;
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        }
+      }
+
+      if (!window.google?.accounts?.id) {
+        setGoogleError("ยังโหลด Google Sign-In ไม่สำเร็จ กรุณารีเฟรชหน้า");
+        return;
+      }
+
+      if (!googleInitRef.current) {
+        window.google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID.trim(),
+          callback: handleGoogleCredential,
+          ux_mode: "popup",
+          use_fedcm_for_prompt: false,
+          use_fedcm_for_button: false,
+          auto_select: false,
+        });
+        googleInitRef.current = true;
+      }
 
       const btn = document.getElementById("googleBtn");
       if (btn) {
-        btn.innerHTML = ""; // 🔥 สำคัญมาก ล้างก่อน render ใหม่
+        btn.innerHTML = "";
         window.google.accounts.id.renderButton(btn, {
           theme: "filled_blue",
           size: "large",
           width: 320,
         });
         setIsGoogleReady(true);
+      } else {
+        setGoogleError("ไม่พบตำแหน่งปุ่ม Google บนหน้า");
       }
-    }
-
-    const existingScript = document.getElementById("google-gsi");
-
-    if (existingScript) {
-      // 🔥 ถ้า script มีอยู่แล้ว ให้ init ใหม่เลย
-      initGoogle();
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.id = "google-gsi";
-    script.src = "https://accounts.google.com/gsi/client";
-    script.async = true;
-    script.defer = true;
-    script.onload = initGoogle;
-
-    document.body.appendChild(script);
-  }, []);
-
-  const handleGoogleFallbackClick = () => {
-    if (!window.google?.accounts?.id) {
-      setError(
-        "Google Sign-In ยังไม่พร้อม กรุณารีเฟรชหน้า หรือเข้าใช้งานผ่าน https://burithaiteam.com/login",
-      );
-      return;
-    }
-
-    try {
-      window.google.accounts.id.prompt();
-    } catch {
-      setError("ไม่สามารถเปิด Google Sign-In ได้ กรุณาลองใหม่");
+    } catch (err) {
+      console.error("Fallback Google sign-in failed:", err);
+      setGoogleError("ไม่สามารถเปิด Google Login ได้ กรุณาลองใหม่");
+    } finally {
+      setIsGoogleLoading(false);
     }
   };
 
@@ -218,7 +364,7 @@ export default function LoginPage() {
         return;
       }
 
-      const res = await fetch(`${API_URL}/api/auth/google/login`, {
+      const res = await fetch(`${apiBaseUrl}/api/auth/google/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include", // ✅ ให้ cookie จาก backend ถูก set
@@ -268,7 +414,7 @@ export default function LoginPage() {
     try {
       setIsLoading(true);
 
-      const res = await fetch(`${API_URL}/api/auth/login`, {
+      const res = await fetch(`${apiBaseUrl}/api/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -352,12 +498,10 @@ export default function LoginPage() {
   //   }
   // }, []);
 
-  const [checkingAuth, setCheckingAuth] = useState(true);
-
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await fetchAuthSession(API_URL);
+        const res = await fetchAuthSession(apiBaseUrl);
 
         if (res.ok) {
           // 🔥 login อยู่ → ห้ามเข้า login
@@ -376,7 +520,7 @@ export default function LoginPage() {
     };
 
     checkAuth();
-  }, [router]);
+  }, [router, apiBaseUrl]);
   if (checkingAuth) return null;
 
   return (
@@ -520,40 +664,20 @@ export default function LoginPage() {
 
           <div className="flex flex-col gap-3 text-center">
             <div id="googleBtn" className="w-full flex justify-center" />
+            {/* <button
+              type="button"
+              onClick={handleGoogleFallbackClick}
+              disabled={isGoogleLoading}
+              className="w-full py-2 rounded-lg text-sm font-medium border border-gray-300 bg-white text-gray-800 hover:bg-gray-100 disabled:opacity-60"
+            >
+              Continue with Google
+            </button> */}
             {!isGoogleReady && (
-              <button
-                type="button"
-                onClick={handleGoogleFallbackClick}
-                disabled={isGoogleLoading}
-                className="w-full py-2 rounded-lg text-sm font-medium border border-gray-300 bg-white text-gray-800 hover:bg-gray-100 disabled:opacity-60"
-              >
-                <span className="inline-flex items-center justify-center gap-2">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 48 48"
-                    className="h-7 w-7"
-                    aria-hidden="true"
-                  >
-                    <path
-                      fill="#FFC107"
-                      d="M43.611 20.083H42V20H24v8h11.303C33.656 32.657 29.249 36 24 36c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.84 1.154 7.957 3.043l5.657-5.657C34.046 6.053 29.27 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"
-                    />
-                    <path
-                      fill="#FF3D00"
-                      d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.84 1.154 7.957 3.043l5.657-5.657C34.046 6.053 29.27 4 24 4c-7.682 0-14.341 4.337-17.694 10.691z"
-                    />
-                    <path
-                      fill="#4CAF50"
-                      d="M24 44c5.169 0 9.86-1.977 13.409-5.191l-6.19-5.238C29.146 35.091 26.715 36 24 36c-5.231 0-9.626-3.317-11.287-7.946l-6.522 5.026C9.504 39.556 16.227 44 24 44z"
-                    />
-                    <path
-                      fill="#1976D2"
-                      d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.084 5.571l6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"
-                    />
-                  </svg>
-                  Continue with Google
-                </span>
-              </button>
+              <p className="text-sm text-gray-500">Loading Google Sign-In...</p>
+            )}
+            {googleError && <p className="text-sm text-red-600">{googleError}</p>}
+            {isGoogleLoading && (
+              <p className="text-sm text-gray-500">Signing in with Google...</p>
             )}
           </div>
         </div>
