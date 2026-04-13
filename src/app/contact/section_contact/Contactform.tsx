@@ -23,8 +23,8 @@ export default function ContactForm() {
     {
       name: "Phone",
       icon: FaPhoneAlt,
-      href: "tel:0912991970",
-      phone: "091-299-1970",
+      href: "tel:087-368-3548",
+      phone: "087-368-3548",
     },
   ];
 

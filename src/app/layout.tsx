@@ -35,11 +35,11 @@ export default function RootLayout({
       >
         {/* ✅ ห่อด้วย CartProvider ครอบทั้ง app */}
         <CartProvider>
-          <GlobalAuthGuard />   
-          <header className="sticky top-0 z-50 bg-white border-b border-gray-200 dark:bg-gray-900 dark:border-gray-700">
+          <GlobalAuthGuard />
+          <header className="fixed top-0 left-0 right-0 z-[1000] bg-white border-b border-gray-200 dark:bg-gray-900 dark:border-gray-700">
             <TopNavbar />
           </header>
-          <main>
+          <main className="pt-[120px] sm:pt-[100px] md:pt-[170px]">
             {children}
           </main>
           <footer>

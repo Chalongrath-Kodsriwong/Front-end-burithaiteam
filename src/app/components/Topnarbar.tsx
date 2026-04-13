@@ -37,10 +37,10 @@ export default function TopNavbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navItems = [
-    { label: "Home", href: "/" },
-    { label: "About", href: "/about" },
-    { label: "Contact", href: "/contact" },
-    { label: "Product", href: "/product" },
+    { label: "หน้าแรก", href: "/" },
+    { label: "เกี่ยวกับเรา", href: "/about" },
+    { label: "ติดต่อ", href: "/contact" },
+    { label: "สินค้า", href: "/product" },
   ];
 
   const base = "block py-2 px-3 rounded-sm md:p-0";
@@ -341,7 +341,7 @@ export default function TopNavbar() {
             alt="Logo"
           />
           <span className="self-center max-w-[130px] sm:max-w-none text-xs sm:text-xl md:text-2xl font-semibold text-yellow-500 whitespace-nowrap truncate">
-            Burithai team
+            BuriThaiTeam
           </span>
         </Link>
 
@@ -423,7 +423,7 @@ export default function TopNavbar() {
           {!isLoggedIn ? (
             <Link href="/login">
               <button className="block bg-[rgb(212,175,55)] py-1.5 px-2.5 text-xs sm:text-base sm:py-2 sm:px-4 text-black rounded-md transition-all duration-300 hover:scale-105 hover:bg-[rgb(255,215,0)] hover:[box-shadow:0_0_10px_rgb(255,215,0),0_0_20px_rgb(255,215,0)]">
-                Login
+                เข้าสู่ระบบ
               </button>
             </Link>
           ) : (
@@ -484,7 +484,7 @@ export default function TopNavbar() {
                   className="block w-full text-left px-6 py-1 text-[rgba(212,175,55)] hover:bg-[rgba(212,175,55,0.25)]
                   text-sm transition-colors duration-200"
                 >
-                  Payment
+                  ประวัติการสั่งซื้อ
                 </button>
 
                 <button
@@ -493,7 +493,7 @@ export default function TopNavbar() {
                   }}
                   className="block w-full text-left px-6 py-1 text-[rgba(212,175,55)] hover:bg-[rgba(212,175,55,0.25)] text-sm transition-colors duration-200"
                 >
-                  Settings
+                  การตั้งค่า
                 </button>
 
                 <button
@@ -516,7 +516,7 @@ export default function TopNavbar() {
                   }}
                   className="block w-full text-left px-6 py-1 text-red-600 hover:bg-[rgba(115,0,0,0.50)] text-sm"
                 >
-                  Logout
+                  ออกจากระบบ
                 </button>
               </div>
             </div>
@@ -577,7 +577,7 @@ export default function TopNavbar() {
       hover:[text-shadow:0_0_6px_rgb(255,215,0),0_0_12px_rgb(255,215,0),0_0_20px_rgb(212,175,55)] hover:bg-gray-900 focus:bg-gray-900 focus:border-[rgb(255,215,0)] transition-colors duration-300
     "
           >
-            Categories
+            หมวดหมู่
             <svg
               className="w-2.5 h-2.5 ml-2"
               xmlns="http://www.w3.org/2000/svg"
@@ -609,7 +609,7 @@ export default function TopNavbar() {
                       setIsDropdownOpenCategories(false);
                     }}
                   >
-                    All
+                    ทั้งหมด
                   </button>
                 </li>
 
@@ -639,7 +639,7 @@ export default function TopNavbar() {
             <input
               type="search"
               className="search-bar block p-2.5 w-full z-10 text-sm  rounded-lg border-s-2 border border-gray-700 focus:border-yellow-500 bg-gray-800 border-gray-600 placeholder-yellow-500 text-white hover:bg-gray-900 focus:bg-gray-900  transition-colors duration-300"
-              placeholder="Search products..."
+              placeholder="ค้นหาสินค้าที่นี่..."
               value={searchProductName}
               onChange={handleSearchChange}
               onClick={handleClick} // เมื่อคลิกที่ช่อง input จะทำให้ dropdown แสดง
