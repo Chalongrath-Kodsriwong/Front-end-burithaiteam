@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
 import { Product } from "@/types/Productdisplay"
+import { isSellableProduct } from "@/app/utils/productVisibility";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 const ITEMS_PER_PAGE = 20; // แสดง 20 ชิ้นต่อหน้า
@@ -80,7 +81,9 @@ export default function Productdisplay() {
         });
         const json = await res.json();
 
-        const productData = Array.isArray(json.data) ? json.data : [];
+        const productData = Array.isArray(json.data)
+          ? json.data.filter(isSellableProduct)
+          : [];
 
         const mapped: Product[] = productData.map((p: any) => {
           let price = "0";

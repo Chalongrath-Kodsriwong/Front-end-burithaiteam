@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { isSellableProduct } from "@/app/utils/productVisibility";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
@@ -35,7 +36,9 @@ export default function TopicMenu({ setSelectedCategory }: TopicMenuProps) {
       try {
         const res = await fetch(`${API_BASE_URL}/api/products`);
         const json = await res.json();
-        const data = Array.isArray(json.data) ? json.data : [];
+        const data = Array.isArray(json.data)
+          ? json.data.filter(isSellableProduct)
+          : [];
 
         const unique: string[] = Array.from(
           new Set(

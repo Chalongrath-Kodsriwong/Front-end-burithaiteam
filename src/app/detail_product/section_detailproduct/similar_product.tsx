@@ -2,6 +2,7 @@
 import "flowbite";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { isSellableProduct } from "@/app/utils/productVisibility";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
@@ -29,7 +30,7 @@ export default function SimilarProduct({ currentProductId, currentCategory }: an
         const res = await fetch(`${API_URL}/api/products`, { cache: "no-store" });
         const json = await res.json();
 
-        const products = normalizeProducts(json);
+        const products = normalizeProducts(json).filter(isSellableProduct);
 
         // ฟิลเตอร์ตามหมวดหมู่
         const filtered = products.filter((p: any) => {

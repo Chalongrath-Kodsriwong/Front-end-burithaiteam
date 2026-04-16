@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 
 import { ApiProduct, ProductUI } from "@/types/Mostseller";
+import { isSellableProduct } from "@/app/utils/productVisibility";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 const ITEMS_PER_PAGE = 4;
@@ -36,7 +37,9 @@ export default function Mostsell() {
         });
 
         const json = await res.json().catch(() => ({}));
-        const data: ApiProduct[] = Array.isArray(json?.data) ? json.data : [];
+        const data: ApiProduct[] = Array.isArray(json?.data)
+          ? json.data.filter(isSellableProduct)
+          : [];
 
         const mapped: ProductUI[] = data.map((p) => {
           const priceText = formatPriceRange(p.prices);

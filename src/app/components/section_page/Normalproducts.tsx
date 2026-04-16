@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 
 import { Product } from "@/types/Normalproducts";
+import { isSellableProduct } from "@/app/utils/productVisibility";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 const ITEMS_PER_PAGE = 20;
@@ -24,7 +25,9 @@ export default function Productdisplay() {
         });
         const json = await res.json();
 
-        const productData = Array.isArray(json.data) ? json.data : [];
+        const productData = Array.isArray(json.data)
+          ? json.data.filter(isSellableProduct)
+          : [];
 
         const mapped: Product[] = productData.map((p: any) => {
           let price = "0";

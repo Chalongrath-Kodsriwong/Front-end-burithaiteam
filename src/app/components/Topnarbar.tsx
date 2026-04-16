@@ -7,6 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useCart } from "@/app/context/CartContext";
 import { FaRegUserCircle } from "react-icons/fa";
 import { clearClientAuthData } from "@/app/utils/authClient";
+import { isSellableProduct } from "@/app/utils/productVisibility";
 
 import { useRef } from "react";
 
@@ -112,7 +113,7 @@ export default function TopNavbar() {
 
       const uniqueProducts = Array.from(
         new Map(allProducts.map((p) => [p.id_products, p])).values()
-      );
+      ).filter(isSellableProduct);
 
       setSuggestions(uniqueProducts); // ตั้งค่าผลลัพธ์สินค้าที่เกี่ยวข้อง
       setIsDropdownOpen(true); // แสดง dropdown ของสินค้าที่เกี่ยวข้อง
@@ -202,7 +203,9 @@ export default function TopNavbar() {
       try {
         const res = await fetch(`${API_BASE_URL}/api/products`);
         const json = await res.json();
-        const data = Array.isArray(json.data) ? json.data : [];
+        const data = Array.isArray(json.data)
+          ? json.data.filter(isSellableProduct)
+          : [];
 
         // ⭐ ประกาศ uniqueCategories ให้เป็น array จริง ๆ
         const uniqueCategories: string[] = Array.from(
