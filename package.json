@@ -10,18 +10,11 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
-    "@react-oauth/google": "^0.13.4",
-    "bite": "^0.1.0-4",
-    "flow": "^0.2.3",
     "framer-motion": "^12.38.0",
-    "gapi": "^0.0.3",
-    "gapi-script": "^1.2.0",
     "lucide-react": "^0.554.0",
     "next": "^15.5.2",
-    "next-auth": "^4.24.13",
     "react": "^19.2.4",
     "react-dom": "19.2.4",
-    "react-google-login": "^5.2.2",
     "react-icons": "^5.5.0",
     "react-responsive-carousel": "^3.2.23"
   },
