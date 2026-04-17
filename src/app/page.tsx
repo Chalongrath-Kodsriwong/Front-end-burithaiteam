@@ -1,64 +1,44 @@
 "use client";
-import "flowbite";
-import { useEffect, useState } from "react";
-import { BookmarkIcon } from "@heroicons/react/24/solid";
 
 import Banner from "./components/section_page/Banner";
 import Newproducts from "./components/section_page/Newproduct";
-import IntroWeb from "./components/section_page/Introweb";
 import BrandSupport from "./components/section_page/Brandsupport";
 import Achievement from "./components/section_page/Achievement";
 import Mostsell from "./components/section_page/Mostsell";
 import Normalproducts from "./components/section_page/Normalproducts";
 
 export default function Home() {
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
   return (
-    <>
-      <div className="container px-0 mx-auto p-2">
-        {isClient && (
-          <div>
-            <div className="flex flex-col gap-3">
-              <section className="Promote ">
-                <Banner />
-              </section>
+    <div className="container px-0 mx-auto p-2">
+      <div>
+        <div className="flex flex-col gap-3">
+          <section className="Promote ">
+            <Banner />
+          </section>
 
-              <section className="NewProducts">
-                <Newproducts />
-              </section>
+          <section className="NewProducts">
+            <Newproducts />
+          </section>
+        </div>
 
-            </div>
-            {/* <section className="IntroWeb pt-4">
-              <IntroWeb />
-            </section> */}
+        <section className="BrandSupport py-4">
+          <Achievement />
+        </section>
 
-            <section className="BrandSupport py-4">
-              <Achievement />
-            </section>
+        <section className="IntroWeb py-1">
+          <Mostsell />
+        </section>
 
-            <section className="IntroWeb py-1">
-              <Mostsell />
-            </section>
+        <section className="Achievement py-2">
+          <BrandSupport />
+        </section>
 
-            <section className="Achievement py-2">
-              <BrandSupport />
-            </section>
-
-            <div>
-              {/* <section className="MostSeller">
-                <Mostsell />
-              </section> */}
-              <section className="Normalproducts">
-                <Normalproducts />
-              </section>
-            </div>
-          </div>
-        )}
+        <div>
+          <section className="Normalproducts">
+            <Normalproducts />
+          </section>
+        </div>
       </div>
-    </>
+    </div>
   );
 }

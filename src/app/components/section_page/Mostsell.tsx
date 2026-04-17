@@ -22,12 +22,9 @@ function formatPriceRange(prices?: number[]) {
 export default function Mostsell() {
   const [products, setProducts] = useState<ProductUI[]>([]);
   const [page, setPage] = useState(0);
-  const [isClient, setIsClient] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setIsClient(true);
-
     async function fetchTopSell() {
       try {
         setLoading(true);
@@ -88,7 +85,7 @@ export default function Mostsell() {
   );
 
   if (loading) return <div className="p-4 text-center">กำลังโหลดสินค้า...</div>;
-  if (!isClient || products.length === 0)
+  if (products.length === 0)
     return <div className="p-4 text-center">ไม่มีข้อมูลสินค้า</div>;
 
   return (

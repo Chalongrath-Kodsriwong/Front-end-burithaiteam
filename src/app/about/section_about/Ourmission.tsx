@@ -7,8 +7,6 @@ import { AchievementItem } from "@/types/Achievement";
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
 export default function Ourmission() {
-  const [isClient, setIsClient] = useState(false);
-
   const [pausedIndexes, setPausedIndexes] = useState<number[]>([]);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [imageIndexes, setImageIndexes] = useState<number[]>([]);
@@ -20,7 +18,6 @@ export default function Ourmission() {
   const [itemIndexes, setItemIndexes] = useState<number[]>([]);
 
   useEffect(() => {
-    setIsClient(true);
     fetchAchievements();
   }, []);
 
@@ -79,7 +76,7 @@ export default function Ourmission() {
 
   // 🔥 auto slide (เหมือนเดิม)
   useEffect(() => {
-    if (!isClient || groupedData.length === 0) return;
+    if (groupedData.length === 0) return;
 
     const interval = setInterval(() => {
       setItemIndexes((prev) =>
@@ -95,14 +92,13 @@ export default function Ourmission() {
     }, 6000);
 
     return () => clearInterval(interval);
-  }, [isClient, groupedData, pausedIndexes]);
+  }, [groupedData, pausedIndexes]);
 
   return (
     <div className="max-w-screen-2xl mx-auto px-4 py-6 my-3 shadow-lg rounded-lg">
       <h1 className="text-3xl font-bold mb-6">ผลงานของเรา</h1>
 
-      {isClient && (
-        <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-8">
           {groupedData.map((group, i) => {
             const current = group.items[itemIndexes[i]];
             const images = current?.url || [];
@@ -188,7 +184,6 @@ export default function Ourmission() {
             );
           })}
         </div>
-      )}
     </div>
   );
 }

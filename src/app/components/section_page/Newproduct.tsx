@@ -23,12 +23,9 @@ function formatPriceRange(prices?: number[]) {
 export default function Newproducts() {
   const [products, setProducts] = useState<ProductUI[]>([]);
   const [page, setPage] = useState(0);
-  const [isClient, setIsClient] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setIsClient(true);
-
     async function fetchNewProducts() {
       try {
         setLoading(true);
@@ -90,7 +87,7 @@ export default function Newproducts() {
   );
 
   if (loading) return <div className="p-4">กำลังโหลดสินค้า...</div>;
-  if (!isClient || products.length === 0)
+  if (products.length === 0)
     return <div className="p-4">ไม่มีข้อมูลสินค้า</div>;
 
   return (

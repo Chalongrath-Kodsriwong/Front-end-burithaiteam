@@ -1,19 +1,11 @@
 "use client";
 import "flowbite";
-import { useEffect, useState } from "react";
 
 export default function Ourservice() {
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
   return (
     <div className="container mx-auto px-4 py-6 my-8 border border-t-400 shadow-lg rounded-lg">
       <h1 className="text-3xl font-bold mb-3">บริการของเรา</h1>
-      {isClient && (
-        <div className="section_ourservice py-4 px-4 flex flex-wrap justify-center gap-8">
+      <div className="section_ourservice py-4 px-4 flex flex-wrap justify-center gap-8">
           <div className="relative p-4 rounded-lg shadow-md w-full md:w-[45%] lg:w-[30%] overflow-hidden bg-[#0f172a] text-yellow-500">
             {/* 🌟 Gradient Background */}
             <div
@@ -118,7 +110,6 @@ export default function Ourservice() {
             </div>
           </div>
         </div>
-      )}
     </div>
   );
 }

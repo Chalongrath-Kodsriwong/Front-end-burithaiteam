@@ -12,12 +12,9 @@ const ITEMS_PER_PAGE = 20;
 export default function Productdisplay() {
   const [products, setProducts] = useState<Product[]>([]);
   const [page, setPage] = useState(0);
-  const [isClient, setIsClient] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setIsClient(true);
-
     async function fetchProducts() {
       try {
         const res = await fetch(`${API_URL}/api/products`, {
@@ -95,7 +92,7 @@ export default function Productdisplay() {
   );
 
   if (loading) return <div className="p-4 text-center">กำลังโหลดสินค้า...</div>;
-  if (!isClient || products.length === 0)
+  if (products.length === 0)
     return <div className="p-4 text-center">ไม่มีข้อมูลสินค้า</div>;
 
   return (
