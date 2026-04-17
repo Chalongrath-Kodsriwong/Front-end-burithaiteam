@@ -10,6 +10,10 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 export default function DetailOfProductShort({ product }: any) {
   if (!product) return <div>กำลังโหลดสินค้า...</div>;
 
+  const hasVisibleVariant = Array.isArray(product?.variants)
+    ? product.variants.some((variant: any) => `${variant?.variant_name ?? ""}`.trim().length > 0)
+    : false;
+
   const extractPriceRange = (product: any) => {
     if (!product?.variants) return "0";
 
@@ -46,6 +50,13 @@ export default function DetailOfProductShort({ product }: any) {
 
   // ❌ ไม่มี default แล้ว
   const [selectedInventory, setSelectedInventory] = useState<any>(null);
+
+  useEffect(() => {
+    if (hasVisibleVariant) return;
+    if (allInventories.length === 0) return;
+
+    setSelectedInventory((current: any) => current ?? allInventories[0]);
+  }, [allInventories, hasVisibleVariant]);
 
   const variantId = Number(selectedInventory?.variant_id);
   const inventoryId = Number(selectedInventory?.inventory_id);
@@ -232,30 +243,32 @@ export default function DetailOfProductShort({ product }: any) {
 
       <p className="text-lg sm:text-xl font-semibold mb-4">ราคา: ฿ {displayPrice}</p>
 
-      {/* ✅ variant_name เป็น label เฉยๆ */}
-      <div className="mb-2 font-medium text-gray-700">
-        {product.variants?.[0]?.variant_name || "ตัวเลือกสินค้า"}
-      </div>
+      {hasVisibleVariant ? (
+        <>
+          <div className="mb-2 font-medium text-gray-700">
+            {product.variants?.[0]?.variant_name || "ตัวเลือกสินค้า"}
+          </div>
 
-      {/* ✅ inventory */}
-      <div className="mb-4">
-        <div className="flex flex-wrap gap-2">
-          {allInventories.map((inv: any) => (
-            <button
-              key={inv.inventory_id}
-              onClick={() => setSelectedInventory(inv)}
-              disabled={inv.stock === 0}
-              className={`px-2.5 sm:px-3 py-1 text-sm sm:text-base border rounded ${
-                selectedInventory?.inventory_id === inv.inventory_id
-                  ? "border-red-500 bg-red-50"
-                  : "border-gray-300"
-              } ${inv.stock === 0 ? "opacity-50 cursor-not-allowed" : ""}`}
-            >
-              {inv.inventory_name}
-            </button>
-          ))}
-        </div>
-      </div>
+          <div className="mb-4">
+            <div className="flex flex-wrap gap-2">
+              {allInventories.map((inv: any) => (
+                <button
+                  key={inv.inventory_id}
+                  onClick={() => setSelectedInventory(inv)}
+                  disabled={inv.stock === 0}
+                  className={`px-2.5 sm:px-3 py-1 text-sm sm:text-base border rounded ${
+                    selectedInventory?.inventory_id === inv.inventory_id
+                      ? "border-red-500 bg-red-50"
+                      : "border-gray-300"
+                  } ${inv.stock === 0 ? "opacity-50 cursor-not-allowed" : ""}`}
+                >
+                  {inv.inventory_name}
+                </button>
+              ))}
+            </div>
+          </div>
+        </>
+      ) : null}
 
       <div className="flex items-center gap-2 sm:gap-4 mb-6">
         <button
