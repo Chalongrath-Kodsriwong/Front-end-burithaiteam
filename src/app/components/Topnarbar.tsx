@@ -42,6 +42,7 @@ export default function TopNavbar() {
     { label: "เกี่ยวกับเรา", href: "/about" },
     { label: "ติดต่อ", href: "/contact" },
     { label: "สินค้า", href: "/product" },
+    { label: "ออกแบบ", href: "/design" },
   ];
 
   const base = "block py-2 px-3 rounded-sm md:p-0";
