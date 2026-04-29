@@ -226,12 +226,21 @@ function classifyProduct(product: ApiProduct): CatalogGroupKey | null {
   const shortDescription = String(product.short_description || "").toLowerCase();
   const text = `${category} ${name} ${brand} ${shortDescription}`;
 
+  // Prefer explicit categories first so accessory products that mention
+  // "LED Module" in their titles/descriptions do not fall into the module group.
+  if (/megnent|magnet|magnete|แม่เหล็ก/.test(category)) return "magnet";
+  if (/receiver|receiving|receivers/.test(category)) return "receiver";
+  if (/switching/.test(category)) return "switching";
+  if (/processor/.test(category)) return "processor";
+  if (/sender/.test(category)) return "sender";
+  if (/^led$|led\s*module|module/.test(category)) return "module";
+
   if (/magnet|magnete|แม่เหล็ก/.test(text)) return "magnet";
-  if (/led\s*module|module/.test(text)) return "module";
   if (/receiver|receiving|receivers/.test(text)) return "receiver";
   if (/switching/.test(text)) return "switching";
   if (/processor/.test(text)) return "processor";
   if (/sender/.test(text)) return "sender";
+  if (/led\s*module|module/.test(text)) return "module";
   return null;
 }
 
