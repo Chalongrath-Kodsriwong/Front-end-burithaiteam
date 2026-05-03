@@ -40,6 +40,8 @@ type CatalogItem = {
   heightMm?: number;
   pixelWidth?: number;
   pixelHeight?: number;
+  receiverMaxPanelsX?: number;
+  receiverMaxPanelsY?: number;
 };
 
 type SteelItem = {
@@ -55,6 +57,11 @@ type PlacedCell = {
   row: number;
   col: number;
   moduleId: number;
+};
+
+type GridCellPoint = {
+  row: number;
+  col: number;
 };
 
 type CatalogGroupKey =
@@ -73,7 +80,7 @@ type SummaryRow = {
   total: number;
 };
 
-type ZoomMode = "fit" | "75" | "90" | "100" | "110" | "125" | "150" | "175";
+type ZoomMode = "75" | "90" | "100" | "110" | "125" | "150" | "175";
 
 const steelOptions: SteelItem[] = [
   {
@@ -219,6 +226,37 @@ function inferPanelPixels(product: ApiProduct) {
   return pixelCandidate || null;
 }
 
+function inferReceiverCapacity(product: ApiProduct) {
+  const specRoot =
+    typeof product.spec_table === "object" &&
+    product.spec_table !== null &&
+    !Array.isArray(product.spec_table)
+      ? (product.spec_table as Record<string, unknown>)
+      : null;
+  const receiverConfig =
+    specRoot &&
+    typeof specRoot.receiver_simulator_config === "object" &&
+    specRoot.receiver_simulator_config !== null &&
+    !Array.isArray(specRoot.receiver_simulator_config)
+      ? (specRoot.receiver_simulator_config as Record<string, unknown>)
+      : specRoot &&
+          typeof specRoot.receiverSimulatorConfig === "object" &&
+          specRoot.receiverSimulatorConfig !== null &&
+          !Array.isArray(specRoot.receiverSimulatorConfig)
+        ? (specRoot.receiverSimulatorConfig as Record<string, unknown>)
+        : null;
+
+  const maxPanelsX = Number(receiverConfig?.maxPanelsX);
+  const maxPanelsY = Number(receiverConfig?.maxPanelsY);
+
+  return {
+    maxPanelsX:
+      Number.isFinite(maxPanelsX) && maxPanelsX > 0 ? maxPanelsX : undefined,
+    maxPanelsY:
+      Number.isFinite(maxPanelsY) && maxPanelsY > 0 ? maxPanelsY : undefined,
+  };
+}
+
 function classifyProduct(product: ApiProduct): CatalogGroupKey | null {
   const category = String(product.category?.name || "").toLowerCase();
   const name = String(product.name || "").toLowerCase();
@@ -247,6 +285,7 @@ function classifyProduct(product: ApiProduct): CatalogGroupKey | null {
 function toCatalogItem(product: ApiProduct): CatalogItem {
   const inferred = inferPanelDimensions(product);
   const inferredPixels = inferPanelPixels(product);
+  const inferredReceiver = inferReceiverCapacity(product);
 
   return {
     id: product.id_products,
@@ -260,6 +299,8 @@ function toCatalogItem(product: ApiProduct): CatalogItem {
     heightMm: inferred?.heightMm,
     pixelWidth: inferredPixels?.pixelWidth,
     pixelHeight: inferredPixels?.pixelHeight,
+    receiverMaxPanelsX: inferredReceiver.maxPanelsX,
+    receiverMaxPanelsY: inferredReceiver.maxPanelsY,
   };
 }
 
@@ -403,7 +444,7 @@ export default function DesignPage() {
     rows: BASE_GRID_ROWS,
     cols: BASE_GRID_COLS,
   });
-  const [zoomMode, setZoomMode] = useState<ZoomMode>("fit");
+  const [zoomMode, setZoomMode] = useState<ZoomMode>("100");
   const [isPointerDown, setIsPointerDown] = useState(false);
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState<{
@@ -425,9 +466,14 @@ export default function DesignPage() {
     width: 0,
     height: 0,
   });
+  const [selectionStart, setSelectionStart] = useState<GridCellPoint | null>(null);
+  const [selectionEnd, setSelectionEnd] = useState<GridCellPoint | null>(null);
 
   const scrollRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const boardViewportRef = useRef<HTMLDivElement | null>(null);
+  const gridBoardRef = useRef<HTMLDivElement | null>(null);
+  const lastDragCellRef = useRef<string | null>(null);
+  const previousGridSizeRef = useRef({ rows: BASE_GRID_ROWS, cols: BASE_GRID_COLS });
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -597,6 +643,74 @@ export default function DesignPage() {
     });
   };
 
+  const getCellFromPointer = (clientX: number, clientY: number): GridCellPoint | null => {
+    const gridNode = gridBoardRef.current;
+    if (!gridNode) return null;
+
+    const rect = gridNode.getBoundingClientRect();
+    if (
+      clientX < rect.left ||
+      clientX > rect.right ||
+      clientY < rect.top ||
+      clientY > rect.bottom
+    ) {
+      return null;
+    }
+
+    const relativeX = clientX - rect.left;
+    const relativeY = clientY - rect.top;
+    const col = Math.min(gridCols - 1, Math.max(0, Math.floor((relativeX / rect.width) * gridCols)));
+    const row = Math.min(gridRows - 1, Math.max(0, Math.floor((relativeY / rect.height) * gridRows)));
+    return { row, col };
+  };
+
+  const commitSelection = () => {
+    if (!selectionStart || !selectionEnd) {
+      setIsPointerDown(false);
+      lastDragCellRef.current = null;
+      return;
+    }
+
+    const targetModuleId = selectedModule?.id;
+    if (!targetModuleId) {
+      setIsPointerDown(false);
+      setSelectionStart(null);
+      setSelectionEnd(null);
+      lastDragCellRef.current = null;
+      return;
+    }
+
+    const minRow = Math.min(selectionStart.row, selectionEnd.row);
+    const maxRow = Math.max(selectionStart.row, selectionEnd.row);
+    const minCol = Math.min(selectionStart.col, selectionEnd.col);
+    const maxCol = Math.max(selectionStart.col, selectionEnd.col);
+    const isSingleCell = minRow === maxRow && minCol === maxCol;
+
+    if (isSingleCell) {
+      placeAt(minRow, minCol, targetModuleId);
+    } else {
+      setPlacedCells((prev) => {
+        const next = new Map<string, PlacedCell>();
+        prev.forEach((cell) => next.set(`${cell.row}-${cell.col}`, cell));
+
+        for (let row = minRow; row <= maxRow; row += 1) {
+          for (let col = minCol; col <= maxCol; col += 1) {
+            next.set(`${row}-${col}`, { row, col, moduleId: targetModuleId });
+          }
+        }
+
+        return Array.from(next.values()).sort((a, b) =>
+          a.row === b.row ? a.col - b.col : a.row - b.row
+        );
+      });
+    }
+
+    setIsPointerDown(false);
+    setSelectionStart(null);
+    setSelectionEnd(null);
+    lastDragCellRef.current = null;
+  };
+
   const placementMap = useMemo(() => {
     const map = new Map<string, PlacedCell>();
     placedCells.forEach((cell) => {
@@ -637,28 +751,56 @@ export default function DesignPage() {
     };
   }, [placedCells]);
 
+  const selectionBounds = useMemo(() => {
+    if (!selectionStart || !selectionEnd) return null;
+    const minRow = Math.min(selectionStart.row, selectionEnd.row);
+    const maxRow = Math.max(selectionStart.row, selectionEnd.row);
+    const minCol = Math.min(selectionStart.col, selectionEnd.col);
+    const maxCol = Math.max(selectionStart.col, selectionEnd.col);
+
+    return {
+      minRow,
+      maxRow,
+      minCol,
+      maxCol,
+      width: maxCol - minCol + 1,
+      height: maxRow - minRow + 1,
+    };
+  }, [selectionEnd, selectionStart]);
+
   const totalModuleCount = placedCells.length;
   const estimatedMagnetCount = totalModuleCount * 4;
-  const estimatedReceiverCount = totalModuleCount > 0 ? Math.ceil(totalModuleCount / 8) : 0;
-  const estimatedSwitchingCount = totalModuleCount > 0 ? Math.ceil(totalModuleCount / 6) : 0;
+  const estimatedSwitchingCount = totalModuleCount > 0 ? Math.ceil(totalModuleCount / 8) : 0;
   const estimatedProcessorCount = totalModuleCount > 0 && selectedProcessor ? 1 : 0;
   const estimatedSenderCount = totalModuleCount > 0 && selectedSender ? 1 : 0;
+  const receiverBlockCols = selectedReceiver?.receiverMaxPanelsX ?? 4;
+  const receiverBlockRows = selectedReceiver?.receiverMaxPanelsY ?? 12;
   const selectedModuleWidthMm = selectedModule?.widthMm ?? 320;
   const selectedModuleHeightMm = selectedModule?.heightMm ?? 160;
   const moduleAspectRatio = selectedModuleWidthMm / selectedModuleHeightMm;
-  const cellHeightPx = Math.round(
-    clamp((selectedModuleHeightMm / 128) * 54, 48, 116)
-  );
+  const cellHeightPx = 54;
   const cellWidthPx = Math.round(
-    clamp(cellHeightPx * moduleAspectRatio, 84, 230)
+    clamp(cellHeightPx * moduleAspectRatio, 84, 180)
   );
+  const steelVerticalBarWidthPx = Math.max(
+    10,
+    Math.round(cellWidthPx * 0.16)
+  );
+  const steelHorizontalBarHeightPx = Math.max(
+    8,
+    Math.round(cellHeightPx * 0.1)
+  );
+  const steelVerticalBarLeftOffsetPx = Math.round(cellWidthPx * 0.18);
+  const steelVerticalBarOffsetPx = Math.round(cellWidthPx * 0.7);
+  const steelTopBarOffsetPx = Math.round(cellHeightPx * 0.12);
+  const steelBottomBarOffsetPx = Math.round(cellHeightPx * 0.78);
   const maxPlacedRow = placedCells.reduce((max, cell) => Math.max(max, cell.row), -1);
   const maxPlacedCol = placedCells.reduce((max, cell) => Math.max(max, cell.col), -1);
   const gridRows = gridSize.rows;
   const gridCols = gridSize.cols;
   const canvasWidthPx = gridCols * cellWidthPx;
   const canvasHeightPx = gridRows * cellHeightPx;
-  const boardPaddingPx = 56;
+  const boardPaddingPx = 40;
   const rawFitScale = Math.min(
     1,
     boardViewportSize.width > 0
@@ -668,8 +810,8 @@ export default function DesignPage() {
       ? (boardViewportSize.height - boardPaddingPx) / canvasHeightPx
       : 1
   );
-  const fitScale = Number(Math.min(1, rawFitScale * 1.08).toFixed(3));
-  const manualZoomScaleMap: Record<Exclude<ZoomMode, "fit">, number> = {
+  const fitScale = Number(Math.min(1, Math.max(0.72, rawFitScale * 1.18)).toFixed(3));
+  const manualZoomScaleMap: Record<ZoomMode, number> = {
     "75": 0.75,
     "90": 0.9,
     "100": 1,
@@ -681,14 +823,11 @@ export default function DesignPage() {
   const boardChromePadding = 72;
   const stageBaseWidth = canvasWidthPx + boardChromePadding;
   const stageBaseHeight = canvasHeightPx + boardChromePadding;
-  const manualZoom =
-    zoomMode === "fit" ? 1 : manualZoomScaleMap[zoomMode];
-  const viewScale = Number(
-    (zoomMode === "fit" ? fitScale : fitScale * manualZoom).toFixed(3)
-  );
+  const manualZoom = manualZoomScaleMap[zoomMode];
+  const viewScale = Number((fitScale * manualZoom).toFixed(3));
   const fittedCanvasWidth = stageBaseWidth * viewScale;
   const fittedCanvasHeight = stageBaseHeight * viewScale;
-  const isZoomedView = zoomMode !== "fit";
+  const isZoomedView = true;
   const screenWidthM = occupiedBounds
     ? Number(((occupiedBounds.width * selectedModuleWidthMm) / 1000).toFixed(2))
     : 0;
@@ -726,6 +865,108 @@ export default function DesignPage() {
   const estimatedSteelLinearMeters = Number(
     (steelXLinearMeters + steelYLinearMeters).toFixed(2)
   );
+  const switchingCellKeys = useMemo(() => {
+    if (!selectedSwitching || estimatedSwitchingCount <= 0 || placedCells.length === 0) {
+      return new Set<string>();
+    }
+
+    const blockRows = 4;
+    const blockCols = 2;
+    const keys = new Set<string>();
+
+    const minRow = Math.min(...placedCells.map((cell) => cell.row));
+    const maxRow = Math.max(...placedCells.map((cell) => cell.row));
+    const minCol = Math.min(...placedCells.map((cell) => cell.col));
+    const maxCol = Math.max(...placedCells.map((cell) => cell.col));
+
+    for (let startRow = minRow; startRow <= maxRow; startRow += blockRows) {
+      for (let startCol = minCol; startCol <= maxCol; startCol += blockCols) {
+        const groupCells = placedCells.filter(
+          (cell) =>
+            cell.row >= startRow &&
+            cell.row < startRow + blockRows &&
+            cell.col >= startCol &&
+            cell.col < startCol + blockCols
+        );
+        if (groupCells.length === 0) continue;
+
+        const preferredRow = Math.min(startRow + 2, startRow + blockRows - 1);
+        const targetCell =
+          groupCells.find(
+            (cell) => cell.col === startCol && cell.row === preferredRow
+          ) ||
+          groupCells.find((cell) => cell.col === startCol) ||
+          groupCells[0];
+
+        keys.add(`${targetCell.row}-${targetCell.col}`);
+      }
+    }
+
+    return keys;
+  }, [estimatedSwitchingCount, placedCells, selectedSwitching]);
+  const receiverBlocks = useMemo(() => {
+    if (placedCells.length === 0) return [] as Array<{
+      startRow: number;
+      startCol: number;
+      cells: PlacedCell[];
+    }>;
+
+    const minRow = Math.min(...placedCells.map((cell) => cell.row));
+    const maxRow = Math.max(...placedCells.map((cell) => cell.row));
+    const minCol = Math.min(...placedCells.map((cell) => cell.col));
+    const maxCol = Math.max(...placedCells.map((cell) => cell.col));
+    const blocks: Array<{ startRow: number; startCol: number; cells: PlacedCell[] }> = [];
+
+    for (let startRow = minRow; startRow <= maxRow; startRow += receiverBlockRows) {
+      for (let startCol = minCol; startCol <= maxCol; startCol += receiverBlockCols) {
+        const cells = placedCells.filter(
+          (cell) =>
+            cell.row >= startRow &&
+            cell.row < startRow + receiverBlockRows &&
+            cell.col >= startCol &&
+            cell.col < startCol + receiverBlockCols
+        );
+        if (cells.length > 0) {
+          blocks.push({ startRow, startCol, cells });
+        }
+      }
+    }
+
+    return blocks;
+  }, [placedCells, receiverBlockCols, receiverBlockRows]);
+  const estimatedReceiverCount = receiverBlocks.length;
+  const receiverCellKeys = useMemo(() => {
+    if (!selectedReceiver || estimatedReceiverCount <= 0 || receiverBlocks.length === 0) {
+      return new Set<string>();
+    }
+
+    const keys = new Set<string>();
+
+    receiverBlocks.forEach((block) => {
+      const blockMaxRow = Math.max(...block.cells.map((cell) => cell.row));
+      const blockMaxCol = Math.max(...block.cells.map((cell) => cell.col));
+      const preferredRow = Math.min(
+        block.startRow + Math.max(0, Math.floor(receiverBlockRows / 2) - 1),
+        blockMaxRow
+      );
+      const preferredCol = Math.min(block.startCol, blockMaxCol);
+      const targetCell =
+        block.cells.find(
+          (cell) => cell.col === preferredCol && cell.row === preferredRow
+        ) ||
+        block.cells.find((cell) => cell.row === preferredRow) ||
+        block.cells[block.cells.length - 1];
+
+      keys.add(`${targetCell.row}-${targetCell.col}`);
+    });
+
+    return keys;
+  }, [
+    estimatedReceiverCount,
+    receiverBlockRows,
+    receiverBlocks,
+    selectedReceiver,
+  ]);
 
   const summaryRows = useMemo<SummaryRow[]>(() => {
     const rows: SummaryRow[] = [];
@@ -836,6 +1077,21 @@ export default function DesignPage() {
   }, [maxPlacedCol, maxPlacedRow]);
 
   useEffect(() => {
+    const previous = previousGridSizeRef.current;
+    const gridExpanded =
+      gridSize.rows > previous.rows || gridSize.cols > previous.cols;
+
+    if (gridExpanded && isPointerDown) {
+      setIsPointerDown(false);
+      setSelectionStart(null);
+      setSelectionEnd(null);
+      lastDragCellRef.current = null;
+    }
+
+    previousGridSizeRef.current = gridSize;
+  }, [gridSize, isPointerDown]);
+
+  useEffect(() => {
     if (!isZoomedView) {
       setIsPanning(false);
       setPanStart(null);
@@ -847,7 +1103,7 @@ export default function DesignPage() {
   }, [isZoomedView]);
 
   return (
-    <div className="min-h-screen bg-[#f7f3ed] px-4 py-6 text-gray-900 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-white px-4 py-6 text-gray-900 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl space-y-6">
         <div>
           <h1 className="text-2xl font-black sm:text-3xl">LED Design Simulator</h1>
@@ -875,7 +1131,7 @@ export default function DesignPage() {
               </div>
             </div>
 
-              <div className="mb-4 flex flex-wrap items-center gap-3 rounded-2xl bg-[#f8f6f3] p-3 text-sm text-gray-600">
+              <div className="mb-4 flex flex-wrap items-center gap-3 rounded-2xl bg-white p-3 text-sm text-gray-600 shadow-sm">
               <span>
                 รุ่นจอที่กำลังเลือก: <strong className="text-gray-900">{selectedModule?.name || "ยังไม่ได้เลือก"}</strong>
               </span>
@@ -895,9 +1151,23 @@ export default function DesignPage() {
             </div>
 
             <div
-              className="relative h-[min(78vh,820px)] overflow-hidden rounded-[28px] border-2 border-[#ecd7b8] bg-[#fffdf9] p-4 shadow-[inset_0_0_0_1px_rgba(228,215,195,0.45)]"
-              onPointerUp={() => setIsPointerDown(false)}
-              onPointerLeave={() => setIsPointerDown(false)}
+              className="relative h-[min(78vh,820px)] overflow-hidden rounded-[28px] border-2 border-[#e5e7eb] bg-white p-4 shadow-[inset_0_0_0_1px_rgba(229,231,235,0.8)]"
+              onPointerUp={() => {
+                if (selectionStart) {
+                  commitSelection();
+                  return;
+                }
+                setIsPointerDown(false);
+                lastDragCellRef.current = null;
+              }}
+              onPointerLeave={() => {
+                if (selectionStart) {
+                  commitSelection();
+                  return;
+                }
+                setIsPointerDown(false);
+                lastDragCellRef.current = null;
+              }}
             >
               <div className="mb-3 flex flex-wrap items-center justify-between gap-3 text-xs font-semibold text-gray-500">
                 <div className="flex flex-wrap items-center gap-3">
@@ -908,12 +1178,10 @@ export default function DesignPage() {
                   <span>
                     Scale {cellWidthPx} x {cellHeightPx} px / panel
                   </span>
-                  <span>
-                    Zoom {zoomMode === "fit" ? "Fit" : `${zoomMode}%`}
-                  </span>
+                  <span>Zoom {zoomMode}%</span>
                   <div className="flex flex-wrap items-center gap-2 rounded-full bg-white/90 px-2 py-1 shadow-sm">
                     {(
-                      ["fit", "75", "90", "100", "110", "125", "150", "175"] as ZoomMode[]
+                      ["75", "90", "100", "110", "125", "150", "175"] as ZoomMode[]
                     ).map((option) => (
                       <label
                         key={option}
@@ -931,25 +1199,21 @@ export default function DesignPage() {
                           onChange={() => setZoomMode(option)}
                           className="h-3 w-3"
                         />
-                        <span>{option === "fit" ? "Fit" : `${option}%`}</span>
+                        <span>{`${option}%`}</span>
                       </label>
                     ))}
                   </div>
                 </div>
                 <div className="rounded-full bg-white px-3 py-1 text-[11px] text-gray-600 shadow-sm">
-                  {isZoomedView
-                    ? "ซูมแล้วสามารถกดลากเพื่อเลื่อนขึ้นลงซ้ายขวาได้"
-                    : "ตารางจะขยายและซูมออกอัตโนมัติเมื่อวางจอใกล้ขอบ"}
+                  ซูมแล้วสามารถกดลากเพื่อเลื่อนขึ้นลงซ้ายขวาได้
                 </div>
               </div>
 
               <div
                 ref={boardViewportRef}
-                className={`h-[calc(100%-2.5rem)] rounded-[22px] bg-white p-6 ${
-                  isZoomedView ? "overflow-auto" : "overflow-hidden"
-                }`}
+                className="h-[calc(100%-2.5rem)] overflow-auto rounded-[22px] bg-white p-6"
                 onPointerDown={(event) => {
-                  if (!isZoomedView || !boardViewportRef.current) return;
+                  if (!boardViewportRef.current) return;
                   setIsPanning(true);
                   setPanStart({
                     x: event.clientX,
@@ -959,7 +1223,7 @@ export default function DesignPage() {
                   });
                 }}
                 onPointerMove={(event) => {
-                  if (!isZoomedView || !isPanning || !panStart || !boardViewportRef.current) {
+                  if (!isPanning || !panStart || !boardViewportRef.current) {
                     return;
                   }
                   boardViewportRef.current.scrollLeft =
@@ -976,17 +1240,11 @@ export default function DesignPage() {
                   setPanStart(null);
                 }}
                 style={{
-                  cursor: isZoomedView
-                    ? isPanning
-                      ? "grabbing"
-                      : "grab"
-                    : "default",
+                  cursor: isPanning ? "grabbing" : "grab",
                 }}
               >
                 <div
-                  className={`min-h-full min-w-full ${
-                    isZoomedView ? "" : "flex items-center justify-center"
-                  }`}
+                  className="min-h-full min-w-full"
                 >
                   <div
                     className="relative"
@@ -1012,8 +1270,42 @@ export default function DesignPage() {
                 </div> */}
 
                 <div
+                  ref={gridBoardRef}
                   className="relative ml-12 mt-10"
                   style={{ width: canvasWidthPx, height: canvasHeightPx }}
+                  onPointerDown={(event) => {
+                    if (!selectedModule) return;
+                    event.preventDefault();
+                    event.stopPropagation();
+                    const cell = getCellFromPointer(event.clientX, event.clientY);
+                    if (!cell) return;
+                    setIsPointerDown(true);
+                    setSelectionStart(cell);
+                    setSelectionEnd(cell);
+                    lastDragCellRef.current = `${cell.row}-${cell.col}`;
+                  }}
+                  onPointerMove={(event) => {
+                    if (!isPointerDown || !selectionStart) return;
+                    event.preventDefault();
+                    const cell = getCellFromPointer(event.clientX, event.clientY);
+                    if (!cell) return;
+                    const cellKey = `${cell.row}-${cell.col}`;
+                    if (lastDragCellRef.current === cellKey) return;
+                    lastDragCellRef.current = cellKey;
+                    setSelectionEnd(cell);
+                  }}
+                  onPointerUp={(event) => {
+                    if (!selectionStart) return;
+                    event.preventDefault();
+                    event.stopPropagation();
+                    commitSelection();
+                  }}
+                  onPointerCancel={() => {
+                    setIsPointerDown(false);
+                    setSelectionStart(null);
+                    setSelectionEnd(null);
+                    lastDragCellRef.current = null;
+                  }}
                 >
                   <div className="pointer-events-none absolute inset-x-0 -top-6 flex text-[11px] font-semibold text-gray-400">
                     {Array.from({ length: gridCols }).map((_, col) => (
@@ -1038,6 +1330,65 @@ export default function DesignPage() {
                     ))}
                   </div>
 
+                  <div className="pointer-events-none absolute inset-0 z-[1]">
+                    {Array.from({ length: gridCols }).map((_, col) => (
+                      <div key={`steel-vertical-group-${col}`}>
+                        <div
+                          className="absolute bg-[#cfcfcf] shadow-[inset_0_0_0_1px_rgba(72,72,72,0.22)]"
+                          style={{
+                            top: 0,
+                            left: col * cellWidthPx + steelVerticalBarLeftOffsetPx,
+                            width: steelVerticalBarWidthPx,
+                            height: canvasHeightPx,
+                          }}
+                        />
+                        <div
+                          className="absolute bg-[#cfcfcf] shadow-[inset_0_0_0_1px_rgba(72,72,72,0.22)]"
+                          style={{
+                            top: 0,
+                            left: col * cellWidthPx + steelVerticalBarOffsetPx,
+                            width: steelVerticalBarWidthPx,
+                            height: canvasHeightPx,
+                          }}
+                        />
+                      </div>
+                    ))}
+                    {Array.from({ length: gridRows }).map((_, row) => (
+                      <div key={`steel-horizontal-group-${row}`}>
+                        <div
+                          className="absolute bg-[#d8d8d8] shadow-[inset_0_0_0_1px_rgba(72,72,72,0.22)]"
+                          style={{
+                            top: row * cellHeightPx + steelTopBarOffsetPx,
+                            left: 0,
+                            width: canvasWidthPx,
+                            height: steelHorizontalBarHeightPx,
+                          }}
+                        />
+                        <div
+                          className="absolute bg-[#d8d8d8] shadow-[inset_0_0_0_1px_rgba(72,72,72,0.22)]"
+                          style={{
+                            top: row * cellHeightPx + steelBottomBarOffsetPx,
+                            left: 0,
+                            width: canvasWidthPx,
+                            height: steelHorizontalBarHeightPx,
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  {selectionBounds && (
+                    <div
+                      className="pointer-events-none absolute z-[3] border-2 border-dashed border-[#67f045] bg-[#67f045]/10"
+                      style={{
+                        top: selectionBounds.minRow * cellHeightPx,
+                        left: selectionBounds.minCol * cellWidthPx,
+                        width: selectionBounds.width * cellWidthPx,
+                        height: selectionBounds.height * cellHeightPx,
+                      }}
+                    />
+                  )}
+
                   <div
                     className="relative z-[2] grid"
                     style={{
@@ -1052,22 +1403,17 @@ export default function DesignPage() {
                       const col = index % gridCols;
                       const cell = placementMap.get(`${row}-${col}`);
                       const module = cell ? moduleLookup.get(cell.moduleId) : null;
+                      const hasSwitchingVisual = switchingCellKeys.has(`${row}-${col}`);
+                      const hasReceiverVisual = receiverCellKeys.has(`${row}-${col}`);
                       const pixelCols = module?.pixelWidth ?? 64;
                       const pixelRows = module?.pixelHeight ?? 32;
-                      const dotX = Math.max(1.4, Math.min(7, 100 / pixelCols));
-                      const dotY = Math.max(1.4, Math.min(7, 100 / pixelRows));
+                      const dotX = Math.max(3.4, Math.min(13, 190 / pixelCols));
+                      const dotY = Math.max(3.4, Math.min(13, 190 / pixelRows));
 
                       return (
                         <button
                           key={`${row}-${col}`}
                           type="button"
-                          onPointerDown={() => {
-                            setIsPointerDown(true);
-                            placeAt(row, col);
-                          }}
-                          onPointerEnter={() => {
-                            if (isPointerDown) placeAt(row, col);
-                          }}
                           onDragOver={(event) => {
                             event.preventDefault();
                             event.dataTransfer.dropEffect = "copy";
@@ -1091,29 +1437,66 @@ export default function DesignPage() {
                             }
                           }}
                           className={`relative border border-[#eddcc7] transition ${
-                            cell ? "bg-white" : "bg-white hover:bg-[#fff8ee]"
+                            cell
+                              ? "bg-transparent"
+                              : "bg-white hover:bg-[#fff8ee]"
                           }`}
                           style={{ width: cellWidthPx, height: cellHeightPx }}
                         >
                           {module && (
                             <>
-                              <div className="absolute inset-[4%] rounded-[2px] border-[3px] border-[#67d84c] bg-white shadow-[inset_0_0_0_1px_rgba(78,163,58,0.18)]">
-                                <div className="absolute inset-x-[14%] top-[16%] h-[8%] rounded-full bg-[#d2d2d2] shadow-[inset_0_0_0_1px_rgba(88,88,88,0.12)]" />
-                                <div className="absolute inset-x-[14%] bottom-[16%] h-[8%] rounded-full bg-[#d2d2d2] shadow-[inset_0_0_0_1px_rgba(88,88,88,0.12)]" />
-                                <div className="absolute inset-y-[10%] left-[18%] w-[8%] rounded-full bg-[#b7b7b7] shadow-[inset_0_0_0_1px_rgba(88,88,88,0.16)]" />
-                                <div className="absolute inset-y-[10%] right-[18%] w-[8%] rounded-full bg-[#b7b7b7] shadow-[inset_0_0_0_1px_rgba(88,88,88,0.16)]" />
+                              {hasSwitchingVisual && (
+                                <div className="pointer-events-none absolute inset-0 z-[0] flex items-center justify-end pr-[7%]">
+                                  <div className="relative h-[70%] w-[20%] rounded-[10px] border-[3px] border-[#e04a3a] bg-white/92 shadow-[0_0_0_1px_rgba(224,74,58,0.18)]">
+                                    <div className="absolute inset-x-[16%] top-[8%] h-[9%] rounded-sm border border-[#e04a3a] bg-[#fff5f3]" />
+                                    <div className="absolute inset-x-[14%] top-[21%] h-[31%] rounded-sm border border-[#e04a3a] bg-[radial-gradient(circle,rgba(224,74,58,0.7)_0_24%,rgba(224,74,58,0)_30%)] [background-size:6px_6px]" />
+                                    <div className="absolute inset-x-[21%] bottom-[28%] h-[15%] rounded-sm border border-[#e04a3a] bg-[#fff8f6]" />
+                                    <div className="absolute inset-x-[14%] bottom-[8%] flex justify-between">
+                                      {Array.from({ length: 4 }).map((_, terminalIndex) => (
+                                        <span
+                                          key={`switching-${row}-${col}-${terminalIndex}`}
+                                          className="h-[7px] w-[7px] rounded-full border border-[#e04a3a] bg-white"
+                                        />
+                                      ))}
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                              {hasReceiverVisual && (
+                                <div className="pointer-events-none absolute inset-0 z-[0] flex items-end justify-center pb-[10%]">
+                                  <div className="relative h-[46%] w-[24%] rounded-[8px] border-[3px] border-[#2f6fe6] bg-white/92 shadow-[0_0_0_1px_rgba(47,111,230,0.18)]">
+                                    <div className="absolute inset-x-[10%] top-[8%] h-[12%] rounded-sm border border-[#2f6fe6] bg-[#f3f7ff]" />
+                                    <div className="absolute inset-x-[16%] top-[24%] h-[42%] rounded-sm border border-[#2f6fe6] bg-[radial-gradient(circle,rgba(47,111,230,0.78)_0_18%,rgba(47,111,230,0)_24%)] [background-size:6px_6px]" />
+                                    <div className="absolute inset-y-[18%] left-[14%] w-[8%] rounded-sm border border-[#2f6fe6] bg-[#f8fbff]" />
+                                    <div className="absolute inset-y-[18%] right-[14%] w-[8%] rounded-sm border border-[#2f6fe6] bg-[#f8fbff]" />
+                                    <div className="absolute inset-x-[14%] bottom-[8%] flex justify-between">
+                                      {Array.from({ length: 3 }).map((_, portIndex) => (
+                                        <span
+                                          key={`receiver-${row}-${col}-${portIndex}`}
+                                          className="h-[7px] w-[7px] rounded-sm border border-[#2f6fe6] bg-white"
+                                        />
+                                      ))}
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                              <div className="pointer-events-none absolute inset-[4%] z-[1] rounded-[1px] border-[4px] border-[#67f045] bg-transparent shadow-[0_0_0_1px_rgba(90,120,92,0.18)]">
                                 <div
-                                  className="absolute inset-[10%] rounded-[1px]"
+                                  className="absolute inset-[1.5%] rounded-[1px]"
                                   style={{
-                                    backgroundColor: "#ffffff",
+                                    backgroundColor: "transparent",
                                     backgroundImage:
-                                      "radial-gradient(circle, rgba(94,103,96,0.92) 0 30%, rgba(94,103,96,0) 35%)",
+                                      "radial-gradient(circle, rgba(93,172,86,0.9) 0 44%, rgba(93,172,86,0) 54%)",
                                     backgroundSize: `${dotX}% ${dotY}%`,
                                     backgroundPosition: "center",
                                   }}
                                 />
+                                {/* <div className="absolute inset-x-[13%] top-[23%] h-[2px] bg-[rgba(32,32,32,0.78)]" />
+                                <div className="absolute inset-x-[13%] bottom-[23%] h-[2px] bg-[rgba(32,32,32,0.78)]" />
+                                <div className="absolute inset-y-[12%] left-[24%] w-[2px] bg-[rgba(32,32,32,0.78)]" />
+                                <div className="absolute inset-y-[12%] right-[24%] w-[2px] bg-[rgba(32,32,32,0.78)]" /> */}
                               </div>
-                              <div className="pointer-events-none absolute left-1 top-1 rounded bg-white/85 px-1 py-[1px] text-[8px] font-bold text-[#41b52c] shadow-sm sm:text-[9px]">
+                              <div className="pointer-events-none absolute left-1 top-1 z-[2] rounded bg-white/85 px-1 py-[1px] text-[8px] font-bold text-[#41b52c] shadow-sm sm:text-[9px]">
                                 {pixelCols} x {pixelRows}
                               </div>
                             </>
@@ -1123,17 +1506,6 @@ export default function DesignPage() {
                     })}
                   </div>
 
-                  {occupiedBounds && (
-                    <div
-                      className="pointer-events-none absolute border-[6px] border-[#775138] shadow-[0_0_0_2px_rgba(255,255,255,0.65)]"
-                      style={{
-                        top: occupiedBounds.minRow * cellHeightPx,
-                        left: occupiedBounds.minCol * cellWidthPx,
-                        width: occupiedBounds.width * cellWidthPx,
-                        height: occupiedBounds.height * cellHeightPx,
-                      }}
-                    />
-                  )}
                 </div>
                     </div>
                   </div>
@@ -1156,6 +1528,11 @@ export default function DesignPage() {
                   <div className="font-semibold text-gray-900">จำนวนการ์ด Receiver</div>
                   <div>
                     {estimatedReceiverCount} ตัว {selectedReceiver ? `• ${selectedReceiver.name}` : ""}
+                  </div>
+                  <div className="mt-1 text-xs text-gray-500">
+                    {selectedReceiver
+                      ? `1 การ์ด รองรับได้ แกน X ${receiverBlockCols} แผ่น • แกน Y ${receiverBlockRows} แผ่น`
+                      : ""}
                   </div>
                 </div>
                 <div className="rounded-2xl bg-gray-50 px-4 py-3">
