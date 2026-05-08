@@ -1,14 +1,13 @@
 import type { Metadata } from "next";
 
-import ProductDetailClient from "./ProductDetailClient";
+import ShareRedirectClient from "./ShareRedirectClient";
 
 const SITE_URL = "https://burithaiteam.com";
 const BACKEND_API_URL =
   process.env.BACKEND_API_URL || "http://158.173.159.107:5001";
 
 type PageProps = {
-  params: Promise<{ id: string }>;
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+  params: Promise<{ id: string; shareKey: string }>;
 };
 
 function toAbsoluteUrl(url?: string | null) {
@@ -52,9 +51,7 @@ async function fetchProductForMetadata(id: string) {
 
     const listJson = await listRes.json();
     const listProduct = Array.isArray(listJson?.data)
-      ? listJson.data.find(
-          (item: any) => String(item?.id_products) === String(id)
-        )
+      ? listJson.data.find((item: any) => String(item?.id_products) === String(id))
       : null;
 
     if (!listProduct) return detailProduct;
@@ -70,16 +67,14 @@ async function fetchProductForMetadata(id: string) {
       brand: detailProduct?.brand || listProduct?.brand,
     };
   } catch (error) {
-    console.error("Failed to fetch product metadata:", error);
+    console.error("Failed to fetch share metadata:", error);
     return null;
   }
 }
 
 function extractPriceText(product: any) {
   const directPrices = Array.isArray(product?.prices)
-    ? product.prices
-        .map((price: any) => Number(price))
-        .filter((price: number) => Number.isFinite(price))
+    ? product.prices.map((price: any) => Number(price)).filter((price: number) => Number.isFinite(price))
     : [];
 
   const inventoryPrices = Array.isArray(product?.variants)
@@ -100,18 +95,27 @@ function extractPriceText(product: any) {
   return `${Math.min(...prices).toLocaleString("th-TH")} - ${Math.max(...prices).toLocaleString("th-TH")}`;
 }
 
-export async function generateMetadata({ params, searchParams }: PageProps): Promise<Metadata> {
-  const { id } = await params;
-  const resolvedSearchParams = searchParams ? await searchParams : {};
-  const sharePreviewValue = Array.isArray(resolvedSearchParams?.sharePreview)
-    ? resolvedSearchParams.sharePreview[0]
-    : resolvedSearchParams?.sharePreview;
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { id, shareKey } = await params;
   const product = await fetchProductForMetadata(id);
+  const productPageUrl = `${SITE_URL}/detail_product/${id}`;
+  const shareUrl = `${SITE_URL}/share/product/${id}/${encodeURIComponent(shareKey)}`;
+  const previewImage = appendCacheParam(
+    `${SITE_URL}/detail_product/${id}/opengraph-image`,
+    shareKey
+  );
 
   if (!product) {
     return {
       title: "สินค้า | BuriThaiTeam Store",
       description: "รายละเอียดสินค้าจาก BuriThaiTeam Store",
+      alternates: { canonical: shareUrl },
+      openGraph: {
+        title: "สินค้า | BuriThaiTeam Store",
+        description: "รายละเอียดสินค้าจาก BuriThaiTeam Store",
+        url: shareUrl,
+        images: [{ url: previewImage, width: 1200, height: 630, alt: "BuriThaiTeam Store" }],
+      },
     };
   }
 
@@ -121,36 +125,17 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
     product.short_description ||
     product.description ||
     "รายละเอียดสินค้าจาก BuriThaiTeam Store";
-  const fullDescription = priceText
-    ? `${description} ราคา ฿${priceText}`
-    : description;
-  const productImages = Array.isArray(product.images) ? product.images : [];
-  const coverImageUrl =
-    productImages.find(
-      (item: any) =>
-        item?.url && !String(item.url).toLowerCase().endsWith(".mp4")
-    )?.url || product.avatar;
-  const baseProductImage = toAbsoluteUrl(coverImageUrl);
-  const productUrl = sharePreviewValue
-    ? `${SITE_URL}/detail_product/${id}?sharePreview=${encodeURIComponent(sharePreviewValue)}`
-    : `${SITE_URL}/detail_product/${id}`;
-  const productImage = appendCacheParam(baseProductImage, sharePreviewValue);
-  const previewImage = appendCacheParam(
-    `${SITE_URL}/detail_product/${id}/opengraph-image`,
-    sharePreviewValue
-  );
+  const fullDescription = priceText ? `${description} ราคา ฿${priceText}` : description;
   const titleWithPrice = priceText ? `${title} | ราคา ฿${priceText}` : title;
 
   return {
     title: `${titleWithPrice} | BuriThaiTeam Store`,
     description: fullDescription,
-    alternates: {
-      canonical: productUrl,
-    },
+    alternates: { canonical: shareUrl },
     openGraph: {
       title: titleWithPrice,
       description: fullDescription,
-      url: productUrl,
+      url: shareUrl,
       siteName: "BuriThaiTeam Store",
       type: "website",
       images: [
@@ -158,11 +143,6 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
           url: previewImage,
           width: 1200,
           height: 630,
-          alt: title,
-          type: "image/png",
-        },
-        {
-          url: productImage,
           alt: title,
         },
       ],
@@ -177,11 +157,12 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
       "product:price:amount": priceText ?? "",
       "product:price:currency": "THB",
       "product:image": previewImage,
+      "og:product_page": productPageUrl,
     },
   };
 }
 
-export default async function ProductDetailPage({ params }: PageProps) {
+export default async function ShareProductPage({ params }: PageProps) {
   const { id } = await params;
-  return <ProductDetailClient id={id} />;
+  return <ShareRedirectClient targetUrl={`${SITE_URL}/detail_product/${id}`} />;
 }

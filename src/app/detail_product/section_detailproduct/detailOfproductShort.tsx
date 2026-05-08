@@ -1,24 +1,39 @@
 "use client";
 
 import { useRouter, useParams, useSearchParams } from "next/navigation";
-import React, { useEffect, useRef, useState } from "react";
-import { Heart } from "lucide-react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Copy, Heart, Share2, X } from "lucide-react";
+import { FaFacebookF, FaInstagram, FaTiktok, FaWhatsapp } from "react-icons/fa";
 import { useCart } from "@/app/context/CartContext";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
 export default function DetailOfProductShort({ product }: any) {
-  if (!product) return <div>กำลังโหลดสินค้า...</div>;
+  const router = useRouter();
+  const { id } = useParams();
+  const searchParams = useSearchParams();
+  const handledActionRef = useRef<string | null>(null);
+  const { addToCart } = useCart();
 
-  const hasVisibleVariant = Array.isArray(product?.variants)
-    ? product.variants.some((variant: any) => `${variant?.variant_name ?? ""}`.trim().length > 0)
-    : false;
+  const productVariants = useMemo(
+    () => (Array.isArray(product?.variants) ? product.variants : []),
+    [product?.variants],
+  );
+
+  const hasVisibleVariant = productVariants.some(
+    (variant: any) => `${variant?.variant_name ?? ""}`.trim().length > 0,
+  );
 
   const extractPriceRange = (product: any) => {
-    if (!product?.variants) return "0";
+    const variants = Array.isArray(product?.variants) ? product.variants : [];
+    if (variants.length === 0) return "0";
 
-    const prices = product.variants
-      .flatMap((v: any) => v.inventories.map((i: any) => Number(i.price)))
+    const prices = variants
+      .flatMap((v: any) =>
+        Array.isArray(v?.inventories)
+          ? v.inventories.map((i: any) => Number(i.price))
+          : [],
+      )
       .filter((n: number) => !isNaN(n));
 
     if (prices.length <= 0) return "0";
@@ -30,23 +45,26 @@ export default function DetailOfProductShort({ product }: any) {
   };
 
   const priceText = extractPriceRange(product);
+  const currentProductId = Number(product?.id_products || 0);
 
   const [quantity, setQuantity] = useState(1);
 
   const increaseQty = () => setQuantity((q) => q + 1);
   const decreaseQty = () => setQuantity((q) => (q > 1 ? q - 1 : 1));
 
-  const { addToCart } = useCart();
-
-  // ✅ รวม inventories
-  const allInventories =
-    product?.variants?.flatMap((v: any) =>
-      v.inventories.map((inv: any) => ({
-        ...inv,
-        variant_name: v.variant_name,
-        variant_id: v.variant_id,
-      })),
-    ) || [];
+  const allInventories = useMemo(
+    () =>
+      productVariants.flatMap((v: any) =>
+        Array.isArray(v?.inventories)
+          ? v.inventories.map((inv: any) => ({
+              ...inv,
+              variant_name: v.variant_name,
+              variant_id: v.variant_id,
+            }))
+          : [],
+      ),
+    [productVariants],
+  );
 
   // ❌ ไม่มี default แล้ว
   const [selectedInventory, setSelectedInventory] = useState<any>(null);
@@ -66,13 +84,11 @@ export default function DetailOfProductShort({ product }: any) {
     ? selectedInventory.price.toLocaleString()
     : priceText;
 
-  const router = useRouter();
-  const { id } = useParams();
-  const searchParams = useSearchParams();
-  const handledActionRef = useRef<string | null>(null);
-
   const [wishlistLoading, setWishlistLoading] = useState(false);
   const [wishlistMsg, setWishlistMsg] = useState("");
+  const [isShareOpen, setIsShareOpen] = useState(false);
+  const [shareUrl, setShareUrl] = useState("");
+  const [copyMsg, setCopyMsg] = useState("");
 
   const clearPendingActionParams = () => {
     const params = new URLSearchParams(searchParams.toString());
@@ -98,8 +114,6 @@ export default function DetailOfProductShort({ product }: any) {
     const actionVariantId = Number(searchParams.get("variantId") || "0");
     const actionInventoryId = Number(searchParams.get("inventoryId") || "0");
     const actionQty = Math.max(1, Number(searchParams.get("qty") || "1"));
-    const currentProductId = Number(product.id_products);
-
     if (!currentProductId || actionProductId !== currentProductId) return;
 
     const key = `${action}:${actionProductId}:${actionVariantId}:${actionInventoryId}:${actionQty}`;
@@ -137,7 +151,20 @@ export default function DetailOfProductShort({ product }: any) {
         alert("ไม่สามารถเพิ่มสินค้าหลัง login ได้ กรุณาลองใหม่");
       }
     })();
-  }, [searchParams, product.id_products, allInventories, addToCart, id, router]);
+  }, [searchParams, currentProductId, allInventories, addToCart, id, router]);
+
+  useEffect(() => {
+    if (!isShareOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsShareOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isShareOpen]);
 
   const handleAddToCartClick = () => {
     if (!selectedInventory) {
@@ -152,7 +179,7 @@ export default function DetailOfProductShort({ product }: any) {
       const pid = Array.isArray(id) ? id[0] : String(id);
       const redirectTarget =
         `/detail_product/${pid}?action=add_to_cart` +
-        `&productId=${Number(product.id_products)}` +
+        `&productId=${currentProductId}` +
         `&variantId=${variantId}` +
         `&inventoryId=${inventoryId}` +
         `&qty=${quantity}`;
@@ -160,7 +187,7 @@ export default function DetailOfProductShort({ product }: any) {
       return;
     }
 
-    addToCart(Number(product.id_products), quantity, variantId, inventoryId);
+    addToCart(currentProductId, quantity, variantId, inventoryId);
   };
 
   const handleBuyNow = async () => {
@@ -175,7 +202,7 @@ export default function DetailOfProductShort({ product }: any) {
       const pid = Array.isArray(id) ? id[0] : String(id);
       const redirectTarget =
         `/detail_product/${pid}?action=buy_now` +
-        `&productId=${Number(product.id_products)}` +
+        `&productId=${currentProductId}` +
         `&variantId=${variantId}` +
         `&inventoryId=${inventoryId}` +
         `&qty=${quantity}`;
@@ -185,7 +212,7 @@ export default function DetailOfProductShort({ product }: any) {
 
     try {
       await addToCart(
-        Number(product.id_products),
+        currentProductId,
         quantity,
         variantId,
         inventoryId
@@ -202,7 +229,7 @@ export default function DetailOfProductShort({ product }: any) {
       setWishlistMsg("");
       setWishlistLoading(true);
 
-      const productId = Number(product.id_products);
+      const productId = currentProductId;
 
       const res = await fetch(`${API_URL}/api/wish-list`, {
         method: "POST",
@@ -236,6 +263,111 @@ export default function DetailOfProductShort({ product }: any) {
       setTimeout(() => setWishlistMsg(""), 2000);
     }
   };
+
+  const productTitle = product?.name || "สินค้า";
+
+  const buildFacebookShareUrl = () => {
+    const productId = String(product?.id_products ?? id ?? "product");
+    return `https://burithaiteam.com/share-card/product/${productId}/${productId}`;
+  };
+
+  const buildProductUrl = () => {
+    const productId = String(product?.id_products ?? id ?? "product");
+    return `https://burithaiteam.com/detail_product/${productId}`;
+  };
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    setShareUrl(buildFacebookShareUrl());
+  }, [id, currentProductId]);
+
+  const copyShareLink = async () => {
+    const urlToCopy = buildProductUrl();
+    try {
+      await navigator.clipboard.writeText(urlToCopy);
+      setCopyMsg("คัดลอกลิงก์แล้ว");
+    } catch (error) {
+      console.error("Copy link failed:", error);
+      setCopyMsg("คัดลอกลิงก์ไม่สำเร็จ");
+    } finally {
+      window.setTimeout(() => setCopyMsg(""), 1800);
+    }
+  };
+
+  const handleOpenShareModal = () => {
+    setShareUrl(buildFacebookShareUrl());
+    setIsShareOpen(true);
+  };
+
+  const openShareWindow = async (type: "facebook" | "whatsapp" | "instagram" | "tiktok") => {
+    const productUrl = buildProductUrl();
+    const facebookShareUrl = shareUrl || buildFacebookShareUrl();
+    const shareSummary = `ดูสินค้า ${productTitle}${priceText ? ` ราคา ฿${priceText}` : ""}`;
+    const encodedText = encodeURIComponent(`${shareSummary} ${productUrl}`);
+
+    let targetUrl = "";
+
+    if (type === "facebook") {
+      const encodedUrl = encodeURIComponent(facebookShareUrl);
+      const encodedQuote = encodeURIComponent(shareSummary);
+      targetUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}&quote=${encodedQuote}`;
+    }
+
+    if (type === "whatsapp") {
+      targetUrl = `https://wa.me/?text=${encodedText}`;
+    }
+
+    if (type === "instagram") {
+      await copyShareLink();
+      targetUrl = "https://www.instagram.com/create/select/";
+    }
+
+    if (type === "tiktok") {
+      await copyShareLink();
+      targetUrl = "https://www.tiktok.com/upload";
+    }
+
+    if (type === "facebook") {
+      window.open(targetUrl, "_blank");
+      return;
+    }
+
+    window.open(targetUrl, "_blank", "noopener,noreferrer,width=900,height=700");
+  };
+
+  const shareActions = [
+    {
+      key: "facebook",
+      label: "Facebook",
+      icon: FaFacebookF,
+      className: "bg-[#1877F2] text-white",
+      note: "แชร์ลิงก์ไปยัง Facebook",
+    },
+    {
+      key: "whatsapp",
+      label: "WhatsApp",
+      icon: FaWhatsapp,
+      className: "bg-[#25D366] text-white",
+      note: "แชร์ลิงก์ไปยัง WhatsApp",
+    },
+    {
+      key: "instagram",
+      label: "Instagram",
+      icon: FaInstagram,
+      className:
+        "bg-gradient-to-br from-[#F58529] via-[#DD2A7B] to-[#515BD4] text-white",
+      note: "คัดลอกลิงก์แล้วเปิดหน้าโพสต์ Instagram",
+    },
+    {
+      key: "tiktok",
+      label: "TikTok",
+      icon: FaTiktok,
+      className: "bg-black text-white",
+      note: "คัดลอกลิงก์แล้วเปิดหน้าอัปโหลด TikTok",
+    },
+  ] as const;
+
+  if (!product) return <div>กำลังโหลดสินค้า...</div>;
 
   return (
     <div className="p-3 sm:p-4 bg-white rounded shadow">
@@ -320,21 +452,107 @@ export default function DetailOfProductShort({ product }: any) {
         {product.short_description ?? "ไม่มีรายละเอียดสินค้า"}
       </p>
 
-      <button
-        onClick={handleAddWishlist}
-        disabled={wishlistLoading}
-        className={`px-6 py-2 rounded flex items-center gap-2 text-white ${
-          wishlistLoading
-            ? "bg-gray-400 cursor-not-allowed"
-            : "bg-black hover:bg-gray-800"
-        }`}
-      >
-        <Heart className="w-4 h-4" />
-        {wishlistLoading ? "กำลังเพิ่มลงใน Wishlist..." : "เพิ่มใน Wishlist"}
-      </button>
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          onClick={handleAddWishlist}
+          disabled={wishlistLoading}
+          className={`px-6 py-2 rounded flex items-center gap-2 text-white ${
+            wishlistLoading
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-black hover:bg-gray-800"
+          }`}
+        >
+          <Heart className="w-4 h-4" />
+          {wishlistLoading ? "กำลังเพิ่มลงใน Wishlist..." : "เพิ่มใน Wishlist"}
+        </button>
+
+        <button
+          type="button"
+          onClick={handleOpenShareModal}
+          className="px-6 py-2 rounded flex items-center gap-2 border border-gray-300 text-gray-800 hover:bg-gray-50"
+        >
+          <Share2 className="w-4 h-4" />
+          แชร์สินค้า
+        </button>
+      </div>
 
       {wishlistMsg && (
         <p className="mt-2 text-sm text-green-700">{wishlistMsg}</p>
+      )}
+
+      {isShareOpen && (
+        <div
+          className="fixed inset-0 z-[1200] flex items-center justify-center bg-black/60 p-4"
+          onClick={() => setIsShareOpen(false)}
+        >
+          <div
+            className="w-full max-w-xl rounded-2xl bg-white shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">แชร์สินค้า</h3>
+                <p className="text-sm text-gray-500">เลือกช่องทางที่ต้องการแชร์สินค้า</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsShareOpen(false)}
+                className="rounded-full p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+                aria-label="ปิดหน้าต่างแชร์สินค้า"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="space-y-5 px-5 py-5">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {shareActions.map((action) => {
+                  const Icon = action.icon;
+                  return (
+                    <button
+                      key={action.key}
+                      type="button"
+                      onClick={() =>
+                        openShareWindow(
+                          action.key as "facebook" | "whatsapp" | "instagram" | "tiktok"
+                        )
+                      }
+                      className="flex flex-col items-center gap-2 rounded-2xl border border-gray-200 px-3 py-4 hover:border-gray-300 hover:bg-gray-50"
+                    >
+                      <span
+                        className={`flex h-12 w-12 items-center justify-center rounded-full text-xl ${action.className}`}
+                      >
+                        <Icon />
+                      </span>
+                      <span className="text-sm font-medium text-gray-800">{action.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="space-y-3 rounded-2xl bg-gray-50 p-4">
+                <p className="text-sm font-medium text-gray-700">ลิงก์สินค้า</p>
+                <div className="rounded-xl border border-gray-200 bg-white px-3 py-3 text-sm text-gray-700 break-all">
+                  {buildProductUrl()}
+                </div>
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-xs text-gray-500">
+                    Instagram และ TikTok จะคัดลอกลิงก์ให้ก่อน แล้วเปิดหน้าโพสต์/อัปโหลดของบัญชีที่ล็อกอินไว้
+                  </p>
+                  <button
+                    type="button"
+                    onClick={copyShareLink}
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
+                  >
+                    <Copy className="h-4 w-4" />
+                    คัดลอกลิงก์
+                  </button>
+                </div>
+                {copyMsg && <p className="text-sm text-green-700">{copyMsg}</p>}
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
