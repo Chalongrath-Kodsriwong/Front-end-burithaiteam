@@ -4,20 +4,8 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       {
-        userAgent: "facebookexternalhit",
-        disallow: "",
-      },
-      {
-        userAgent: "Facebot",
-        disallow: "",
-      },
-      {
-        userAgent: "facebookcatalog",
-        disallow: "",
-      },
-      {
         userAgent: "*",
-        disallow: "",
+        allow: "/",
       },
     ],
     sitemap: "https://burithaiteam.com/sitemap.xml",

@@ -7,7 +7,7 @@ services:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
         NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_CLIENT_ID}
         BACKEND_API_URL: ${BACKEND_API_URL}
-    image: papopsan02749/burithai_frontend:2.1.2
+    image: burithiateamstoreinfo/burithaiteam-frontend:2.4.43
     container_name: burithai_frontend
     restart: always
     ports:
