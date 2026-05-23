@@ -9,6 +9,11 @@ import GlobalAuthGuard from "./components/GlobalAuthChecker";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://burithaiteam.com"),
+  verification: {
+    other: {
+      "facebook-domain-verification": ["dvkiqpln0jbtvoa8cbaayn1mzz4xrr"],
+    },
+  },
   title: "BuriThaiTeam Store",
   description:
     "BuriThaiTeam Store ผู้เชี่ยวชาญด้านจอ LED Module อุปกรณ์ควบคุม และงานติดตั้งจอ LED คุณภาพสูง",

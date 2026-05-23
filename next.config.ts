@@ -17,6 +17,16 @@ const nextConfig: NextConfig = {
     ],
   },
 
+  async redirects() {
+    return [
+      {
+        source: "/detail_product",
+        destination: "/product",
+        permanent: false,
+      },
+    ];
+  },
+
   // ✅ แก้ Google Popup Cross-Origin
   async headers() {
     return [

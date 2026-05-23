@@ -3,6 +3,8 @@
 import { useRouter, useParams, useSearchParams } from "next/navigation";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Heart } from "lucide-react";
+import { FaFacebook, FaInstagram, FaWeixin, FaShareAlt, FaCopy, FaCheck } from "react-icons/fa";
+import { SiLine } from "react-icons/si";
 import { useCart } from "@/app/context/CartContext";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
@@ -207,6 +209,59 @@ export default function DetailOfProductShort({ product }: any) {
     }
   };
 
+  const pid = Array.isArray(id) ? id[0] : String(id);
+  const productUrl = `https://burithaiteam.com/detail_product/${pid}`;
+
+  const [showShare, setShowShare] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const shareRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (shareRef.current && !shareRef.current.contains(e.target as Node)) {
+        setShowShare(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const handleCopyUrl = async () => {
+    await navigator.clipboard.writeText(productUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleShareFacebook = async () => {
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (isIOS && navigator.share) {
+      try {
+        await navigator.share({ title: product?.name ?? "สินค้า BuriThaiTeam", url: productUrl });
+        return;
+      } catch { /* cancelled */ }
+    }
+    window.location.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(productUrl)}`;
+  };
+
+  const handleShareLine = () => {
+    window.open(
+      `https://line.me/R/msg/text/?${encodeURIComponent(productUrl)}`,
+      "_blank", "noopener,noreferrer"
+    );
+  };
+
+  const handleShareInstagram = async () => {
+    await navigator.clipboard.writeText(productUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleShareWeChat = async () => {
+    await navigator.clipboard.writeText(productUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   const handleAddWishlist = async () => {
     try {
       setWishlistMsg("");
@@ -345,6 +400,71 @@ export default function DetailOfProductShort({ product }: any) {
           <Heart className="w-4 h-4" />
           {wishlistLoading ? "กำลังเพิ่มลงใน Wishlist..." : "เพิ่มใน Wishlist"}
         </button>
+
+        {/* Share button + panel */}
+        <div className="relative" ref={shareRef}>
+          <button
+            onClick={() => setShowShare((v) => !v)}
+            className="px-6 py-2 rounded flex items-center gap-2 text-white bg-gray-700 hover:bg-gray-600"
+          >
+            <FaShareAlt className="w-4 h-4" />
+            แชร์
+          </button>
+
+          {showShare && (
+            <div className="absolute bottom-full mb-2 left-0 z-50 bg-white rounded-xl shadow-xl border border-gray-100 p-4 w-72">
+              <p className="text-sm font-semibold text-gray-700 mb-3">แชร์สินค้านี้</p>
+
+              {/* Platform icons */}
+              <div className="flex gap-4 mb-4">
+                <button onClick={handleShareFacebook} className="flex flex-col items-center gap-1">
+                  <div className="w-12 h-12 rounded-full bg-[#1877F2] flex items-center justify-center text-white">
+                    <FaFacebook className="w-6 h-6" />
+                  </div>
+                  <span className="text-xs text-gray-600">Facebook</span>
+                </button>
+
+                <button onClick={handleShareLine} className="flex flex-col items-center gap-1">
+                  <div className="w-12 h-12 rounded-full bg-[#00B900] flex items-center justify-center text-white">
+                    <SiLine className="w-6 h-6" />
+                  </div>
+                  <span className="text-xs text-gray-600">Line</span>
+                </button>
+
+                <button onClick={handleShareInstagram} className="flex flex-col items-center gap-1">
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center text-white"
+                    style={{ background: "linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045)" }}>
+                    <FaInstagram className="w-6 h-6" />
+                  </div>
+                  <span className="text-xs text-gray-600">Instagram</span>
+                </button>
+
+                <button onClick={handleShareWeChat} className="flex flex-col items-center gap-1">
+                  <div className="w-12 h-12 rounded-full bg-[#07C160] flex items-center justify-center text-white">
+                    <FaWeixin className="w-6 h-6" />
+                  </div>
+                  <span className="text-xs text-gray-600">WeChat</span>
+                </button>
+              </div>
+
+              {/* URL + copy */}
+              <div className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2 border border-gray-200">
+                <span className="text-xs text-gray-500 flex-1 truncate">{productUrl}</span>
+                <button
+                  onClick={handleCopyUrl}
+                  className="flex items-center gap-1 text-xs font-medium whitespace-nowrap text-blue-600 hover:text-blue-800"
+                >
+                  {copied ? <FaCheck className="w-3 h-3 text-green-600" /> : <FaCopy className="w-3 h-3" />}
+                  {copied ? "คัดลอกแล้ว" : "คัดลอก"}
+                </button>
+              </div>
+
+              {copied && (
+                <p className="mt-2 text-xs text-green-600">คัดลอก URL แล้ว วางใน IG / WeChat ได้เลย</p>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {wishlistMsg && (
