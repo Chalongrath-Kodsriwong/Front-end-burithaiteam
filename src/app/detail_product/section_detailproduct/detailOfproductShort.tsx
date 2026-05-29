@@ -3,8 +3,9 @@
 import { useRouter, useParams, useSearchParams } from "next/navigation";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Heart } from "lucide-react";
-import { FaFacebook, FaInstagram, FaWeixin, FaShareAlt, FaCopy, FaCheck } from "react-icons/fa";
+import { FaFacebook, FaInstagram, FaWeixin } from "react-icons/fa";
 import { SiLine } from "react-icons/si";
+import { Share2, Copy, Check } from "lucide-react";
 import { useCart } from "@/app/context/CartContext";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
@@ -407,7 +408,7 @@ export default function DetailOfProductShort({ product }: any) {
             onClick={() => setShowShare((v) => !v)}
             className="px-6 py-2 rounded flex items-center gap-2 text-white bg-gray-700 hover:bg-gray-600"
           >
-            <FaShareAlt className="w-4 h-4" />
+            <Share2 className="w-4 h-4" />
             แชร์
           </button>
 
@@ -454,7 +455,7 @@ export default function DetailOfProductShort({ product }: any) {
                   onClick={handleCopyUrl}
                   className="flex items-center gap-1 text-xs font-medium whitespace-nowrap text-blue-600 hover:text-blue-800"
                 >
-                  {copied ? <FaCheck className="w-3 h-3 text-green-600" /> : <FaCopy className="w-3 h-3" />}
+                  {copied ? <Check className="w-3 h-3 text-green-600" /> : <Copy className="w-3 h-3" />}
                   {copied ? "คัดลอกแล้ว" : "คัดลอก"}
                 </button>
               </div>

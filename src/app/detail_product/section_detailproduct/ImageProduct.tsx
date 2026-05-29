@@ -1,6 +1,7 @@
 "use client";
 import "flowbite";
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
 
 import { MediaItem } from "@/types/Imageproduct";
 
@@ -136,11 +137,14 @@ export default function ImageProduct({ product }: any) {
             onClick={openPreview}
             className="w-full mb-4 rounded-lg overflow-hidden shadow group"
           >
-            <img
+            <Image
               src={selected.url}
               alt={product.name}
-              onError={(e) => (e.currentTarget.src = "/image/logo_white.jpeg")}
+              width={520}
+              height={350}
               className="w-full h-64 sm:h-72 md:h-[350px] object-cover transition duration-300 group-hover:scale-[1.02]"
+              unoptimized={selected.url.startsWith("http")}
+              onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/image/logo_white.jpeg"; }}
             />
           </button>
         )}
@@ -174,11 +178,14 @@ export default function ImageProduct({ product }: any) {
                   </div>
                 </div>
               ) : (
-                <img
+                <Image
                   src={m.url}
                   alt={`thumb-${idx}`}
-                  onError={(e) => (e.currentTarget.src = "/image/logo_white.jpeg")}
+                  width={80}
+                  height={80}
                   className="w-full h-full object-cover"
+                  unoptimized={m.url.startsWith("http")}
+                  onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/image/logo_white.jpeg"; }}
                 />
               )}
             </button>
@@ -224,11 +231,14 @@ export default function ImageProduct({ product }: any) {
             onClick={(event) => event.stopPropagation()}
           >
             <div className="w-full overflow-hidden rounded-2xl bg-white shadow-2xl">
-              <img
+              <Image
                 src={selected.url}
                 alt={product.name}
-                onError={(e) => (e.currentTarget.src = "/image/logo_white.jpeg")}
+                width={1200}
+                height={900}
                 className="max-h-[78vh] w-full object-contain bg-white"
+                unoptimized={selected.url.startsWith("http")}
+                onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/image/logo_white.jpeg"; }}
               />
             </div>
 
@@ -250,11 +260,14 @@ export default function ImageProduct({ product }: any) {
                           : "border-gray-300 hover:border-gray-400"
                       }`}
                     >
-                      <img
+                      <Image
                         src={item.url}
                         alt={`preview-thumb-${idx}`}
-                        onError={(e) => (e.currentTarget.src = "/image/logo_white.jpeg")}
+                        width={80}
+                        height={80}
                         className="w-full h-full object-cover"
+                        unoptimized={item.url.startsWith("http")}
+                        onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/image/logo_white.jpeg"; }}
                       />
                     </button>
                   ))}

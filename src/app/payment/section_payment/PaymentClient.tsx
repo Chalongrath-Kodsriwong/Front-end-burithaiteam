@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { MdDriveFolderUpload } from "react-icons/md";
+import { FolderUp } from "lucide-react";
 import Link from "next/link";
 
 import { useRouter } from "next/navigation"; // นำเข้า useRouter สำหรับการทำการ redirect
@@ -737,7 +737,7 @@ export default function PaymentPage() {
                   className="mb-4 border-2 border-gray-400 rounded-lg p-2 pr-10 w-full text-sm hover:bg-gray-200 cursor-pointer"
                 />
 
-                <MdDriveFolderUpload
+                <FolderUp
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none"
                   size={20}
                 />

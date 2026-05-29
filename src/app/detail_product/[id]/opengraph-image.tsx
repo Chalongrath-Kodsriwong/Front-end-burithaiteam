@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 
 const BACKEND_API_URL =
-  process.env.BACKEND_API_URL || "http://158.173.159.107:5001";
+  process.env.BACKEND_API_URL || "http://localhost:5001";
 const SITE_URL = "https://burithaiteam.com";
 
 export const size = { width: 1200, height: 630 };

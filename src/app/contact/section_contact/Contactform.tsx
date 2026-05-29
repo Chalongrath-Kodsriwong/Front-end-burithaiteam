@@ -1,6 +1,7 @@
 "use client";
 import "flowbite";
-import { FaFacebook, FaLine, FaPhoneAlt } from "react-icons/fa";
+import { FaFacebook, FaLine } from "react-icons/fa";
+import { Phone } from "lucide-react";
 import { SiWechat } from "react-icons/si";
 
 export default function ContactForm() {
@@ -22,7 +23,7 @@ export default function ContactForm() {
     // },
     {
       name: "Phone",
-      icon: FaPhoneAlt,
+      icon: Phone,
       href: "tel:087-368-3548",
       phone: "087-368-3548",
     },

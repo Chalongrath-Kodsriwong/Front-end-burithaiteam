@@ -1,7 +1,7 @@
 "use client";
 import "flowbite";
 import { useEffect, useMemo, useState } from "react";
-import { BookmarkIcon } from "@heroicons/react/24/solid";
+import { Bookmark } from "lucide-react";
 import Link from "next/link";
 
 import { ApiProduct, ProductUI } from "@/types/Newproduct";
@@ -94,7 +94,7 @@ export default function Newproducts() {
     <div className="pb-3">
       <h2 className="text-2xl font-bold flex items-center mb-4">
         <div className="relative w-28 h-16">
-          <BookmarkIcon className="w-full h-full text-red-600 rotate-[4.71rad]" />
+          <Bookmark className="w-full h-full text-red-600 rotate-[4.71rad]" fill="currentColor" />
           <span className="absolute inset-0 flex items-center justify-center text-white text-xl font-bold -translate-x-1">
             New
           </span>

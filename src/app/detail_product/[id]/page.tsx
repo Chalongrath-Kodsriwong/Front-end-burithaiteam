@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 const SITE_URL = "https://burithaiteam.com";
 const BACKEND_API_URL =
-  process.env.BACKEND_API_URL || "http://158.173.159.107:5001";
+  process.env.BACKEND_API_URL || "http://localhost:5001";
 
 type PageProps = {
   params: Promise<{ id: string }>;

@@ -1,6 +1,6 @@
 "use client";
 import "flowbite";
-import { FaMapMarkerAlt, FaEnvelope, FaPhone } from "react-icons/fa";
+import { MapPin, Mail, Phone } from "lucide-react";
 
 export default function ContactAddress() {
   return (
@@ -10,7 +10,7 @@ export default function ContactAddress() {
 
         <div className="space-y-8 text-xl">
           <p className="flex items-center">
-            <FaMapMarkerAlt className="mr-5 h-auto w-8" />
+            <MapPin className="mr-5 h-auto w-8" />
             หมู่บ้าน นราอิลิแกนซ์ 300/81 ซอย 3, หมู่ 5 ต.บ้านกรด อ.บางปะอิน
             จ.พระนครศรีอยุธยา 13160 Thailand
           </p>
@@ -22,7 +22,7 @@ export default function ContactAddress() {
               rel="noopener noreferrer"
               className="inline-flex items-center whitespace-nowrap hover:underline"
             >
-              <FaEnvelope className="mr-5 h-auto w-8" />
+              <Mail className="mr-5 h-auto w-8" />
               <span>burithiateamstore.info@gmail.com</span>
             </a>
             <a
@@ -40,7 +40,7 @@ export default function ContactAddress() {
               href="tel:+66873683548"
               className="inline-flex items-center whitespace-nowrap underline-offset-4 hover:underline"
             >
-              <FaPhone className="mr-5 h-auto w-8" />
+              <Phone className="mr-5 h-auto w-8" />
               <span>+66 087-368-3548</span>
             </a>
             <a

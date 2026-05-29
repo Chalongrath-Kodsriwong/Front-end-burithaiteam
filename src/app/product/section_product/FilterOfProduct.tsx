@@ -3,7 +3,7 @@ import "flowbite";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { AiOutlineAppstore, AiOutlineMenu } from "react-icons/ai";
+import { LayoutGrid, List } from "lucide-react";
 
 export default function FilterProduct({ category }: { category: string }) {
   const [isClient, setIsClient] = useState(false);
@@ -162,8 +162,8 @@ export default function FilterProduct({ category }: { category: string }) {
               </select>
             </div>
 
-            <AiOutlineAppstore className="text-[11px] sm:text-base shrink-0" />
-            <AiOutlineMenu className="text-[11px] sm:text-base shrink-0" />
+            <LayoutGrid className="text-[11px] sm:text-base shrink-0" />
+            <List className="text-[11px] sm:text-base shrink-0" />
           </div>
         </div>
       )}

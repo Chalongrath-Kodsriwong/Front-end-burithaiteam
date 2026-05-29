@@ -2,7 +2,7 @@
 import "flowbite";
 import { useEffect, useState } from "react";
 
-import { AiOutlineAppstore, AiOutlineMenu } from "react-icons/ai";
+import { LayoutGrid, List } from "lucide-react";
 
 import { useSearchParams } from "next/navigation";
 
