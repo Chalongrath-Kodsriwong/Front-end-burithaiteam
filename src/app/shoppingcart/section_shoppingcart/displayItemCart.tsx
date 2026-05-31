@@ -44,11 +44,27 @@ export default function DisplayItemCart() {
         description: ci.product.short_description ?? "-",
         avatar: ci.product.images?.[0]?.url || "/image/logo_white.jpeg",
         quantity: ci.quantity,
+        inventoryId: ci.inventory_id ?? null,
       }));
 
       mapped.sort((a, b) => b.cartItemId - a.cartItemId);
 
       setProducts(mapped);
+
+      // auto-select item จาก buy now
+      const buyNowInventoryId = sessionStorage.getItem("buynow_inventory_id");
+      if (buyNowInventoryId) {
+        sessionStorage.removeItem("buynow_inventory_id");
+        const targetInventoryId = Number(buyNowInventoryId);
+        const match = mapped.find((p) => p.inventoryId === targetInventoryId);
+        if (match) {
+          setSelectedIds([match.cartItemId]);
+        } else if (mapped.length > 0) {
+          // fallback: เลือก item ใหม่สุด (อันแรกหลัง sort descending)
+          setSelectedIds([mapped[0].cartItemId]);
+        }
+      }
+
       setError(null);
     } catch (err) {
       console.error("Cart fetch error:", err);

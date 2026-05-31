@@ -1,24 +1,41 @@
 "use client";
 
 import { useRouter, useParams, useSearchParams } from "next/navigation";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Heart } from "lucide-react";
+import { FaFacebook, FaInstagram, FaWeixin } from "react-icons/fa";
+import { SiLine } from "react-icons/si";
+import { Share2, Copy, Check } from "lucide-react";
 import { useCart } from "@/app/context/CartContext";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
 export default function DetailOfProductShort({ product }: any) {
-  if (!product) return <div>กำลังโหลดสินค้า...</div>;
+  const router = useRouter();
+  const { id } = useParams();
+  const searchParams = useSearchParams();
+  const handledActionRef = useRef<string | null>(null);
+  const { addToCart } = useCart();
 
-  const hasVisibleVariant = Array.isArray(product?.variants)
-    ? product.variants.some((variant: any) => `${variant?.variant_name ?? ""}`.trim().length > 0)
-    : false;
+  const productVariants = useMemo(
+    () => (Array.isArray(product?.variants) ? product.variants : []),
+    [product?.variants],
+  );
+
+  const hasVisibleVariant = productVariants.some(
+    (variant: any) => `${variant?.variant_name ?? ""}`.trim().length > 0,
+  );
 
   const extractPriceRange = (product: any) => {
-    if (!product?.variants) return "0";
+    const variants = Array.isArray(product?.variants) ? product.variants : [];
+    if (variants.length === 0) return "0";
 
-    const prices = product.variants
-      .flatMap((v: any) => v.inventories.map((i: any) => Number(i.price)))
+    const prices = variants
+      .flatMap((v: any) =>
+        Array.isArray(v?.inventories)
+          ? v.inventories.map((i: any) => Number(i.price))
+          : [],
+      )
       .filter((n: number) => !isNaN(n));
 
     if (prices.length <= 0) return "0";
@@ -30,23 +47,26 @@ export default function DetailOfProductShort({ product }: any) {
   };
 
   const priceText = extractPriceRange(product);
+  const currentProductId = Number(product?.id_products || 0);
 
   const [quantity, setQuantity] = useState(1);
 
   const increaseQty = () => setQuantity((q) => q + 1);
   const decreaseQty = () => setQuantity((q) => (q > 1 ? q - 1 : 1));
 
-  const { addToCart } = useCart();
-
-  // ✅ รวม inventories
-  const allInventories =
-    product?.variants?.flatMap((v: any) =>
-      v.inventories.map((inv: any) => ({
-        ...inv,
-        variant_name: v.variant_name,
-        variant_id: v.variant_id,
-      })),
-    ) || [];
+  const allInventories = useMemo(
+    () =>
+      productVariants.flatMap((v: any) =>
+        Array.isArray(v?.inventories)
+          ? v.inventories.map((inv: any) => ({
+              ...inv,
+              variant_name: v.variant_name,
+              variant_id: v.variant_id,
+            }))
+          : [],
+      ),
+    [productVariants],
+  );
 
   // ❌ ไม่มี default แล้ว
   const [selectedInventory, setSelectedInventory] = useState<any>(null);
@@ -65,11 +85,6 @@ export default function DetailOfProductShort({ product }: any) {
   const displayPrice = selectedInventory
     ? selectedInventory.price.toLocaleString()
     : priceText;
-
-  const router = useRouter();
-  const { id } = useParams();
-  const searchParams = useSearchParams();
-  const handledActionRef = useRef<string | null>(null);
 
   const [wishlistLoading, setWishlistLoading] = useState(false);
   const [wishlistMsg, setWishlistMsg] = useState("");
@@ -98,8 +113,6 @@ export default function DetailOfProductShort({ product }: any) {
     const actionVariantId = Number(searchParams.get("variantId") || "0");
     const actionInventoryId = Number(searchParams.get("inventoryId") || "0");
     const actionQty = Math.max(1, Number(searchParams.get("qty") || "1"));
-    const currentProductId = Number(product.id_products);
-
     if (!currentProductId || actionProductId !== currentProductId) return;
 
     const key = `${action}:${actionProductId}:${actionVariantId}:${actionInventoryId}:${actionQty}`;
@@ -126,6 +139,7 @@ export default function DetailOfProductShort({ product }: any) {
         );
 
         if (action === "buy_now") {
+          sessionStorage.setItem("buynow_inventory_id", String(actionInventoryId));
           router.replace("/shoppingcart");
           return;
         }
@@ -137,7 +151,7 @@ export default function DetailOfProductShort({ product }: any) {
         alert("ไม่สามารถเพิ่มสินค้าหลัง login ได้ กรุณาลองใหม่");
       }
     })();
-  }, [searchParams, product.id_products, allInventories, addToCart, id, router]);
+  }, [searchParams, currentProductId, allInventories, addToCart, id, router]);
 
   const handleAddToCartClick = () => {
     if (!selectedInventory) {
@@ -152,7 +166,7 @@ export default function DetailOfProductShort({ product }: any) {
       const pid = Array.isArray(id) ? id[0] : String(id);
       const redirectTarget =
         `/detail_product/${pid}?action=add_to_cart` +
-        `&productId=${Number(product.id_products)}` +
+        `&productId=${currentProductId}` +
         `&variantId=${variantId}` +
         `&inventoryId=${inventoryId}` +
         `&qty=${quantity}`;
@@ -160,7 +174,7 @@ export default function DetailOfProductShort({ product }: any) {
       return;
     }
 
-    addToCart(Number(product.id_products), quantity, variantId, inventoryId);
+    addToCart(currentProductId, quantity, variantId, inventoryId);
   };
 
   const handleBuyNow = async () => {
@@ -175,7 +189,7 @@ export default function DetailOfProductShort({ product }: any) {
       const pid = Array.isArray(id) ? id[0] : String(id);
       const redirectTarget =
         `/detail_product/${pid}?action=buy_now` +
-        `&productId=${Number(product.id_products)}` +
+        `&productId=${currentProductId}` +
         `&variantId=${variantId}` +
         `&inventoryId=${inventoryId}` +
         `&qty=${quantity}`;
@@ -185,11 +199,12 @@ export default function DetailOfProductShort({ product }: any) {
 
     try {
       await addToCart(
-        Number(product.id_products),
+        currentProductId,
         quantity,
         variantId,
         inventoryId
       );
+      sessionStorage.setItem("buynow_inventory_id", String(inventoryId));
       router.push("/shoppingcart");
     } catch (error) {
       console.error("Buy now error:", error);
@@ -197,12 +212,65 @@ export default function DetailOfProductShort({ product }: any) {
     }
   };
 
+  const pid = Array.isArray(id) ? id[0] : String(id);
+  const productUrl = `https://burithaiteam.com/detail_product/${pid}`;
+
+  const [showShare, setShowShare] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const shareRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (shareRef.current && !shareRef.current.contains(e.target as Node)) {
+        setShowShare(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const handleCopyUrl = async () => {
+    await navigator.clipboard.writeText(productUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleShareFacebook = async () => {
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (isIOS && navigator.share) {
+      try {
+        await navigator.share({ title: product?.name ?? "สินค้า BuriThaiTeam", url: productUrl });
+        return;
+      } catch { /* cancelled */ }
+    }
+    window.location.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(productUrl)}`;
+  };
+
+  const handleShareLine = () => {
+    window.open(
+      `https://line.me/R/msg/text/?${encodeURIComponent(productUrl)}`,
+      "_blank", "noopener,noreferrer"
+    );
+  };
+
+  const handleShareInstagram = async () => {
+    await navigator.clipboard.writeText(productUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleShareWeChat = async () => {
+    await navigator.clipboard.writeText(productUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   const handleAddWishlist = async () => {
     try {
       setWishlistMsg("");
       setWishlistLoading(true);
 
-      const productId = Number(product.id_products);
+      const productId = currentProductId;
 
       const res = await fetch(`${API_URL}/api/wish-list`, {
         method: "POST",
@@ -236,6 +304,8 @@ export default function DetailOfProductShort({ product }: any) {
       setTimeout(() => setWishlistMsg(""), 2000);
     }
   };
+
+  if (!product) return <div>กำลังโหลดสินค้า...</div>;
 
   return (
     <div className="p-3 sm:p-4 bg-white rounded shadow">
@@ -320,18 +390,85 @@ export default function DetailOfProductShort({ product }: any) {
         {product.short_description ?? "ไม่มีรายละเอียดสินค้า"}
       </p>
 
-      <button
-        onClick={handleAddWishlist}
-        disabled={wishlistLoading}
-        className={`px-6 py-2 rounded flex items-center gap-2 text-white ${
-          wishlistLoading
-            ? "bg-gray-400 cursor-not-allowed"
-            : "bg-black hover:bg-gray-800"
-        }`}
-      >
-        <Heart className="w-4 h-4" />
-        {wishlistLoading ? "กำลังเพิ่มลงใน Wishlist..." : "เพิ่มใน Wishlist"}
-      </button>
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          onClick={handleAddWishlist}
+          disabled={wishlistLoading}
+          className={`px-6 py-2 rounded flex items-center gap-2 text-white ${
+            wishlistLoading
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-black hover:bg-gray-800"
+          }`}
+        >
+          <Heart className="w-4 h-4" />
+          {wishlistLoading ? "กำลังเพิ่มลงใน Wishlist..." : "เพิ่มใน Wishlist"}
+        </button>
+
+        {/* Share button + panel */}
+        <div className="relative" ref={shareRef}>
+          <button
+            onClick={() => setShowShare((v) => !v)}
+            className="px-6 py-2 rounded flex items-center gap-2 text-white bg-gray-700 hover:bg-gray-600"
+          >
+            <Share2 className="w-4 h-4" />
+            แชร์
+          </button>
+
+          {showShare && (
+            <div className="absolute bottom-full mb-2 left-0 z-50 bg-white rounded-xl shadow-xl border border-gray-100 p-4 w-72">
+              <p className="text-sm font-semibold text-gray-700 mb-3">แชร์สินค้านี้</p>
+
+              {/* Platform icons */}
+              <div className="flex gap-4 mb-4">
+                <button onClick={handleShareFacebook} className="flex flex-col items-center gap-1">
+                  <div className="w-12 h-12 rounded-full bg-[#1877F2] flex items-center justify-center text-white">
+                    <FaFacebook className="w-6 h-6" />
+                  </div>
+                  <span className="text-xs text-gray-600">Facebook</span>
+                </button>
+
+                <button onClick={handleShareLine} className="flex flex-col items-center gap-1">
+                  <div className="w-12 h-12 rounded-full bg-[#00B900] flex items-center justify-center text-white">
+                    <SiLine className="w-6 h-6" />
+                  </div>
+                  <span className="text-xs text-gray-600">Line</span>
+                </button>
+
+                <button onClick={handleShareInstagram} className="flex flex-col items-center gap-1">
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center text-white"
+                    style={{ background: "linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045)" }}>
+                    <FaInstagram className="w-6 h-6" />
+                  </div>
+                  <span className="text-xs text-gray-600">Instagram</span>
+                </button>
+
+                <button onClick={handleShareWeChat} className="flex flex-col items-center gap-1">
+                  <div className="w-12 h-12 rounded-full bg-[#07C160] flex items-center justify-center text-white">
+                    <FaWeixin className="w-6 h-6" />
+                  </div>
+                  <span className="text-xs text-gray-600">WeChat</span>
+                </button>
+              </div>
+
+              {/* URL + copy */}
+              <div className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2 border border-gray-200">
+                <span className="text-xs text-gray-500 flex-1 truncate">{productUrl}</span>
+                <button
+                  onClick={handleCopyUrl}
+                  className="flex items-center gap-1 text-xs font-medium whitespace-nowrap text-blue-600 hover:text-blue-800"
+                >
+                  {copied ? <Check className="w-3 h-3 text-green-600" /> : <Copy className="w-3 h-3" />}
+                  {copied ? "คัดลอกแล้ว" : "คัดลอก"}
+                </button>
+              </div>
+
+              {copied && (
+                <p className="mt-2 text-xs text-green-600">คัดลอก URL แล้ว วางใน IG / WeChat ได้เลย</p>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
 
       {wishlistMsg && (
         <p className="mt-2 text-sm text-green-700">{wishlistMsg}</p>

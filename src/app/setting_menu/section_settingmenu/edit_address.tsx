@@ -2,8 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { provinceList } from "@/data/provinces";
-import { labelOptions } from "@/data/addressLabels";
+import {
+  ThaiAddressInput,
+  AddressFields,
+  EMPTY_FIELDS,
+  useThaiAddressDB,
+} from "@/app/components/ThaiAddressInput";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
@@ -33,6 +37,8 @@ type Address = {
   label?: string | null;
   address_text: string;
   province?: string | null;
+  amphoe?: string | null;
+  district?: string | null;
   postal_code?: string | null;
   phone?: string | null;
   created_at?: string;
@@ -41,6 +47,7 @@ type Address = {
 
 export default function EditAddress({ user }: { user: any }) {
   const router = useRouter();
+  const db = useThaiAddressDB();
 
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -56,30 +63,11 @@ export default function EditAddress({ user }: { user: any }) {
   const [showEditPopup, setShowEditPopup] = useState(false);
 
   // edit
-  const [editAddressText, setEditAddressText] = useState({
-    label: "",
-    address_text: "",
-    province: "",
-    postal_code: "",
-    phone: "",
-  });
+  const [editAddressText, setEditAddressText] = useState<AddressFields>(EMPTY_FIELDS);
   const [editId, setEditId] = useState<number | null>(null);
 
   // new
-  const [newAddress, setNewAddress] = useState({
-    label: "",
-    address_text: "",
-    province: "",
-    postal_code: "",
-    phone: "",
-  });
-
-  // Autocomplete
-  const [filteredLabels, setFilteredLabels] = useState<string[]>([]);
-  const [showLabelDropdown, setShowLabelDropdown] = useState(false);
-
-  const [filteredProvinces, setFilteredProvinces] = useState<string[]>([]);
-  const [showProvinceDropdown, setShowProvinceDropdown] = useState(false);
+  const [newAddress, setNewAddress] = useState<AddressFields>(EMPTY_FIELDS);
 
   const selectedAddress = useMemo(
     () => addresses.find((a) => a.id_address === selectedId),
@@ -93,6 +81,11 @@ export default function EditAddress({ user }: { user: any }) {
       <div className="leading-relaxed">
         <p className="font-semibold">{addr.label || "ที่อยู่"}</p>
         <p>{addr.address_text}</p>
+        {(addr.amphoe || addr.district) && (
+          <p className="text-sm text-gray-600">
+            {[addr.amphoe, addr.district].filter(Boolean).join(" › ")}
+          </p>
+        )}
         <p>
           {addr.province || "-"} {addr.postal_code || ""}
         </p>
@@ -208,14 +201,7 @@ export default function EditAddress({ user }: { user: any }) {
       setSelectedId(created.id_address);
       setSelectedAddressId(created.id_address);
 
-      setNewAddress({
-        label: "",
-        address_text: "",
-        province: "",
-        postal_code: "",
-        phone: "",
-      });
-
+      setNewAddress(EMPTY_FIELDS);
       setShowAddPopup(false);
     } else {
       alert(json.message || "เพิ่มที่อยู่ล้มเหลว");
@@ -228,6 +214,8 @@ export default function EditAddress({ user }: { user: any }) {
       label: addr.label || "",
       address_text: addr.address_text || "",
       province: addr.province || "",
+      amphoe: addr.amphoe || "",
+      district: addr.district || "",
       postal_code: addr.postal_code || "",
       phone: addr.phone || "",
     });
@@ -523,140 +511,29 @@ export default function EditAddress({ user }: { user: any }) {
 
       {/* ========================= POPUP ADD ========================= */}
       {showAddPopup && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-3">
-          <div className="bg-white p-4 sm:p-6 rounded-md shadow-md w-full max-w-md max-h-[85vh] overflow-y-auto">
-            <h3 className="text-base sm:text-lg font-semibold mb-4">เพิ่มที่อยู่ใหม่</h3>
-
-            {/* Label Autocomplete */}
-            <div className="relative mb-4">
-              <label className="block mb-2 font-medium">ป้ายกำกับ</label>
-              <input
-                type="text"
-                className="border border-gray-300 rounded-md p-2 w-full"
-                placeholder="บ้าน / ที่ทำงาน / อื่นๆ"
-                value={newAddress.label}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setNewAddress({ ...newAddress, label: value });
-
-                  const results = labelOptions.filter((item) =>
-                    item.toLowerCase().includes(value.toLowerCase())
-                  );
-                  setFilteredLabels(results);
-                  setShowLabelDropdown(true);
-                }}
-                onFocus={() => {
-                  setFilteredLabels(labelOptions);
-                  setShowLabelDropdown(true);
-                }}
-                onBlur={() => setTimeout(() => setShowLabelDropdown(false), 150)}
-              />
-
-              {showLabelDropdown && filteredLabels.length > 0 && (
-                <ul className="absolute z-20 w-full bg-white border border-gray-300 rounded-md shadow-md max-h-40 overflow-y-auto">
-                  {filteredLabels.map((item) => (
-                    <li
-                      key={item}
-                      className="p-2 hover:bg-gray-200 cursor-pointer"
-                      onClick={() => {
-                        setNewAddress({ ...newAddress, label: item });
-                        setShowLabelDropdown(false);
-                      }}
-                    >
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-
-            {/* Address */}
-            <label className="block mb-2 font-medium">ที่อยู่</label>
-            <textarea
-              className="border border-gray-300 rounded-md p-2 w-full mb-4"
-              rows={3}
-              placeholder="123/45 ถนน... ซอย..."
-              value={newAddress.address_text}
-              onChange={(e) =>
-                setNewAddress({ ...newAddress, address_text: e.target.value })
-              }
-            />
-
-            {/* Province Autocomplete */}
-            <div className="relative mb-4">
-              <label className="block mb-2 font-medium">จังหวัด</label>
-              <input
-                type="text"
-                className="border border-gray-300 rounded-md p-2 w-full"
-                placeholder="กรุงเทพมหานคร"
-                value={newAddress.province}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setNewAddress({ ...newAddress, province: value });
-
-                  const results = provinceList.filter((p) => p.includes(value));
-                  setFilteredProvinces(results);
-                  setShowProvinceDropdown(true);
-                }}
-                onFocus={() => {
-                  setFilteredProvinces(provinceList);
-                  setShowProvinceDropdown(true);
-                }}
-                onBlur={() => setTimeout(() => setShowProvinceDropdown(false), 150)}
-              />
-
-              {showProvinceDropdown && filteredProvinces.length > 0 && (
-                <ul className="absolute z-20 w-full bg-white border border-gray-300 rounded-md shadow-md max-h-40 overflow-y-auto">
-                  {filteredProvinces.map((item) => (
-                    <li
-                      key={item}
-                      className="p-2 hover:bg-gray-200 cursor-pointer"
-                      onClick={() => {
-                        setNewAddress({ ...newAddress, province: item });
-                        setShowProvinceDropdown(false);
-                      }}
-                    >
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-
-            {/* Postal Code */}
-            <label className="block mb-2 font-medium">รหัสไปรษณีย์</label>
-            <input
-              type="text"
-              className="border border-gray-300 rounded-md p-2 w-full mb-4"
-              placeholder="10110"
-              maxLength={5}
-              value={newAddress.postal_code}
-              onChange={(e) =>
-                setNewAddress({ ...newAddress, postal_code: e.target.value })
-              }
-            />
-
-            {/* Phone */}
-            <label className="block mb-2 font-medium">เบอร์โทรศัพท์</label>
-            <input
-              type="text"
-              className="border border-gray-300 rounded-md p-2 w-full mb-4"
-              placeholder="0801234567"
-              maxLength={10}
-              value={newAddress.phone}
-              onChange={(e) => setNewAddress({ ...newAddress, phone: e.target.value })}
-            />
-
-            <div className="flex flex-col-reverse sm:flex-row justify-end mt-4 gap-2">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 px-4 pt-44 pb-4">
+          <div className="bg-white p-4 rounded-2xl shadow-2xl w-full max-w-sm max-h-[80vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-base font-semibold">เพิ่มที่อยู่ใหม่</h3>
               <button
-                className="w-full sm:w-auto bg-gray-300 text-sm px-4 py-2 rounded-md sm:mr-2"
+                className="keep-original-btn text-gray-400 hover:text-gray-600 text-2xl leading-none bg-transparent"
                 onClick={() => setShowAddPopup(false)}
+              >
+                ×
+              </button>
+            </div>
+
+            <ThaiAddressInput value={newAddress} onChange={setNewAddress} db={db} />
+
+            <div className="flex justify-end mt-4 pt-3 border-t border-gray-100 gap-2">
+              <button
+                className="keep-original-btn px-4 py-2 rounded-lg text-white bg-black hover:bg-gray-800 text-sm transition-all duration-200 active:scale-95"
+                onClick={() => { setNewAddress(EMPTY_FIELDS); setShowAddPopup(false); }}
               >
                 ยกเลิก
               </button>
-
               <button
-                className="w-full sm:w-auto bg-green-500 text-white text-sm px-4 py-2 rounded-md"
+                className="keep-original-btn px-5 py-2 rounded-lg bg-yellow-500 text-black hover:bg-yellow-400 text-sm font-medium transition-all duration-200 active:scale-95"
                 onClick={handleAdd}
               >
                 บันทึก
@@ -668,72 +545,29 @@ export default function EditAddress({ user }: { user: any }) {
 
       {/* ========================= POPUP EDIT ========================= */}
       {showEditPopup && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-3">
-          <div className="bg-white p-4 sm:p-6 rounded-md shadow-md w-full max-w-md max-h-[85vh] overflow-y-auto">
-            <h3 className="text-base sm:text-lg font-semibold mb-4">แก้ไขที่อยู่</h3>
-
-            <label className="block mb-2 font-medium">ป้ายกำกับ</label>
-            <input
-              type="text"
-              className="border border-gray-300 rounded-md p-2 w-full mb-4"
-              value={editAddressText.label}
-              onChange={(e) =>
-                setEditAddressText({ ...editAddressText, label: e.target.value })
-              }
-            />
-
-            <label className="block mb-2 font-medium">ที่อยู่</label>
-            <textarea
-              className="border border-gray-300 rounded-md p-2 w-full mb-4"
-              rows={3}
-              value={editAddressText.address_text}
-              onChange={(e) =>
-                setEditAddressText({ ...editAddressText, address_text: e.target.value })
-              }
-            />
-
-            <label className="block mb-2 font-medium">จังหวัด</label>
-            <input
-              type="text"
-              className="border border-gray-300 rounded-md p-2 w-full mb-4"
-              value={editAddressText.province}
-              onChange={(e) =>
-                setEditAddressText({ ...editAddressText, province: e.target.value })
-              }
-            />
-
-            <label className="block mb-2 font-medium">รหัสไปรษณีย์</label>
-            <input
-              type="text"
-              className="border border-gray-300 rounded-md p-2 w-full mb-4"
-              maxLength={5}
-              value={editAddressText.postal_code}
-              onChange={(e) =>
-                setEditAddressText({ ...editAddressText, postal_code: e.target.value })
-              }
-            />
-
-            <label className="block mb-2 font-medium">เบอร์โทรศัพท์</label>
-            <input
-              type="text"
-              className="border border-gray-300 rounded-md p-2 w-full mb-4"
-              maxLength={10}
-              value={editAddressText.phone}
-              onChange={(e) =>
-                setEditAddressText({ ...editAddressText, phone: e.target.value })
-              }
-            />
-
-            <div className="flex flex-col-reverse sm:flex-row justify-end gap-2">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 px-4 pt-44 pb-4">
+          <div className="bg-white p-4 rounded-2xl shadow-2xl w-full max-w-sm max-h-[80vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-base font-semibold">แก้ไขที่อยู่</h3>
               <button
-                className="w-full sm:w-auto bg-gray-300 text-sm px-4 py-2 rounded-md sm:mr-2"
+                className="keep-original-btn text-gray-400 hover:text-gray-600 text-2xl leading-none bg-transparent"
+                onClick={() => setShowEditPopup(false)}
+              >
+                ×
+              </button>
+            </div>
+
+            <ThaiAddressInput value={editAddressText} onChange={setEditAddressText} db={db} />
+
+            <div className="flex justify-end mt-4 pt-3 border-t border-gray-100 gap-2">
+              <button
+                className="keep-original-btn px-4 py-2 rounded-lg text-gray-600 bg-gray-100 hover:bg-gray-200 text-sm transition-all duration-200 active:scale-95"
                 onClick={() => setShowEditPopup(false)}
               >
                 ยกเลิก
               </button>
-
               <button
-                className="w-full sm:w-auto bg-yellow-500 text-white text-sm px-4 py-2 rounded-md"
+                className="keep-original-btn px-5 py-2 rounded-lg bg-amber-500 text-white hover:bg-amber-600 text-sm font-medium transition-all duration-200 active:scale-95"
                 onClick={handleUpdate}
               >
                 อัปเดต

@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { MdContentCopy } from "react-icons/md";
+import { Copy } from "lucide-react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
@@ -219,7 +219,7 @@ const CheckOrderPage = () => {
                 disabled={!order?.tracking_number}
                 className="inline-flex items-center gap-1 whitespace-nowrap text-sm text-gray-600 underline disabled:opacity-50"
               >
-               <MdContentCopy className="shrink-0" size={16} />
+               <Copy className="shrink-0" size={16} />
                 {copied ? "คัดลอกแล้ว" : "คัดลอกหมายเลขพัสดุ"}
               </button>
             </div>

@@ -4,6 +4,8 @@ import { Carousel } from "react-responsive-carousel";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
+import { fetchWithTimeout } from "@/app/utils/fetchWithTimeout";
 
 import {BannerItem} from "@/types/Banner"
 
@@ -31,7 +33,7 @@ export default function Promote() {
       try {
         setLoading(true);
 
-        const res = await fetch(`${API_URL}/api/banners?page=1&limit=20`, {
+        const res = await fetchWithTimeout(`${API_URL}/api/banners?page=1&limit=20`, {
           method: "GET",
           cache: "no-store",
         });
@@ -156,11 +158,15 @@ export default function Promote() {
             stopOnHover
           >
             {slideImages.map((img, index) => (
-              <div key={index}>
-                <img
+              <div key={index} className="relative w-full h-[300px] lg:h-[500px]">
+                <Image
                   src={img.src}
                   alt={img.alt}
-                  className="object-cover w-full h-[300px] lg:h-[500px]"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  priority={index === 0}
+                  unoptimized={img.src.startsWith("http")}
                 />
               </div>
             ))}

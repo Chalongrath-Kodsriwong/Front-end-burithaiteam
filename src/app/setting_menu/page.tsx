@@ -81,8 +81,8 @@ export default function SettingMenuPage() {
               onClick={() => handleMenuChange("account")}
               className={`w-full text-left text-xs sm:text-sm md:text-base px-2 py-1.5 sm:py-2 rounded ${
                 activeMenu === "account"
-                  ? "bg-white font-semibold"
-                  : "hover:bg-gray-300"
+                  ? "keep-original-btn bg-yellow-400 text-black font-semibold"
+                  : ""
               }`}
             >
               Account
@@ -94,8 +94,8 @@ export default function SettingMenuPage() {
               onClick={() => handleMenuChange("address")}
               className={`w-full text-left text-xs sm:text-sm md:text-base px-2 py-1.5 sm:py-2 rounded ${
                 activeMenu === "address"
-                  ? "bg-white font-semibold"
-                  : "hover:bg-gray-300"
+                  ? "keep-original-btn bg-yellow-400 text-black font-semibold"
+                  : ""
               }`}
             >
               Address
@@ -107,8 +107,8 @@ export default function SettingMenuPage() {
               onClick={() => handleMenuChange("history")}
               className={`w-full text-left text-xs sm:text-sm md:text-base px-2 py-1.5 sm:py-2 rounded ${
                 activeMenu === "history"
-                  ? "bg-white font-semibold"
-                  : "hover:bg-gray-300"
+                  ? "keep-original-btn bg-yellow-400 text-black font-semibold"
+                  : ""
               }`}
             >
               History Payment
@@ -118,7 +118,7 @@ export default function SettingMenuPage() {
           <li>
             <button
               onClick={handleLogout}
-              className="w-full text-left text-xs sm:text-sm md:text-base px-2 py-1.5 sm:py-2 rounded text-red-600 hover:bg-gray-300"
+              className="w-full text-left text-xs sm:text-sm md:text-base px-2 py-1.5 sm:py-2 rounded"
             >
               Logout
             </button>

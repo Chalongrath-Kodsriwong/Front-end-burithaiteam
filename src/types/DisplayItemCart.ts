@@ -7,4 +7,5 @@ export interface Product {
   description: string;
   avatar: string;
   quantity: number;
+  inventoryId: number | null;
 }
