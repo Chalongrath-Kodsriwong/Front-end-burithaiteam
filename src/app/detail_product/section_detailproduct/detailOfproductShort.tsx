@@ -139,6 +139,7 @@ export default function DetailOfProductShort({ product }: any) {
         );
 
         if (action === "buy_now") {
+          sessionStorage.setItem("buynow_inventory_id", String(actionInventoryId));
           router.replace("/shoppingcart");
           return;
         }
@@ -203,6 +204,7 @@ export default function DetailOfProductShort({ product }: any) {
         variantId,
         inventoryId
       );
+      sessionStorage.setItem("buynow_inventory_id", String(inventoryId));
       router.push("/shoppingcart");
     } catch (error) {
       console.error("Buy now error:", error);
