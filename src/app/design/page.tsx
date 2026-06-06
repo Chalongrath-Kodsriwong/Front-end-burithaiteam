@@ -1292,8 +1292,11 @@ export default function DesignPage() {
                           onPointerMove={(e) => {
                             if (!isPointerDownRef.current || !selectionAnchorRef.current) return;
                             const rect = e.currentTarget.getBoundingClientRect();
-                            const col = Math.floor((e.clientX - rect.left) / cellWidthPx);
-                            const row = Math.floor((e.clientY - rect.top) / cellHeightPx);
+                            // ใช้ขนาด rect จริงบนหน้าจอ (หลัง scale) เพื่อให้ตรงกับนิ้ว
+                            const cellW = rect.width / gridCols;
+                            const cellH = rect.height / gridRows;
+                            const col = Math.floor((e.clientX - rect.left) / cellW);
+                            const row = Math.floor((e.clientY - rect.top) / cellH);
                             const clampedRow = Math.max(0, Math.min(row, gridRows - 1));
                             const clampedCol = Math.max(0, Math.min(col, gridCols - 1));
                             const prev = selectionCursorRef.current;
