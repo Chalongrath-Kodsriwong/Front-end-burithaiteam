@@ -1287,6 +1287,21 @@ export default function DesignPage() {
                             gridTemplateRows: `repeat(${gridRows}, ${cellHeightPx}px)`,
                             width: canvasWidthPx,
                             height: canvasHeightPx,
+                            touchAction: "none",
+                          }}
+                          onPointerMove={(e) => {
+                            if (!isPointerDownRef.current || !selectionAnchorRef.current) return;
+                            const rect = e.currentTarget.getBoundingClientRect();
+                            const col = Math.floor((e.clientX - rect.left) / cellWidthPx);
+                            const row = Math.floor((e.clientY - rect.top) / cellHeightPx);
+                            const clampedRow = Math.max(0, Math.min(row, gridRows - 1));
+                            const clampedCol = Math.max(0, Math.min(col, gridCols - 1));
+                            const prev = selectionCursorRef.current;
+                            if (prev?.row === clampedRow && prev?.col === clampedCol) return;
+                            selectionCursorRef.current = { row: clampedRow, col: clampedCol };
+                            setSelectionBoundsVis(
+                              computeSelBounds(selectionAnchorRef.current, { row: clampedRow, col: clampedCol })
+                            );
                           }}
                         >
                           {Array.from({ length: gridRows * gridCols }).map(
