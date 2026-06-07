@@ -129,13 +129,13 @@ export default function ImageProduct({ product }: any) {
             src={selected.url}
             controls
             playsInline
-            className="w-full h-64 sm:h-72 md:h-[350px] object-cover rounded-lg shadow mb-4 bg-black"
+            className="w-full h-64 sm:h-72 md:h-[350px] object-cover rounded-xl mb-4 bg-[#08090d] border border-[rgba(0,207,255,0.15)]"
           />
         ) : (
           <button
             type="button"
             onClick={openPreview}
-            className="w-full mb-4 rounded-lg overflow-hidden shadow group"
+            className="w-full mb-4 rounded-xl overflow-hidden group border border-[rgba(0,207,255,0.15)] hover:border-[rgba(0,207,255,0.4)] hover:shadow-[0_0_20px_rgba(0,207,255,0.12)] transition-all duration-300 bg-[rgba(6,8,14,0.95)]"
           >
             <Image
               src={selected.url}
@@ -155,10 +155,10 @@ export default function ImageProduct({ product }: any) {
               key={`${m.url}-${idx}`}
               type="button"
               onClick={() => selectMedia(idx)}
-              className={`w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded cursor-pointer border overflow-hidden flex items-center justify-center transition ${
+              className={`w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-lg cursor-pointer border overflow-hidden flex items-center justify-center transition-all duration-200 ${
                 selected.url === m.url
-                  ? "border-blue-500 ring-2 ring-blue-100"
-                  : "border-gray-300 hover:border-gray-400"
+                  ? "border-[#00CFFF] shadow-[0_0_10px_rgba(0,207,255,0.4)] bg-[rgba(0,207,255,0.08)]"
+                  : "border-[rgba(0,207,255,0.15)] hover:border-[rgba(0,207,255,0.4)] bg-[rgba(6,8,14,0.95)]"
               }`}
               title={m.kind === "video" ? "วิดีโอ" : "รูปภาพ"}
             >

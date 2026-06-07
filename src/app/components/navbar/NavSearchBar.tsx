@@ -135,10 +135,11 @@ export default function NavSearchBar() {
     <form className="relative z-40 px-2 py-2 border-t border-[rgba(212,175,55,0.1)] bg-transparent" onSubmit={handleSubmit}>
       <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2 max-w-screen-md mx-auto">
         {/* Category dropdown button */}
+        <div className="relative order-1 shrink-0">
         <button
           type="button"
           onClick={() => setIsDropdownOpenCategories(!isDropdownOpenCategories)}
-          className="categories-button order-1 shrink-0 z-10 inline-flex h-10 items-center py-2 px-2.5 sm:px-4 text-xs sm:text-sm font-medium text-yellow-500 bg-[#1a1a2e] border border-[rgba(212,175,55,0.25)] rounded-lg hover:border-yellow-500 hover:text-[rgb(255,215,0)] hover:bg-[#1e1e3a] focus:outline-none focus:border-yellow-500 transition-all duration-300 whitespace-nowrap"
+          className="categories-button z-10 inline-flex h-10 items-center py-2 px-2.5 sm:px-4 text-xs sm:text-sm font-medium text-yellow-500 bg-[#1a1a2e] border border-[rgba(212,175,55,0.25)] rounded-lg hover:border-yellow-500 hover:text-[rgb(255,215,0)] hover:bg-[#1e1e3a] focus:outline-none focus:border-yellow-500 transition-all duration-300 whitespace-nowrap"
         >
           หมวดหมู่
           <svg className="w-2.5 h-2.5 ml-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
@@ -173,6 +174,7 @@ export default function NavSearchBar() {
             </ul>
           </div>
         )}
+        </div>
 
         {/* Search input */}
         <div className="relative order-2 w-full min-w-0">

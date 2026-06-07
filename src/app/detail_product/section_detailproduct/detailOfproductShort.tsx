@@ -2,10 +2,9 @@
 
 import { useRouter, useParams, useSearchParams } from "next/navigation";
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Heart } from "lucide-react";
+import { Heart, Share2, Copy, Check } from "lucide-react";
 import { FaFacebook, FaInstagram, FaWeixin } from "react-icons/fa";
 import { SiLine } from "react-icons/si";
-import { Share2, Copy, Check } from "lucide-react";
 import { useCart } from "@/app/context/CartContext";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
@@ -41,16 +40,13 @@ export default function DetailOfProductShort({ product }: any) {
     if (prices.length <= 0) return "0";
     if (prices.length === 1) return prices[0].toLocaleString();
 
-    return `${Math.min(...prices).toLocaleString()} - ${Math.max(
-      ...prices,
-    ).toLocaleString()}`;
+    return `${Math.min(...prices).toLocaleString()} - ${Math.max(...prices).toLocaleString()}`;
   };
 
   const priceText = extractPriceRange(product);
   const currentProductId = Number(product?.id_products || 0);
 
   const [quantity, setQuantity] = useState(1);
-
   const increaseQty = () => setQuantity((q) => q + 1);
   const decreaseQty = () => setQuantity((q) => (q > 1 ? q - 1 : 1));
 
@@ -68,20 +64,17 @@ export default function DetailOfProductShort({ product }: any) {
     [productVariants],
   );
 
-  // ❌ ไม่มี default แล้ว
   const [selectedInventory, setSelectedInventory] = useState<any>(null);
 
   useEffect(() => {
     if (hasVisibleVariant) return;
     if (allInventories.length === 0) return;
-
     setSelectedInventory((current: any) => current ?? allInventories[0]);
   }, [allInventories, hasVisibleVariant]);
 
   const variantId = Number(selectedInventory?.variant_id);
   const inventoryId = Number(selectedInventory?.inventory_id);
 
-  // ✅ ถ้ายังไม่เลือก → แสดง range
   const displayPrice = selectedInventory
     ? selectedInventory.price.toLocaleString()
     : priceText;
@@ -96,7 +89,6 @@ export default function DetailOfProductShort({ product }: any) {
     params.delete("variantId");
     params.delete("inventoryId");
     params.delete("qty");
-
     const pid = Array.isArray(id) ? id[0] : String(id);
     const query = params.toString();
     router.replace(query ? `/detail_product/${pid}?${query}` : `/detail_product/${pid}`);
@@ -105,45 +97,32 @@ export default function DetailOfProductShort({ product }: any) {
   useEffect(() => {
     const action = searchParams.get("action");
     if (!action || (action !== "add_to_cart" && action !== "buy_now")) return;
-
     const username = localStorage.getItem("username");
     if (!username) return;
-
     const actionProductId = Number(searchParams.get("productId") || "0");
     const actionVariantId = Number(searchParams.get("variantId") || "0");
     const actionInventoryId = Number(searchParams.get("inventoryId") || "0");
     const actionQty = Math.max(1, Number(searchParams.get("qty") || "1"));
     if (!currentProductId || actionProductId !== currentProductId) return;
-
     const key = `${action}:${actionProductId}:${actionVariantId}:${actionInventoryId}:${actionQty}`;
     if (handledActionRef.current === key) return;
-
     const inventory = allInventories.find(
       (inv: any) =>
         Number(inv.variant_id) === actionVariantId &&
-        Number(inv.inventory_id) === actionInventoryId
+        Number(inv.inventory_id) === actionInventoryId,
     );
     if (!inventory) return;
-
     handledActionRef.current = key;
     setSelectedInventory(inventory);
     setQuantity(actionQty);
-
     (async () => {
       try {
-        await addToCart(
-          currentProductId,
-          actionQty,
-          actionVariantId,
-          actionInventoryId
-        );
-
+        await addToCart(currentProductId, actionQty, actionVariantId, actionInventoryId);
         if (action === "buy_now") {
           sessionStorage.setItem("buynow_inventory_id", String(actionInventoryId));
           router.replace("/shoppingcart");
           return;
         }
-
         clearPendingActionParams();
       } catch (error) {
         console.error("Auto add-to-cart after login failed:", error);
@@ -154,56 +133,34 @@ export default function DetailOfProductShort({ product }: any) {
   }, [searchParams, currentProductId, allInventories, addToCart, id, router]);
 
   const handleAddToCartClick = () => {
-    if (!selectedInventory) {
-      alert("กรุณาเลือกสินค้า");
-      return;
-    }
-
+    if (!selectedInventory) { alert("กรุณาเลือกสินค้า"); return; }
     const username = localStorage.getItem("username");
-
-    // 🔥 ถ้ายังไม่ได้ login → เด้งไปหน้า login
     if (!username) {
       const pid = Array.isArray(id) ? id[0] : String(id);
-      const redirectTarget =
-        `/detail_product/${pid}?action=add_to_cart` +
-        `&productId=${currentProductId}` +
-        `&variantId=${variantId}` +
-        `&inventoryId=${inventoryId}` +
-        `&qty=${quantity}`;
-      router.replace(`/login?redirect=${encodeURIComponent(redirectTarget)}`);
+      router.replace(
+        `/login?redirect=${encodeURIComponent(
+          `/detail_product/${pid}?action=add_to_cart&productId=${currentProductId}&variantId=${variantId}&inventoryId=${inventoryId}&qty=${quantity}`
+        )}`
+      );
       return;
     }
-
     addToCart(currentProductId, quantity, variantId, inventoryId);
   };
 
   const handleBuyNow = async () => {
-    if (!selectedInventory) {
-      alert("กรุณาเลือกสินค้า");
-      return;
-    }
-
+    if (!selectedInventory) { alert("กรุณาเลือกสินค้า"); return; }
     const username = localStorage.getItem("username");
-
     if (!username) {
       const pid = Array.isArray(id) ? id[0] : String(id);
-      const redirectTarget =
-        `/detail_product/${pid}?action=buy_now` +
-        `&productId=${currentProductId}` +
-        `&variantId=${variantId}` +
-        `&inventoryId=${inventoryId}` +
-        `&qty=${quantity}`;
-      router.replace(`/login?redirect=${encodeURIComponent(redirectTarget)}`);
+      router.replace(
+        `/login?redirect=${encodeURIComponent(
+          `/detail_product/${pid}?action=buy_now&productId=${currentProductId}&variantId=${variantId}&inventoryId=${inventoryId}&qty=${quantity}`
+        )}`
+      );
       return;
     }
-
     try {
-      await addToCart(
-        currentProductId,
-        quantity,
-        variantId,
-        inventoryId
-      );
+      await addToCart(currentProductId, quantity, variantId, inventoryId);
       sessionStorage.setItem("buynow_inventory_id", String(inventoryId));
       router.push("/shoppingcart");
     } catch (error) {
@@ -238,19 +195,14 @@ export default function DetailOfProductShort({ product }: any) {
   const handleShareFacebook = async () => {
     const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
     if (isIOS && navigator.share) {
-      try {
-        await navigator.share({ title: product?.name ?? "สินค้า BuriThaiTeam", url: productUrl });
-        return;
-      } catch { /* cancelled */ }
+      try { await navigator.share({ title: product?.name ?? "สินค้า BuriThaiTeam", url: productUrl }); return; }
+      catch { /* cancelled */ }
     }
     window.location.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(productUrl)}`;
   };
 
   const handleShareLine = () => {
-    window.open(
-      `https://line.me/R/msg/text/?${encodeURIComponent(productUrl)}`,
-      "_blank", "noopener,noreferrer"
-    );
+    window.open(`https://line.me/R/msg/text/?${encodeURIComponent(productUrl)}`, "_blank", "noopener,noreferrer");
   };
 
   const handleShareInstagram = async () => {
@@ -269,32 +221,21 @@ export default function DetailOfProductShort({ product }: any) {
     try {
       setWishlistMsg("");
       setWishlistLoading(true);
-
-      const productId = currentProductId;
-
       const res = await fetch(`${API_URL}/api/wish-list`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId }),
+        body: JSON.stringify({ productId: currentProductId }),
       });
-
       if (res.status === 401 || res.status === 403) {
         router.replace(`/login?redirect=/detail_product/${id}`);
         return;
       }
-
       const json = await res.json().catch(() => ({}));
-
       if (!res.ok) {
-        if (res.status === 409) {
-          setWishlistMsg("สินค้านี้อยู่ใน Wishlist แล้ว ❤️");
-          return;
-        }
-        setWishlistMsg(json?.message || "เพิ่ม Wishlist ไม่สำเร็จ");
+        setWishlistMsg(res.status === 409 ? "สินค้านี้อยู่ใน Wishlist แล้ว ❤️" : (json?.message || "เพิ่ม Wishlist ไม่สำเร็จ"));
         return;
       }
-
       setWishlistMsg("เพิ่มสินค้าเข้า Wishlist แล้ว ✅");
     } catch (e) {
       console.error(e);
@@ -308,162 +249,164 @@ export default function DetailOfProductShort({ product }: any) {
   if (!product) return <div>กำลังโหลดสินค้า...</div>;
 
   return (
-    <div className="p-3 sm:p-4 bg-white rounded shadow">
-      <h2 className="text-xl sm:text-2xl font-bold mb-1 break-words">{product.name}</h2>
+    <div className="bg-[rgba(6,8,14,0.95)] border border-[rgba(0,207,255,0.15)] rounded-xl p-5 sm:p-6">
 
-      <p className="text-lg sm:text-xl font-semibold mb-4">ราคา: ฿ {displayPrice}</p>
+      {/* Category + Brand */}
+      <div className="flex flex-wrap items-center gap-2 mb-3">
+        <span className="led-badge">
+          <span className="led-badge-dot" />
+          {product.category?.name ?? "-"}
+        </span>
+        <span className="text-[10px] font-bold tracking-widest text-[#D4AF37]/80 uppercase border border-[rgba(212,175,55,0.25)] px-2.5 py-1 rounded-sm">
+          {product.brand ?? "-"}
+        </span>
+      </div>
 
-      {hasVisibleVariant ? (
-        <>
-          <div className="mb-2 font-medium text-gray-700">
+      {/* Product name */}
+      <h2 className="text-xl sm:text-2xl lg:text-[1.75rem] font-black text-[#E8F0F8] mb-2 leading-tight break-words">
+        {product.name}
+      </h2>
+
+      {/* Price */}
+      <div className="flex items-baseline gap-2 mb-5">
+        <span className="text-xs text-[#5A7A98] font-medium">ราคา</span>
+        <span className="text-2xl sm:text-3xl font-black text-[#D4AF37]">
+          ฿ {displayPrice}
+        </span>
+      </div>
+
+      {/* Variants */}
+      {hasVisibleVariant && (
+        <div className="mb-5">
+          <div className="text-[10px] font-bold tracking-widest text-[#00CFFF]/60 uppercase mb-2">
             {product.variants?.[0]?.variant_name || "ตัวเลือกสินค้า"}
           </div>
-
-          <div className="mb-4">
-            <div className="flex flex-wrap gap-2">
-              {allInventories.map((inv: any) => (
-                <button
-                  key={inv.inventory_id}
-                  onClick={() => setSelectedInventory(inv)}
-                  disabled={inv.stock === 0}
-                  className={`px-2.5 sm:px-3 py-1 text-sm sm:text-base border rounded ${
-                    selectedInventory?.inventory_id === inv.inventory_id
-                      ? "border-red-500 bg-red-50"
-                      : "border-gray-300"
-                  } ${inv.stock === 0 ? "opacity-50 cursor-not-allowed" : ""}`}
-                >
-                  {inv.inventory_name}
-                </button>
-              ))}
-            </div>
+          <div className="flex flex-wrap gap-2">
+            {allInventories.map((inv: any) => (
+              <button
+                key={inv.inventory_id}
+                onClick={() => setSelectedInventory(inv)}
+                disabled={inv.stock === 0}
+                className={`px-3 py-1.5 text-sm font-semibold rounded-sm border transition-all duration-200
+                  ${selectedInventory?.inventory_id === inv.inventory_id
+                    ? "border-[#00CFFF] bg-[rgba(0,207,255,0.12)] text-[#00CFFF] shadow-[0_0_10px_rgba(0,207,255,0.2)]"
+                    : "border-[rgba(0,207,255,0.2)] text-[#7A9AB8] hover:border-[rgba(0,207,255,0.45)] hover:text-[#B0CEEA]"
+                  }
+                  ${inv.stock === 0 ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}
+              >
+                {inv.inventory_name}
+              </button>
+            ))}
           </div>
-        </>
-      ) : null}
+        </div>
+      )}
 
-      <div className="flex items-center gap-2 sm:gap-4 mb-6">
+      {/* Qty control */}
+      <div className="flex items-center mb-5">
         <button
           onClick={decreaseQty}
-          className="px-2.5 sm:px-3 py-1.5 bg-gray-300 hover:bg-gray-400 rounded-l text-base sm:text-lg font-bold"
+          className="w-9 h-9 flex items-center justify-center bg-[rgba(0,207,255,0.06)] border border-[rgba(0,207,255,0.2)] border-r-0 text-[#00CFFF] hover:bg-[rgba(0,207,255,0.15)] rounded-l-sm text-xl font-bold transition"
         >
-          -
+          −
         </button>
-
         <input
           type="text"
           value={quantity}
           readOnly
-          className="w-12 sm:w-14 text-center border border-gray-300 py-1.5 text-base sm:text-lg"
+          className="w-12 h-9 text-center bg-[rgba(0,207,255,0.04)] border border-[rgba(0,207,255,0.2)] text-[#E8F0F8] text-base font-bold outline-none"
         />
-
         <button
           onClick={increaseQty}
-          className="px-2.5 sm:px-3 py-1.5 bg-gray-300 hover:bg-gray-400 rounded-r text-base sm:text-lg font-bold"
+          className="w-9 h-9 flex items-center justify-center bg-[rgba(0,207,255,0.06)] border border-[rgba(0,207,255,0.2)] border-l-0 text-[#00CFFF] hover:bg-[rgba(0,207,255,0.15)] rounded-r-sm text-xl font-bold transition"
         >
           +
         </button>
       </div>
 
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 mb-5">
-        <button
-          onClick={handleBuyNow}
-          className="w-full sm:w-auto px-4 sm:px-6 py-2 bg-black text-white rounded hover:bg-gray-800"
-        >
+      {/* CTA Buttons */}
+      <div className="flex flex-col sm:flex-row gap-3 mb-5">
+        <button onClick={handleBuyNow} className="btn-gold flex-1 text-sm font-bold">
           ซื้อสินค้า
         </button>
-
-        <button
-          className="w-full sm:w-auto px-4 sm:px-6 py-2 bg-black text-white rounded hover:bg-gray-800"
-          onClick={handleAddToCartClick}
-        >
+        <button onClick={handleAddToCartClick} className="btn-outline-gold flex-1 text-sm font-bold">
           เพิ่มลงตะกร้า ({quantity})
         </button>
       </div>
 
-      <div className="flex flex-col sm:flex-row mb-2 gap-1 sm:gap-6 text-sm">
-        <span className="text-gray-600">
-          หมวดหมู่: {product.category?.name ?? "-"}
-        </span>
-        <span className="text-gray-600">BRAND: {product.brand ?? "-"}</span>
-      </div>
-
-      <p className="text-gray-700 mb-3">
+      {/* Short description */}
+      <p className="text-sm text-[#5A7A98] leading-relaxed mb-4">
         {product.short_description ?? "ไม่มีรายละเอียดสินค้า"}
       </p>
 
+      {/* Divider */}
+      <div className="border-t border-[rgba(0,207,255,0.08)] mb-4" />
+
+      {/* Wishlist + Share */}
       <div className="flex flex-wrap items-center gap-3">
         <button
           onClick={handleAddWishlist}
           disabled={wishlistLoading}
-          className={`px-6 py-2 rounded flex items-center gap-2 text-white ${
-            wishlistLoading
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-black hover:bg-gray-800"
-          }`}
+          className={`flex items-center gap-2 px-4 py-2 rounded-sm text-sm font-medium border transition-all duration-200
+            ${wishlistLoading
+              ? "border-[rgba(0,207,255,0.08)] text-[#3A5A78] cursor-not-allowed"
+              : "border-[rgba(0,207,255,0.2)] text-[#7A9AB8] hover:border-[rgba(0,207,255,0.45)] hover:text-[#B0CEEA] hover:bg-[rgba(0,207,255,0.05)]"
+            }`}
         >
           <Heart className="w-4 h-4" />
-          {wishlistLoading ? "กำลังเพิ่มลงใน Wishlist..." : "เพิ่มใน Wishlist"}
+          {wishlistLoading ? "กำลังเพิ่ม..." : "เพิ่มใน Wishlist"}
         </button>
 
-        {/* Share button + panel */}
         <div className="relative" ref={shareRef}>
           <button
             onClick={() => setShowShare((v) => !v)}
-            className="px-6 py-2 rounded flex items-center gap-2 text-white bg-gray-700 hover:bg-gray-600"
+            className="flex items-center gap-2 px-4 py-2 rounded-sm text-sm font-medium border border-[rgba(0,207,255,0.2)] text-[#7A9AB8] hover:border-[rgba(0,207,255,0.45)] hover:text-[#B0CEEA] hover:bg-[rgba(0,207,255,0.05)] transition-all duration-200"
           >
             <Share2 className="w-4 h-4" />
             แชร์
           </button>
 
           {showShare && (
-            <div className="absolute bottom-full mb-2 left-0 z-50 bg-white rounded-xl shadow-xl border border-gray-100 p-4 w-72">
-              <p className="text-sm font-semibold text-gray-700 mb-3">แชร์สินค้านี้</p>
-
-              {/* Platform icons */}
+            <div className="absolute bottom-full mb-2 left-0 z-50 bg-[rgba(6,8,14,0.98)] border border-[rgba(0,207,255,0.2)] rounded-xl shadow-xl p-4 w-72">
+              <p className="text-sm font-semibold text-[#E8F0F8] mb-3">แชร์สินค้านี้</p>
               <div className="flex gap-4 mb-4">
                 <button onClick={handleShareFacebook} className="flex flex-col items-center gap-1">
-                  <div className="w-12 h-12 rounded-full bg-[#1877F2] flex items-center justify-center text-white">
-                    <FaFacebook className="w-6 h-6" />
+                  <div className="w-11 h-11 rounded-full bg-[#1877F2] flex items-center justify-center text-white">
+                    <FaFacebook className="w-5 h-5" />
                   </div>
-                  <span className="text-xs text-gray-600">Facebook</span>
+                  <span className="text-[10px] text-[#5A7A98]">Facebook</span>
                 </button>
-
                 <button onClick={handleShareLine} className="flex flex-col items-center gap-1">
-                  <div className="w-12 h-12 rounded-full bg-[#00B900] flex items-center justify-center text-white">
-                    <SiLine className="w-6 h-6" />
+                  <div className="w-11 h-11 rounded-full bg-[#00B900] flex items-center justify-center text-white">
+                    <SiLine className="w-5 h-5" />
                   </div>
-                  <span className="text-xs text-gray-600">Line</span>
+                  <span className="text-[10px] text-[#5A7A98]">Line</span>
                 </button>
-
                 <button onClick={handleShareInstagram} className="flex flex-col items-center gap-1">
-                  <div className="w-12 h-12 rounded-full flex items-center justify-center text-white"
+                  <div className="w-11 h-11 rounded-full flex items-center justify-center text-white"
                     style={{ background: "linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045)" }}>
-                    <FaInstagram className="w-6 h-6" />
+                    <FaInstagram className="w-5 h-5" />
                   </div>
-                  <span className="text-xs text-gray-600">Instagram</span>
+                  <span className="text-[10px] text-[#5A7A98]">Instagram</span>
                 </button>
-
                 <button onClick={handleShareWeChat} className="flex flex-col items-center gap-1">
-                  <div className="w-12 h-12 rounded-full bg-[#07C160] flex items-center justify-center text-white">
-                    <FaWeixin className="w-6 h-6" />
+                  <div className="w-11 h-11 rounded-full bg-[#07C160] flex items-center justify-center text-white">
+                    <FaWeixin className="w-5 h-5" />
                   </div>
-                  <span className="text-xs text-gray-600">WeChat</span>
+                  <span className="text-[10px] text-[#5A7A98]">WeChat</span>
                 </button>
               </div>
-
-              {/* URL + copy */}
-              <div className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2 border border-gray-200">
-                <span className="text-xs text-gray-500 flex-1 truncate">{productUrl}</span>
+              <div className="flex items-center gap-2 bg-[rgba(0,207,255,0.05)] rounded-lg px-3 py-2 border border-[rgba(0,207,255,0.15)]">
+                <span className="text-xs text-[#5A7A98] flex-1 truncate">{productUrl}</span>
                 <button
                   onClick={handleCopyUrl}
-                  className="flex items-center gap-1 text-xs font-medium whitespace-nowrap text-blue-600 hover:text-blue-800"
+                  className="flex items-center gap-1 text-xs font-medium whitespace-nowrap text-[#00CFFF] hover:text-white"
                 >
-                  {copied ? <Check className="w-3 h-3 text-green-600" /> : <Copy className="w-3 h-3" />}
+                  {copied ? <Check className="w-3 h-3 text-green-400" /> : <Copy className="w-3 h-3" />}
                   {copied ? "คัดลอกแล้ว" : "คัดลอก"}
                 </button>
               </div>
-
               {copied && (
-                <p className="mt-2 text-xs text-green-600">คัดลอก URL แล้ว วางใน IG / WeChat ได้เลย</p>
+                <p className="mt-2 text-xs text-green-400">คัดลอก URL แล้ว วางใน IG / WeChat ได้เลย</p>
               )}
             </div>
           )}
@@ -471,7 +414,7 @@ export default function DetailOfProductShort({ product }: any) {
       </div>
 
       {wishlistMsg && (
-        <p className="mt-2 text-sm text-green-700">{wishlistMsg}</p>
+        <p className="mt-2 text-sm text-green-400">{wishlistMsg}</p>
       )}
     </div>
   );

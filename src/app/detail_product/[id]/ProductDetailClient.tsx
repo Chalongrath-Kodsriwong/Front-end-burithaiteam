@@ -59,11 +59,23 @@ export default function ProductDetailClient({ id }: ProductDetailClientProps) {
     fetchProduct();
   }, [id, router]);
 
-  if (loading) return <p className="p-4">กำลังโหลดสินค้า...</p>;
-  if (!product) return <p className="p-4">ไม่พบสินค้า</p>;
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-[40vh] gap-2 text-[#5A7A98]">
+      <span className="w-5 h-5 border-2 border-[#00CFFF] border-t-transparent rounded-full animate-spin" />
+      กำลังโหลดสินค้า...
+    </div>
+  );
+  if (!product) return (
+    <div className="flex items-center justify-center min-h-[40vh] text-[#5A7A98]">
+      ไม่พบสินค้า
+    </div>
+  );
 
   return (
-    <div className="w-full p-3 sm:p-4 md:p-5">
+    <section className="relative w-full bg-[#08090d] overflow-hidden">
+      {/* LED grid background */}
+      <div className="absolute inset-0 bg-led-grid opacity-20 pointer-events-none" />
+      <div className="relative z-10 w-full px-4 sm:px-6 md:px-8 py-6 sm:py-8 md:py-10">
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
         <div className="col-span-1 flex justify-center md:justify-start">
           <ImageProduct product={product} />
@@ -77,13 +89,14 @@ export default function ProductDetailClient({ id }: ProductDetailClientProps) {
           <DetailOfProductFull product={product} />
         </div>
 
-        <div className="col-span-1 md:col-span-3 mt-6 md:mt-12">
+        <div className="col-span-1 md:col-span-3 mt-2">
           <SimilarProduct
             currentProductId={id}
             currentCategory={product.category?.name ?? ""}
           />
         </div>
       </div>
-    </div>
+      </div>
+    </section>
   );
 }
