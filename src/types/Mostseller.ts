@@ -1,3 +1,11 @@
+export type PreorderInfo = {
+  originalPrice: number;
+  preorderPrice: number;
+  discountPercent: number;
+  releaseDate?: string | null;
+  mode: string;
+};
+
 export type ApiProduct = {
   id_products: number;
   name: string;
@@ -10,6 +18,7 @@ export type ApiProduct = {
     discountValue: number;
     finalPrices?: number[];
   };
+  preorder?: PreorderInfo | null;
   soldQuantity?: number;
 };
 
@@ -18,7 +27,8 @@ export interface ProductUI {
   name: string;
   brand: string;
   avatar: string;
-  priceText: string; // ราคาปกติ
-  finalPriceText?: string; // ราคาหลังลด (ถ้ามี)
+  priceText: string;
+  finalPriceText?: string;
+  preorder?: PreorderInfo | null;
   soldQty?: number;
 }

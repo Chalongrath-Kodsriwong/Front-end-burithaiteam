@@ -3,6 +3,7 @@ import "flowbite";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { isSellableProduct } from "@/app/utils/productVisibility";
+import PreorderBadge from "@/app/components/PreorderBadge";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
@@ -100,9 +101,13 @@ export default function SimilarProduct({ currentProductId, currentCategory }: an
                   <h4 className="text-xs sm:text-sm font-semibold text-[#C0D8EE] line-clamp-2 leading-snug">
                     {p.name}
                   </h4>
-                  <p className="text-[#D4AF37] text-xs sm:text-sm font-bold mt-auto">
-                    ฿ {priceText}
-                  </p>
+                  {p.preorder ? (
+                    <PreorderBadge preorder={p.preorder} />
+                  ) : (
+                    <p className="text-[#D4AF37] text-xs sm:text-sm font-bold mt-auto">
+                      ฿ {priceText}
+                    </p>
+                  )}
                   <p className="text-[#5A7A98] text-[11px]">{p.brand}</p>
                 </div>
               </div>

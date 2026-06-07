@@ -1,3 +1,5 @@
+import type { PreorderInfo } from "./Mostseller";
+
 export type ApiProduct = {
   id_products: number;
   name: string;
@@ -10,6 +12,7 @@ export type ApiProduct = {
     discountValue: number;
     finalPrices?: number[];
   };
+  preorder?: PreorderInfo | null;
 };
 
 export interface ProductUI {
@@ -19,4 +22,5 @@ export interface ProductUI {
   avatar: string;
   priceText: string;
   finalPriceText?: string;
+  preorder?: PreorderInfo | null;
 }

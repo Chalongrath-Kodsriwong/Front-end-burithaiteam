@@ -75,6 +75,13 @@ export default function DetailOfProductShort({ product }: any) {
   const variantId = Number(selectedInventory?.variant_id);
   const inventoryId = Number(selectedInventory?.inventory_id);
 
+  const purchaseMode: string = selectedInventory?.purchase_mode ?? "normal";
+  const preorderDiscount: number | null = selectedInventory?.preorder_discount ?? null;
+  const preorderReleaseDate: string | null = selectedInventory?.preorder_release_date ?? null;
+  const preorderPrice = preorderDiscount != null
+    ? Math.round((selectedInventory?.price ?? 0) * (1 - preorderDiscount / 100))
+    : null;
+
   const displayPrice = selectedInventory
     ? selectedInventory.price.toLocaleString()
     : priceText;
@@ -166,6 +173,29 @@ export default function DetailOfProductShort({ product }: any) {
     } catch (error) {
       console.error("Buy now error:", error);
       alert("ไม่สามารถเพิ่มสินค้าลงตะกร้าได้");
+    }
+  };
+
+  const handlePreorder = async () => {
+    if (!selectedInventory) { alert("กรุณาเลือกสินค้า"); return; }
+    const username = localStorage.getItem("username");
+    if (!username) {
+      const pid = Array.isArray(id) ? id[0] : String(id);
+      router.replace(
+        `/login?redirect=${encodeURIComponent(
+          `/detail_product/${pid}?action=buy_now&productId=${currentProductId}&variantId=${variantId}&inventoryId=${inventoryId}&qty=${quantity}`
+        )}`
+      );
+      return;
+    }
+    try {
+      await addToCart(currentProductId, quantity, variantId, inventoryId);
+      sessionStorage.setItem("buynow_inventory_id", String(inventoryId));
+      sessionStorage.setItem("buynow_is_preorder", "true");
+      router.push("/shoppingcart");
+    } catch (error) {
+      console.error("Preorder error:", error);
+      alert("ไม่สามารถสั่ง Preorder ได้");
     }
   };
 
@@ -324,13 +354,58 @@ export default function DetailOfProductShort({ product }: any) {
       </div>
 
       {/* CTA Buttons */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-5">
-        <button onClick={handleBuyNow} className="btn-gold flex-1 text-sm font-bold">
-          ซื้อสินค้า
-        </button>
-        <button onClick={handleAddToCartClick} className="btn-outline-gold flex-1 text-sm font-bold">
-          เพิ่มลงตะกร้า ({quantity})
-        </button>
+      <div className="flex flex-col gap-3 mb-5">
+        {/* Row 1: Buy Now (hidden for preorder_only) or Preorder-only */}
+        {purchaseMode === "preorder_only" ? (
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button onClick={handlePreorder}
+              className="btn-gold flex-1 text-sm font-bold flex items-center justify-center gap-2">
+              <span>Preorder</span>
+              {preorderPrice != null && (
+                <span className="text-xs font-normal opacity-90">
+                  ฿{preorderPrice.toLocaleString()} (ลด {preorderDiscount}%)
+                </span>
+              )}
+            </button>
+            <button onClick={handleAddToCartClick} className="btn-outline-gold flex-1 text-sm font-bold">
+              เพิ่มลงตะกร้า ({quantity})
+            </button>
+          </div>
+        ) : (
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button onClick={handleBuyNow} className="btn-gold flex-1 text-sm font-bold">
+              ซื้อสินค้า
+            </button>
+            <button onClick={handleAddToCartClick} className="btn-outline-gold flex-1 text-sm font-bold">
+              เพิ่มลงตะกร้า ({quantity})
+            </button>
+          </div>
+        )}
+
+        {/* Row 2: Preorder button (shown for "both" mode) */}
+        {purchaseMode === "both" && (
+          <button onClick={handlePreorder}
+            className="w-full border border-[rgba(212,175,55,0.5)] text-[#D4AF37] hover:bg-[rgba(212,175,55,0.1)] rounded-sm py-2.5 text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2">
+            <span>Preorder</span>
+            {preorderPrice != null && (
+              <span className="text-xs font-normal opacity-80">
+                ฿{preorderPrice.toLocaleString()} (ลด {preorderDiscount}%)
+              </span>
+            )}
+            {preorderReleaseDate && (
+              <span className="text-xs text-[#5A7A98] font-normal">
+                · วางขาย {new Date(preorderReleaseDate).toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" })}
+              </span>
+            )}
+          </button>
+        )}
+
+        {/* Release date for preorder_only */}
+        {purchaseMode === "preorder_only" && preorderReleaseDate && (
+          <p className="text-xs text-[#5A7A98] text-center">
+            วันวางขาย: {new Date(preorderReleaseDate).toLocaleDateString("th-TH", { day: "numeric", month: "long", year: "numeric" })}
+          </p>
+        )}
       </div>
 
       {/* Short description */}

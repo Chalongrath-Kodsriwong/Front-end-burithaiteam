@@ -1,3 +1,5 @@
+import type { PreorderInfo } from "./Mostseller";
+
 export interface Product {
   id: number;
   name: string;
@@ -5,6 +7,7 @@ export interface Product {
   brand: string;
   avatar: string;
   category?: string;
-  quality?: string; // ⭐ เพิ่มตรงนี้
+  quality?: string;
   numericPrices?: number[];
+  preorder?: PreorderInfo | null;
 }

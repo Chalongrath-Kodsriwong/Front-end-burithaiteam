@@ -6,6 +6,7 @@ import Link from "next/link";
 
 import { ApiProduct, ProductUI } from "@/types/Newproduct";
 import { isSellableProduct } from "@/app/utils/productVisibility";
+import PreorderBadge from "@/app/components/PreorderBadge";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "" ;
 const ITEMS_PER_PAGE = 4;
@@ -55,6 +56,7 @@ export default function Newproducts() {
                 : "/image/logo_white.jpeg",
             priceText,
             finalPriceText,
+            preorder: p.preorder ?? null,
           };
         });
 
@@ -142,7 +144,9 @@ export default function Newproducts() {
                   </h3>
 
                   <div className="mt-1.5 min-h-[2rem]">
-                    {product.finalPriceText ? (
+                    {product.preorder ? (
+                      <PreorderBadge preorder={product.preorder} />
+                    ) : product.finalPriceText ? (
                       <div className="space-y-0.5">
                         <p className="text-xs text-[#445566] line-through">
                           ฿ {product.priceText}

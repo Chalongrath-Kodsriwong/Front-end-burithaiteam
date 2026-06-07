@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 
 import { Product } from "@/types/Productdisplay"
 import { isSellableProduct } from "@/app/utils/productVisibility";
+import PreorderBadge from "@/app/components/PreorderBadge";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 const ITEMS_PER_PAGE = 20; // แสดง 20 ชิ้นต่อหน้า
@@ -128,7 +129,8 @@ export default function Productdisplay() {
                 : "/image/logo_white.jpeg"),
             category: p.category?.name || "",
             quality: p.quality ?? "",
-            numericPrices: prices, // ⭐⭐ ต้องมีบรรทัดนี้!!
+            numericPrices: prices,
+            preorder: p.preorder ?? null,
           };
         });
 
@@ -340,7 +342,11 @@ export default function Productdisplay() {
                 <h3 className="text-xs sm:text-sm font-semibold line-clamp-2 min-h-[2rem] sm:min-h-[2.8rem] leading-snug text-gray-100">
                   {product.name}
                 </h3>
-                <p className="text-yellow-400 font-medium text-[11px] sm:text-sm mt-1">฿ {product.price}</p>
+                {product.preorder ? (
+                  <PreorderBadge preorder={product.preorder} />
+                ) : (
+                  <p className="text-yellow-400 font-medium text-[11px] sm:text-sm mt-1">฿ {product.price}</p>
+                )}
                 <p className="text-[10px] sm:text-xs text-gray-500 mt-0.5 break-words">{product.brand}</p>
               </div>
             </div>
