@@ -30,20 +30,13 @@ export default function ContactForm() {
   ];
 
   return (
-    <div className="container flex justify-center align-middle mx-auto p-2 mt-20">
-      <div className="flex flex-col gap-10 items-start justify-start">
+    <div className="container mx-auto p-2 mt-6">
+      <h2 className="text-2xl font-bold text-gray-100 mb-6 section-title">ช่องทางการติดต่อ</h2>
+      <div className="flex flex-col gap-5">
         {socialLinks.map((social) => {
           const Icon = social.icon;
-          const colorClass =
-            social.name === "Facebook"
-              ? "text-blue-600"
-              : social.name === "Line"
-                ? "text-green-600"
-                : social.name === "WeChat"
-                  ? "text-green-700"
-                  : social.name === "Phone"
-                    ? "text-black"
-                  : "text-black";
+          const iconColor =
+            social.name === "Facebook" ? "text-blue-400" : "text-yellow-500";
 
           return (
             <a
@@ -51,20 +44,16 @@ export default function ContactForm() {
               href={social.href}
               target={social.name === "Phone" ? undefined : "_blank"}
               rel={social.name === "Phone" ? undefined : "noopener noreferrer"}
-              title={social.name}
               aria-label={social.name}
-              className={`inline-flex items-center gap-10 text-gray-900 ${
-                social.name === "Phone" ? "ml-5" : ""
-              }`}
+              className="flex items-center gap-5 p-4 rounded-xl bg-[#111827] border border-[rgba(212,175,55,0.15)]
+                hover:border-yellow-500/60 hover:bg-[#1a2035] transition-all duration-300 group"
             >
-              <Icon
-                className={`${social.name === "Phone" ? "h-12 w-12" : "h-20 w-20"} ${colorClass}`}
-              />
-              <div className={social.name === "Phone" ? "ml-4" : ""}>
-                <span className="text-2xl font-medium">
+              <Icon className={`h-10 w-10 shrink-0 ${iconColor} group-hover:scale-110 transition-transform duration-300`} />
+              <div>
+                <p className="text-base font-semibold text-gray-100">
                   {social.name === "Phone" ? "คุณ บุรี" : social.name}
-                </span>
-                <p className="text-lg">
+                </p>
+                <p className="text-sm text-gray-400">
                   {social.name === "Phone" ? social.phone : "BuriThaiTeam"}
                 </p>
               </div>

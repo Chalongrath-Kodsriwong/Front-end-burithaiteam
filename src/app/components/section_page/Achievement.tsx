@@ -72,46 +72,54 @@ export default function Achievement() {
 }, []);
 
   return (
-    <div className="relative container mx-auto px-6 py-16 rounded-[60px] overflow-hidden bg-[#0f172a]">
+    <section className="relative overflow-hidden">
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_top,rgba(212,175,55,0.06)_0%,transparent_60%)]" />
 
-      {/* 🌟 Dark Gold Fade Background */}
-      <div
-        className="absolute inset-0 pointer-events-none
-        bg-[linear-gradient(to_top,_rgba(120,90,20,0.20),_rgba(15,23,42,1)_100%)]"
-      ></div>
-
-      <div className="relative z-10 text-yellow-400">
-        <div className="text-center mb-14">
-          <h2 className="text-3xl font-bold">Achievement</h2>
-          <h3 className="text-xl font-semibold mt-2">(ผลงานของเรา)</h3>
+      <div className="relative z-10">
+        <div className="flex flex-col items-center text-center mb-10 sm:mb-14">
+          <span className="section-eyebrow-led mb-4">Our Work</span>
+          <h2 className="section-heading mb-3">Achievement</h2>
+          <p className="text-sm text-[#5A7A98]">ผลงานที่เราภาคภูมิใจ และลูกค้าไว้วางใจ</p>
+          <div className="gold-dot-sep">
+            <div className="w-1.5 h-1.5 rounded-full bg-[#00CFFF] shadow-[0_0_8px_rgba(0,207,255,0.9)]" />
+          </div>
         </div>
 
         {loading ? (
-          <div className="text-center py-10">Loading...</div>
+          <div className="text-center py-10">
+            <div className="w-8 h-8 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin mx-auto" />
+          </div>
         ) : achievementList.length === 0 ? (
-          <div className="text-center py-10">No Data</div>
+          <div className="text-center py-10 text-gray-500">ยังไม่มีผลงาน</div>
         ) : (
-          <div className="overflow-hidden">
-            <div className="flex gap-16 animate-marquee w-max">
+          <div className="overflow-hidden [mask-image:linear-gradient(to_right,transparent_0%,black_8%,black_92%,transparent_100%)]">
+            <div className="flex gap-6 sm:gap-10 animate-marquee w-max">
               {[...achievementList, ...achievementList].map((item, index) => (
                 <div
                   key={`${item.id}-${index}`}
-                  className="flex flex-col items-center text-center min-w-[220px]"
+                  className="group flex flex-col items-center text-center min-w-[110px] sm:min-w-[145px]"
                 >
-                  <img
-                    className="rounded-full w-44 h-44 sm:w-52 sm:h-52 object-cover border-2 border-yellow-500 shadow-lg"
-                    src={item.url?.[0] || "/image/logo_black.jpg"}
-                    alt={item.name}
-                  />
-                  <h3 className="mt-5 text-lg sm:text-xl font-semibold">
+                  <div className="w-16 h-16 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-sm overflow-hidden
+                    ring-2 ring-[rgba(0,207,255,0.15)]
+                    group-hover:ring-[rgba(0,207,255,0.65)]
+                    shadow-[0_4px_16px_rgba(0,0,0,0.6)]
+                    group-hover:shadow-[0_0_22px_rgba(0,207,255,0.2)]
+                    transition-all duration-350 backdrop-blur-sm">
+                    <img
+                      src={item.url?.[0] || "/image/logo_black.jpg"}
+                      alt={item.name}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+                  </div>
+                  <p className="mt-2 sm:mt-3 text-xs sm:text-sm font-semibold text-[#7A9AB8] group-hover:text-[#00CFFF] line-clamp-2 max-w-[100px] sm:max-w-[130px] transition-colors duration-300">
                     {item.name}
-                  </h3>
+                  </p>
                 </div>
               ))}
             </div>
           </div>
         )}
       </div>
-    </div>
+    </section>
   );
 }

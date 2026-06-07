@@ -91,55 +91,51 @@ export default function Productdisplay() {
     (page + 1) * ITEMS_PER_PAGE
   );
 
-  if (loading) return <div className="p-4 text-center">กำลังโหลดสินค้า...</div>;
+  if (loading) return <div className="p-4 text-center text-gray-400">กำลังโหลดสินค้า...</div>;
   if (products.length === 0)
-    return <div className="p-4 text-center">ไม่มีข้อมูลสินค้า</div>;
+    return <div className="p-4 text-center text-gray-400">ไม่มีข้อมูลสินค้า</div>;
 
   return (
-    <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-6 rounded-xl shadow-xl">
-      <div className="flex flex-col item-center justify-center text-center p-2 sm:p-4 mb-4">
-      <h2 className="text-lg sm:text-2xl font-bold">
-        <div>My Product</div>
-      </h2>
-      <h2 className="text-sm sm:text-[20px] font-bold mt-0.5">(สินค้าทั้งหมดของเรา)</h2>
+    <div className="container mx-auto px-2 sm:px-4 py-6">
+      {/* Section Header */}
+      <div className="flex flex-col items-center text-center mb-12 sm:mb-16">
+        <span className="section-eyebrow-led mb-4">Our Products</span>
+        <h2 className="section-heading mb-3">สินค้าทั้งหมด</h2>
+        <p className="text-sm text-[#5A7A98]">เลือกชมสินค้าจาก LED Module คุณภาพสูงทุกรูปแบบ</p>
+        <div className="gold-dot-sep">
+          <div className="w-1.5 h-1.5 rounded-full bg-[#00CFFF] shadow-[0_0_8px_rgba(0,207,255,0.9)]" />
+        </div>
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 mx-1 sm:mx-4 md:mx-12 mt-4">
+      <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 mx-1 sm:mx-2 md:mx-6">
         {visibleItems.map((product) => (
           <Link
             key={product.id}
             href={`/detail_product/${product.id}`}
             className="h-full"
           >
-            <div
-              className="h-full w-full p-1.5 sm:p-2 border border-gray-300 rounded-md bg-white cursor-pointer flex flex-col
-              hover:border-yellow-500
-              hover:shadow-[0_0_4px_rgba(212,175,55,0.5),0_0_8px_rgba(184,134,11,0.4)]
-              transition-all duration-300"
-            >
-              <div className="w-full h-24 sm:h-32 md:h-[200px] rounded-md overflow-hidden bg-gray-100">
+            <div className="product-card h-full w-full p-1.5 sm:p-2.5 cursor-pointer flex flex-col">
+              <div className="w-full h-24 sm:h-32 md:h-[180px] rounded-sm overflow-hidden bg-[#0a0c10] border border-[rgba(0,207,255,0.06)]">
                 <img
                   src={product.avatar}
                   alt={product.name}
                   onError={(e) =>
                     (e.currentTarget.src = "/image/logo_white.jpeg")
                   }
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                 />
               </div>
 
-              <div className="p-1 flex-1 flex flex-col">
-                <h3 className="font-semibold text-[10px] sm:text-xs md:text-base leading-snug line-clamp-3 min-h-[2.7rem] sm:min-h-[3rem] md:min-h-[3.5rem]">
+              <div className="p-1 flex-1 flex flex-col mt-1">
+                <h3 className="font-semibold text-[10px] sm:text-xs md:text-sm leading-snug line-clamp-3 min-h-[2.5rem] sm:min-h-[2.8rem] text-[#E8F0F8]">
                   {product.name}
                 </h3>
-
-                <div className="mt-1 sm:mt-2">
-                  <p className="font-bold text-[10px] sm:text-xs md:text-base">฿ {product.price}</p>
-                </div>
-
-                <p className="text-[10px] sm:text-xs md:text-sm text-gray-600 mt-1 sm:mt-2 break-words">
-                  Brand: {product.brand}
+                <p className="font-bold text-[10px] sm:text-xs md:text-sm text-[#D4AF37] mt-1">
+                  ฿ {product.price}
+                </p>
+                <p className="text-[9px] sm:text-[10px] md:text-xs text-[#445566] mt-0.5 break-words">
+                  {product.brand}
                 </p>
               </div>
             </div>
@@ -149,23 +145,23 @@ export default function Productdisplay() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex justify-center items-center gap-4 mt-6">
+        <div className="flex justify-center items-center gap-3 mt-8">
           <button
             onClick={handlePrevPage}
             disabled={page === 0}
-            className="px-4 py-2 bg-gray-300 hover:bg-gray-400 disabled:opacity-50 rounded"
+            className="px-4 py-2 text-sm bg-[#0a0c10] border border-[rgba(0,207,255,0.25)] text-[#00CFFF]
+              hover:border-[rgba(0,207,255,0.7)] hover:shadow-[0_0_10px_rgba(0,207,255,0.25)] disabled:opacity-30 disabled:cursor-not-allowed rounded-sm transition-all"
           >
             ย้อนกลับ
           </button>
-
-          <span className="font-semibold">
-            Page {page + 1} / {totalPages}
+          <span className="text-sm text-[#5A7A98]">
+            {page + 1} / {totalPages}
           </span>
-
           <button
             onClick={handleNextPage}
             disabled={page === totalPages - 1}
-            className="px-4 py-2 bg-gray-300 hover:bg-gray-400 disabled:opacity-50 rounded"
+            className="px-4 py-2 text-sm bg-[#0a0c10] border border-[rgba(0,207,255,0.25)] text-[#00CFFF]
+              hover:border-[rgba(0,207,255,0.7)] hover:shadow-[0_0_10px_rgba(0,207,255,0.25)] disabled:opacity-30 disabled:cursor-not-allowed rounded-sm transition-all"
           >
             ถัดไป
           </button>

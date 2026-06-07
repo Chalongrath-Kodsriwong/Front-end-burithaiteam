@@ -84,89 +84,85 @@ export default function Mostsell() {
     (page + 1) * ITEMS_PER_PAGE
   );
 
-  if (loading) return <div className="p-4 text-center">กำลังโหลดสินค้า...</div>;
+  if (loading) return <div className="p-4 text-center text-gray-400">กำลังโหลดสินค้า...</div>;
   if (products.length === 0)
-    return <div className="p-4 text-center">ไม่มีข้อมูลสินค้า</div>;
+    return <div className="p-4 text-center text-gray-400">ไม่มีข้อมูลสินค้า</div>;
 
   return (
-    <div className="pb-3">
-      <div className="flex flex-col p-4 mb-4 justify-center items-center gap-3">
-        <h2 className="text-3xl font-bold text-center">
-          Most Seller
-        </h2>
-        <h2 className="text-2xl font-bold text-center">
-          (สินค้าที่ขายดีที่สุด)
-        </h2>
+    <div className="pb-6">
+      {/* Section Header */}
+      <div className="flex flex-col items-center text-center mb-12 sm:mb-16">
+        <span className="section-eyebrow-led mb-4">Best Sellers</span>
+        <h2 className="section-heading mb-3">สินค้าขายดี</h2>
+        <p className="text-sm text-[#5A7A98]">สินค้าที่ลูกค้าเลือกซื้อมากที่สุด</p>
+        <div className="gold-dot-sep">
+          <div className="w-1.5 h-1.5 rounded-full bg-[#00CFFF] shadow-[0_0_8px_rgba(0,207,255,0.9)]" />
+        </div>
       </div>
 
       <div className="relative">
-        {/* ปุ่มซ้าย */}
         <button
           onClick={handlePrev}
-          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 
-            w-9 h-9 md:w-12 md:h-12 flex items-center justify-center
-            rounded-full bg-gray-300 hover:text-[rgb(255,215,0)]
-            hover:[text-shadow:0_0_6px_rgb(255,215,0),0_0_12px_rgb(255,215,0),0_0_20px_rgb(212,175,55)] 
-            hover:bg-black/70
-            text-base md:text-xl font-bold shadow-md transition"
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-10
+            w-9 h-9 md:w-10 md:h-10 flex items-center justify-center
+            rounded-sm bg-[#0a0c10] border border-[rgba(0,207,255,0.25)] text-[#00CFFF]
+            hover:border-[rgba(0,207,255,0.7)] hover:shadow-[0_0_12px_rgba(0,207,255,0.3)]
+            text-base md:text-xl font-bold transition-all duration-300"
         >
           ‹
         </button>
 
-        {/* สินค้า */}
-        <div className="grid grid-cols-2 gap-4 px-10 sm:grid-cols-2 sm:gap-5 sm:px-12 md:grid-cols-4 md:px-16 lg:px-20">
+        <div className="grid grid-cols-2 gap-3 px-10 sm:grid-cols-2 sm:gap-4 sm:px-12 md:grid-cols-4 md:px-12 lg:px-14">
           {paginatedItems.map((product) => (
             <Link
               key={product.id}
               href={`/detail_product/${product.id}`}
               className="h-full"
             >
-              <div
-                className="w-full h-full p-2 border border-gray-300 rounded-md bg-white cursor-pointer flex flex-col
-                  hover:border-yellow-500
-                  hover:shadow-[0_0_4px_rgba(212,175,55,0.5),0_0_8px_rgba(184,134,11,0.4)]
-                  transition-all duration-300"
-              >
+              <div className="product-card w-full h-full p-2.5 cursor-pointer flex flex-col relative">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <div className="relative w-full aspect-square rounded-md overflow-hidden bg-gray-100">
+                <div className="relative w-full aspect-square rounded-sm overflow-hidden bg-[#0a0c10] border border-[rgba(0,207,255,0.06)]">
                   <img
                     src={product.avatar}
                     alt={product.name}
                     onError={(e) =>
                       (e.currentTarget.src = "/image/logo_white.jpeg")
                     }
-                    className="absolute inset-0 w-full h-full object-cover"
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                   />
+                  {/* Hot badge */}
+                  <span className="absolute top-2 left-2 led-badge text-[9px] px-1.5 py-0.5">
+                    <span className="led-badge-dot" />Hot
+                  </span>
                 </div>
 
-                <div className="p-1 flex-1 flex flex-col">
-                  <h3 className="font-semibold text-base md:text-lg leading-snug line-clamp-2 min-h-[2.75rem] md:min-h-0">
+                <div className="p-1.5 flex-1 flex flex-col mt-1">
+                  <h3 className="font-semibold text-sm md:text-base leading-snug line-clamp-2 min-h-[2.5rem] md:min-h-0 text-[#E8F0F8]">
                     {product.name}
                   </h3>
 
-                  <div className="mt-1.5 md:mt-1 min-h-[2.6rem] md:min-h-0">
+                  <div className="mt-1.5 min-h-[2rem]">
                     {product.finalPriceText ? (
-                      <div className="space-y-1">
-                        <p className="text-sm text-gray-500 line-through">
+                      <div className="space-y-0.5">
+                        <p className="text-xs text-[#445566] line-through">
                           ฿ {product.priceText}
                         </p>
-                        <p className="font-bold text-red-600 text-base">
+                        <p className="font-bold text-red-400 text-sm md:text-base">
                           ฿ {product.finalPriceText}
                         </p>
                       </div>
                     ) : (
-                      <p className="font-bold text-base">
+                      <p className="font-bold text-[#D4AF37] text-sm md:text-base">
                         ฿ {product.priceText}
                       </p>
                     )}
                   </div>
 
-                  <p className="text-[11px] sm:text-xs md:text-sm text-gray-600 mt-1 break-words">
-                    Brand: {product.brand}
+                  <p className="text-[10px] sm:text-xs text-[#445566] mt-1 break-words">
+                    {product.brand}
                   </p>
-
-                  <p className="text-xs text-gray-500 mt-0.5 break-words">
-                    ขายไปแล้ว: {product.soldQty?.toLocaleString() ?? "0"} ชิ้น
+                  <p className="text-[10px] sm:text-xs text-[#2A3A4A] mt-0.5">
+                    ขายไปแล้ว {product.soldQty?.toLocaleString() ?? "0"} ชิ้น
                   </p>
                 </div>
               </div>
@@ -174,28 +170,27 @@ export default function Mostsell() {
           ))}
         </div>
 
-        {/* ปุ่มขวา */}
         <button
           onClick={handleNext}
-          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 
-            w-9 h-9 md:w-12 md:h-12 flex items-center justify-center
-            rounded-full bg-gray-300 hover:text-[rgb(255,215,0)]
-            hover:[text-shadow:0_0_6px_rgb(255,215,0),0_0_12px_rgb(255,215,0),0_0_20px_rgb(212,175,55)] 
-            hover:bg-black/70
-            text-base md:text-xl font-bold shadow-md transition"
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-10
+            w-9 h-9 md:w-10 md:h-10 flex items-center justify-center
+            rounded-sm bg-[#0a0c10] border border-[rgba(0,207,255,0.25)] text-[#00CFFF]
+            hover:border-[rgba(0,207,255,0.7)] hover:shadow-[0_0_12px_rgba(0,207,255,0.3)]
+            text-base md:text-xl font-bold transition-all duration-300"
         >
           ›
         </button>
       </div>
 
-      {/* pagination dot */}
-      <div className="flex justify-center gap-2 mt-4">
+      <div className="flex justify-center gap-2 mt-6">
         {Array.from({ length: totalPages }).map((_, i) => (
           <button
             key={i}
             onClick={() => setPage(i)}
-            className={`w-3 h-3 rounded-full ${
-              i === page ? "bg-yellow-500" : "bg-gray-300"
+            className={`transition-all duration-300 rounded-full ${
+              i === page
+                ? "w-6 h-2.5 bg-[#00CFFF] shadow-[0_0_8px_rgba(0,207,255,0.7)]"
+                : "w-2.5 h-2.5 bg-[#1a2a3a] hover:bg-[#2a3a4a]"
             }`}
           />
         ))}

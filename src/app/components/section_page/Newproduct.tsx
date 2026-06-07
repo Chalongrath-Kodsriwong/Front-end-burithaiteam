@@ -86,83 +86,80 @@ export default function Newproducts() {
     (page + 1) * ITEMS_PER_PAGE
   );
 
-  if (loading) return <div className="p-4">กำลังโหลดสินค้า...</div>;
+  if (loading) return <div className="p-4 text-gray-400">กำลังโหลดสินค้า...</div>;
   if (products.length === 0)
-    return <div className="p-4">ไม่มีข้อมูลสินค้า</div>;
+    return <div className="p-4 text-gray-400">ไม่มีข้อมูลสินค้า</div>;
 
   return (
-    <div className="pb-3">
-      <h2 className="text-2xl font-bold flex items-center mb-4">
-        <div className="relative w-28 h-16">
-          <Bookmark className="w-full h-full text-red-600 rotate-[4.71rad]" fill="currentColor" />
-          <span className="absolute inset-0 flex items-center justify-center text-white text-xl font-bold -translate-x-1">
-            New
-          </span>
+    <div className="pb-6">
+      {/* Section Header */}
+      <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-5 mb-8">
+        <div>
+          <span className="section-eyebrow-led mb-3 justify-start">New Arrivals</span>
+          <h2 className="section-heading mt-2">สินค้าใหม่</h2>
         </div>
-        <p className="-ml-6">สินค้าใหม่</p>
-      </h2>
+        <span className="led-badge self-start sm:mb-1.5">
+          <span className="led-badge-dot" />
+          New
+        </span>
+      </div>
 
       <div className="relative">
         <button
           onClick={handlePrev}
-          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 
-             w-9 h-9 md:w-12 md:h-12 flex items-center justify-center
-            rounded-full bg-gray-300 hover:text-[rgb(255,215,0)]
-      hover:[text-shadow:0_0_6px_rgb(255,215,0),0_0_12px_rgb(255,215,0),0_0_20px_rgb(212,175,55)] hover:bg-black/70
-             text-base md:text-xl font-bold shadow-md  transition"
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-10
+             w-9 h-9 md:w-10 md:h-10 flex items-center justify-center
+            rounded-sm bg-[#0a0c10] border border-[rgba(0,207,255,0.25)] text-[#00CFFF]
+            hover:border-[rgba(0,207,255,0.7)] hover:shadow-[0_0_12px_rgba(0,207,255,0.3)]
+             text-base md:text-xl font-bold transition-all duration-300"
         >
           ‹
         </button>
 
-        <div className="grid grid-cols-2 gap-4 px-10 sm:grid-cols-2 sm:gap-5 sm:px-12 md:grid-cols-4 md:px-16 lg:px-20">
+        <div className="grid grid-cols-2 gap-3 px-10 sm:grid-cols-2 sm:gap-4 sm:px-12 md:grid-cols-4 md:px-12 lg:px-14">
           {paginatedItems.map((product) => (
             <Link
               key={product.id}
               href={`/detail_product/${product.id}`}
               className="h-full"
             >
-              <div
-                className="w-full h-full p-2 border border-gray-300 rounded-md bg-white cursor-pointer flex flex-col
-                  hover:border-yellow-500
-                  hover:shadow-[0_0_4px_rgba(212,175,55,0.5),0_0_8px_rgba(184,134,11,0.4)]
-                  transition-all duration-300"
-              >
+              <div className="product-card w-full h-full p-2.5 cursor-pointer flex flex-col">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <div className="relative w-full aspect-square rounded-md overflow-hidden bg-gray-100">
+                <div className="relative w-full aspect-square rounded-sm overflow-hidden bg-[#0a0c10] border border-[rgba(0,207,255,0.06)]">
                   <img
                     src={product.avatar}
                     alt={product.name}
                     onError={(e) =>
                       (e.currentTarget.src = "/image/logo_white.jpeg")
                     }
-                    className="absolute inset-0 w-full h-full object-cover"
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                   />
                 </div>
 
-                <div className="p-1 flex-1 flex flex-col">
-                  <h3 className="font-semibold text-base md:text-lg leading-snug line-clamp-2 min-h-[2.75rem] md:min-h-0">
+                <div className="p-1.5 flex-1 flex flex-col mt-1">
+                  <h3 className="font-semibold text-sm md:text-base leading-snug line-clamp-2 min-h-[2.5rem] md:min-h-0 text-[#E8F0F8]">
                     {product.name}
                   </h3>
 
-                  <div className="mt-1.5 md:mt-1 min-h-[2.6rem] md:min-h-0">
+                  <div className="mt-1.5 min-h-[2rem]">
                     {product.finalPriceText ? (
-                      <div className="space-y-1">
-                        <p className="text-sm text-gray-500 line-through">
+                      <div className="space-y-0.5">
+                        <p className="text-xs text-[#445566] line-through">
                           ฿ {product.priceText}
                         </p>
-                        <p className="font-bold text-red-600 text-base">
+                        <p className="font-bold text-red-400 text-sm md:text-base">
                           ฿ {product.finalPriceText}
                         </p>
                       </div>
                     ) : (
-                      <p className="font-bold text-base">
+                      <p className="font-bold text-[#D4AF37] text-sm md:text-base">
                         ฿ {product.priceText}
                       </p>
                     )}
                   </div>
 
-                  <p className="text-[11px] sm:text-xs md:text-sm text-gray-600 mt-1 break-words">
-                    Brand: {product.brand}
+                  <p className="text-[10px] sm:text-xs text-[#445566] mt-1 break-words">
+                    {product.brand}
                   </p>
                 </div>
               </div>
@@ -172,11 +169,11 @@ export default function Newproducts() {
 
         <button
           onClick={handleNext}
-          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 
-             w-9 h-9 md:w-12 md:h-12 flex items-center justify-center
-             rounded-full bg-gray-300 hover:text-[rgb(255,215,0)]
-      hover:[text-shadow:0_0_6px_rgb(255,215,0),0_0_12px_rgb(255,215,0),0_0_20px_rgb(212,175,55)] hover:bg-black/70
-             text-base md:text-xl font-bold shadow-md  transition"
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-10
+             w-9 h-9 md:w-10 md:h-10 flex items-center justify-center
+             rounded-sm bg-[#0a0c10] border border-[rgba(0,207,255,0.25)] text-[#00CFFF]
+            hover:border-[rgba(0,207,255,0.7)] hover:shadow-[0_0_12px_rgba(0,207,255,0.3)]
+             text-base md:text-xl font-bold transition-all duration-300"
         >
           ›
         </button>

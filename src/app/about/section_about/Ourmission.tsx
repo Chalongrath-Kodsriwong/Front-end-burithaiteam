@@ -95,8 +95,10 @@ export default function Ourmission() {
   }, [groupedData, pausedIndexes]);
 
   return (
-    <div className="max-w-screen-2xl mx-auto px-4 py-6 my-3 shadow-lg rounded-lg">
-      <h1 className="text-3xl font-bold mb-6">ผลงานของเรา</h1>
+    <div className="max-w-screen-2xl mx-auto px-4 py-6 my-3">
+      <div className="mb-8">
+        <h2 className="text-2xl md:text-3xl font-bold text-gray-100 section-title">ผลงานของเรา</h2>
+      </div>
 
       <div className="flex flex-col gap-8">
           {groupedData.map((group, i) => {

@@ -50,11 +50,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="antialiased">
+      <body className="antialiased bg-[#08090d] text-[#E8F0F8]">
         {/* ✅ ห่อด้วย CartProvider ครอบทั้ง app */}
         <CartProvider>
           <GlobalAuthGuard />
-          <header className="fixed top-0 left-0 right-0 z-[1000] bg-white border-b border-gray-200 dark:bg-gray-900 dark:border-gray-700">
+          <header className="fixed top-0 left-0 right-0 z-[1000] bg-[#08090d]/92 backdrop-blur-xl border-b border-[rgba(0,207,255,0.12)]">
             <TopNavbar />
           </header>
           <main className="pt-[120px] sm:pt-[100px] md:pt-[170px]">

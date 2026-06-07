@@ -79,7 +79,7 @@ export default function TopNavbar() {
   }, []);
 
   return (
-    <nav className="bg-[rgb(26,26,26)] border-gray-200">
+    <nav className="bg-transparent">
       <div className="w-full flex items-center justify-between gap-2 p-3 md:p-4">
         {/* LEFT LOGO */}
         <Link href="/" className="min-w-0 flex items-center space-x-2 sm:space-x-3 rtl:space-x-reverse">

@@ -43,10 +43,10 @@ export default function FilterProduct({ category }: { category: string }) {
   return (
     <>
       {isClient && (
-        <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-1 sm:gap-2 outline outline-1 outline-gray-500 rounded p-1 sm:p-2">
+        <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-1 sm:gap-2 bg-[#111827] border border-[rgba(212,175,55,0.15)] rounded-xl p-1.5 sm:p-2.5 text-gray-200">
           <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-base">
             <h3 className="leading-none">Selected:</h3>
-            <h3 className="px-1.5 sm:px-3 py-0.5 sm:py-1 bg-gray-100 border border-gray-300 rounded-full text-[10px] sm:text-sm text-gray-700 font-medium shadow-sm leading-none">
+            <h3 className="px-1.5 sm:px-3 py-0.5 sm:py-1 bg-[#1a1a2e] border border-[rgba(212,175,55,0.3)] rounded-full text-[10px] sm:text-sm text-yellow-400 font-medium shadow-sm leading-none">
               {category}
             </h3>
           </div>
@@ -69,23 +69,23 @@ export default function FilterProduct({ category }: { category: string }) {
                   setIsPriceOpen((prev) => !prev);
                   setIsNameOpen(false);
                 }}
-                className={`${isCompactView ? "flex" : "hidden"} h-7 w-[132px] bg-gray-50 border border-gray-300 text-gray-900 text-[10px] rounded-lg px-1.5 text-left items-center justify-between`}
+                className={`${isCompactView ? "flex" : "hidden"} h-7 w-[132px] bg-[#1a1a2e] border border-[rgba(212,175,55,0.2)] text-gray-200 text-[10px] rounded-lg px-1.5 text-left items-center justify-between`}
               >
                 <span className="truncate">{priceLabel}</span>
                 <span className="ml-1">▾</span>
               </button>
               {isCompactView && isPriceOpen && (
-                <div className="absolute left-0 top-full mt-1 w-[132px] z-[60] rounded-lg border border-gray-300 bg-white shadow-lg overflow-hidden">
+                <div className="absolute left-0 top-full mt-1 w-[132px] z-[60] rounded-lg border border-[rgba(212,175,55,0.2)] bg-[#111827] shadow-lg shadow-black/50 overflow-hidden">
                   <button
                     type="button"
-                    className="block w-full text-left px-2 py-1.5 text-[10px] text-gray-900 hover:bg-gray-100"
+                    className="block w-full text-left px-2 py-1.5 text-[10px] text-gray-200 hover:bg-[#1a2035] bg-[#111827]"
                     onClick={() => applyPriceSort("asc")}
                   >
                     Price Min to Max
                   </button>
                   <button
                     type="button"
-                    className="block w-full text-left px-2 py-1.5 text-[10px] text-gray-900 hover:bg-gray-100"
+                    className="block w-full text-left px-2 py-1.5 text-[10px] text-gray-200 hover:bg-[#1a2035] bg-[#111827]"
                     onClick={() => applyPriceSort("desc")}
                   >
                     Price Max to Min
@@ -94,7 +94,7 @@ export default function FilterProduct({ category }: { category: string }) {
               )}
               <select
                 id="topic"
-                className={`${isCompactView ? "hidden" : "block"} h-7 sm:h-auto bg-gray-50 border border-gray-300 text-gray-900 text-[10px] sm:text-sm rounded-lg px-1.5 py-0.5 sm:p-2 w-[132px] sm:w-auto leading-none`}
+                className={`${isCompactView ? "hidden" : "block"} h-7 sm:h-auto bg-[#1a1a2e] border border-[rgba(212,175,55,0.2)] text-gray-200 text-[10px] sm:text-sm rounded-lg px-1.5 py-0.5 sm:p-2 w-[132px] sm:w-auto leading-none`}
                 onChange={(e) => {
                   const sortValue = e.target.value;
                   const params = new URLSearchParams(window.location.search);
@@ -121,23 +121,23 @@ export default function FilterProduct({ category }: { category: string }) {
                   setIsNameOpen((prev) => !prev);
                   setIsPriceOpen(false);
                 }}
-                className={`${isCompactView ? "flex" : "hidden"} h-7 w-[92px] bg-gray-50 border border-gray-300 text-gray-900 text-[10px] rounded-lg px-1.5 text-left items-center justify-between`}
+                className={`${isCompactView ? "flex" : "hidden"} h-7 w-[92px] bg-[#1a1a2e] border border-[rgba(212,175,55,0.2)] text-gray-200 text-[10px] rounded-lg px-1.5 text-left items-center justify-between`}
               >
                 <span className="truncate">{nameLabel}</span>
                 <span className="ml-1">▾</span>
               </button>
               {isCompactView && isNameOpen && (
-                <div className="absolute right-0 top-full mt-1 w-[92px] z-[60] rounded-lg border border-gray-300 bg-white shadow-lg overflow-hidden">
+                <div className="absolute right-0 top-full mt-1 w-[92px] z-[60] rounded-lg border border-[rgba(212,175,55,0.2)] bg-[#111827] shadow-lg shadow-black/50 overflow-hidden">
                   <button
                     type="button"
-                    className="block w-full text-left px-2 py-1.5 text-[10px] text-gray-900 hover:bg-gray-100"
+                    className="block w-full text-left px-2 py-1.5 text-[10px] text-gray-200 hover:bg-[#1a2035] bg-[#111827]"
                     onClick={() => applyNameSort("az")}
                   >
                     เรียง A-Z
                   </button>
                   <button
                     type="button"
-                    className="block w-full text-left px-2 py-1.5 text-[10px] text-gray-900 hover:bg-gray-100"
+                    className="block w-full text-left px-2 py-1.5 text-[10px] text-gray-200 hover:bg-[#1a2035] bg-[#111827]"
                     onClick={() => applyNameSort("za")}
                   >
                     เรียง Z-A
@@ -146,7 +146,7 @@ export default function FilterProduct({ category }: { category: string }) {
               )}
               <select
                 id="topic"
-                className={`${isCompactView ? "hidden" : "block"} h-7 sm:h-auto bg-gray-50 border border-gray-300 text-gray-900 text-[10px] sm:text-sm rounded-lg px-1.5 py-0.5 sm:p-2 w-[92px] sm:w-auto leading-none`}
+                className={`${isCompactView ? "hidden" : "block"} h-7 sm:h-auto bg-[#1a1a2e] border border-[rgba(212,175,55,0.2)] text-gray-200 text-[10px] sm:text-sm rounded-lg px-1.5 py-0.5 sm:p-2 w-[92px] sm:w-auto leading-none`}
                 onChange={(e) => {
                   const sortValue = e.target.value;
                   const params = new URLSearchParams(window.location.search);

@@ -282,43 +282,25 @@ export default function Productdisplay() {
   ============================================ */
   if (!loading && products.length === 0 && keywordSearch) {
     return (
-      <div className="p-4 sm:p-6 text-center bg-white rounded-lg shadow-md">
-        <h2 className="text-lg sm:text-2xl font-bold text-red-600 mb-4">
-          ไม่พบสินค้าที่คุณค้นหา: “{keywordSearch}”
+      <div className="p-4 sm:p-6 text-center rounded-xl bg-gray-900">
+        <h2 className="text-lg sm:text-xl font-bold text-red-400 mb-4">
+          {`ไม่พบสินค้าที่คุณค้นหา: "${keywordSearch}"`}
         </h2>
 
         {suggestions.length > 0 ? (
           <>
-            <p className="text-gray-700 mb-3">
-              สินค้าใกล้เคียงที่อาจตรงกับที่คุณต้องการ:
-            </p>
-
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 mx-1 sm:mx-4 md:mx-12 mt-4">
+            <p className="text-gray-400 mb-4 text-sm">สินค้าใกล้เคียงที่อาจตรงกับที่คุณต้องการ:</p>
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 mt-4">
               {suggestions.map((product) => (
-                <Link
-                  key={product.id}
-                  href={`/detail_product/${product.id}`}
-                  className="h-full"
-                >
-                  <div
-                    className="h-full border p-2 sm:p-4 rounded-lg bg-white shadow-sm cursor-pointer flex flex-col
-                    hover:border-yellow-500
-                    hover:shadow-[0_0_4px_rgba(212,175,55,0.5),0_0_8px_rgba(184,134,11,0.4)]
-                    transition-all duration-300"
-                  >
-                    <div className="w-full h-24 sm:h-40 rounded mb-2 overflow-hidden bg-gray-100">
-                      <img
-                        src={product.avatar}
-                        alt={product.name}
-                        className="w-full h-full object-cover"
-                      />
+                <Link key={product.id} href={`/detail_product/${product.id}`} className="h-full">
+                  <div className="product-card h-full p-2 sm:p-3 cursor-pointer flex flex-col">
+                    <div className="w-full h-24 sm:h-36 rounded-lg mb-2 overflow-hidden bg-[#1a1a2e]">
+                      <img src={product.avatar} alt={product.name} className="w-full h-full object-cover" />
                     </div>
                     <div className="flex-1 flex flex-col">
-                      <h3 className="text-sm sm:text-lg font-semibold line-clamp-2 min-h-[2.3rem] sm:min-h-[3.5rem]">
-                        {product.name}
-                      </h3>
-                      <p className="text-gray-700 font-medium text-xs sm:text-base">฿ {product.price}</p>
-                      <p className="text-[10px] sm:text-sm text-gray-500 mt-1 break-words">Brand: {product.brand}</p>
+                      <h3 className="text-xs sm:text-sm font-semibold line-clamp-2 text-gray-100">{product.name}</h3>
+                      <p className="text-yellow-400 font-medium text-xs sm:text-sm mt-1">฿ {product.price}</p>
+                      <p className="text-[10px] sm:text-xs text-gray-500 mt-0.5">{product.brand}</p>
                     </div>
                   </div>
                 </Link>
@@ -326,55 +308,40 @@ export default function Productdisplay() {
             </div>
           </>
         ) : (
-          <p className="text-gray-600">ไม่มีสินค้าใกล้เคียงกับคำค้นนี้เลย</p>
+          <p className="text-gray-500">ไม่มีสินค้าใกล้เคียงกับคำค้นนี้เลย</p>
         )}
       </div>
     );
   }
 
-  if (loading) return <div className="p-4 text-center">กำลังโหลดสินค้า...</div>;
+  if (loading) return <div className="p-4 text-center text-gray-400">กำลังโหลดสินค้า...</div>;
   if (!isClient || products.length === 0)
-    return <div className="p-4 text-center">ไม่มีข้อมูลสินค้า</div>;
+    return <div className="p-4 text-center text-gray-400">ไม่มีข้อมูลสินค้า</div>;
 
   /* ===========================================
       ⭐ UI: แสดงรายการสินค้า
   ============================================ */
   return (
-    <div className="container mx-auto px-1 sm:px-3 py-3 sm:py-6 rounded-lg shadow-md">
-      {/* <h2 className="text-2xl font-bold flex items-center justify-center gap-2 mb-4">
-        <div>Products</div>
-      </h2> */}
-
+    <div className="container mx-auto px-1 sm:px-3 py-3 sm:py-5">
       {/* Grid สินค้าแบบตาราง */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-6 gap-1.5 sm:gap-4 mt-3 sm:mt-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-6 gap-2 sm:gap-3 mt-2">
         {visibleItems.map((product) => (
-          <Link
-            key={product.id}
-            href={`/detail_product/${product.id}`}
-            className="h-full"
-          >
-            <div
-              className="h-full border p-1.5 sm:p-4 rounded-lg bg-white shadow-sm cursor-pointer flex flex-col
-              hover:border-yellow-500
-              hover:shadow-[0_0_4px_rgba(212,175,55,0.5),0_0_8px_rgba(184,134,11,0.4)]
-              transition-all duration-300"
-            >
-              <div className="w-full h-20 sm:h-40 rounded mb-1.5 sm:mb-2 overflow-hidden bg-gray-100">
+          <Link key={product.id} href={`/detail_product/${product.id}`} className="h-full">
+            <div className="product-card h-full p-1.5 sm:p-2.5 cursor-pointer flex flex-col">
+              <div className="w-full h-20 sm:h-36 rounded-lg mb-1.5 sm:mb-2 overflow-hidden bg-[#1a1a2e]">
                 <img
                   src={product.avatar}
                   alt={product.name}
-                  onError={(e) =>
-                    (e.currentTarget.src = "/image/logo_white.jpeg")
-                  }
-                  className="w-full h-full object-cover"
+                  onError={(e) => (e.currentTarget.src = "/image/logo_white.jpeg")}
+                  className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                 />
               </div>
-              <div className="flex-1 flex flex-col">
-                <h3 className="text-xs sm:text-lg font-semibold line-clamp-2 min-h-[2rem] sm:min-h-[3.5rem] leading-snug">
+              <div className="flex-1 flex flex-col px-0.5">
+                <h3 className="text-xs sm:text-sm font-semibold line-clamp-2 min-h-[2rem] sm:min-h-[2.8rem] leading-snug text-gray-100">
                   {product.name}
                 </h3>
-                <p className="text-gray-700 font-medium text-[11px] sm:text-base">฿ {product.price}</p>
-                <p className="text-[10px] sm:text-sm text-gray-500 mt-0.5 sm:mt-1 break-words">Brand: {product.brand}</p>
+                <p className="text-yellow-400 font-medium text-[11px] sm:text-sm mt-1">฿ {product.price}</p>
+                <p className="text-[10px] sm:text-xs text-gray-500 mt-0.5 break-words">{product.brand}</p>
               </div>
             </div>
           </Link>
@@ -383,23 +350,21 @@ export default function Productdisplay() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex justify-center items-center gap-2 sm:gap-4 mt-6">
+        <div className="flex justify-center items-center gap-3 mt-8">
           <button
             onClick={handlePrevPage}
             disabled={page === 0}
-            className="px-2.5 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base bg-gray-300 hover:bg-gray-400 disabled:opacity-50 rounded"
+            className="px-3 sm:px-5 py-2 text-sm bg-[#1a1a1a] border border-[rgba(212,175,55,0.25)] text-yellow-500
+              hover:border-yellow-500 hover:bg-[#222] disabled:opacity-30 disabled:cursor-not-allowed rounded-lg transition-all"
           >
             ย้อนกลับ
           </button>
-
-          <span className="font-semibold text-sm sm:text-base">
-            Page {page + 1} / {totalPages}
-          </span>
-
+          <span className="text-sm text-gray-400">{page + 1} / {totalPages}</span>
           <button
             onClick={handleNextPage}
             disabled={page === totalPages - 1}
-            className="px-2.5 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base bg-gray-300 hover:bg-gray-400 disabled:opacity-50 rounded"
+            className="px-3 sm:px-5 py-2 text-sm bg-[#1a1a1a] border border-[rgba(212,175,55,0.25)] text-yellow-500
+              hover:border-yellow-500 hover:bg-[#222] disabled:opacity-30 disabled:cursor-not-allowed rounded-lg transition-all"
           >
             ถัดไป
           </button>

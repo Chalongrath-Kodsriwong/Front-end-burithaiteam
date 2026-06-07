@@ -132,14 +132,13 @@ export default function NavSearchBar() {
   };
 
   return (
-    <form className="relative z-40 p-2 border-t border-solid" onSubmit={handleSubmit}>
+    <form className="relative z-40 px-2 py-2 border-t border-[rgba(212,175,55,0.1)] bg-transparent" onSubmit={handleSubmit}>
       <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2 max-w-screen-md mx-auto">
         {/* Category dropdown button */}
         <button
           type="button"
           onClick={() => setIsDropdownOpenCategories(!isDropdownOpenCategories)}
-          className="categories-button order-1 shrink-0 z-10 inline-flex h-10 items-center py-2 px-2.5 sm:px-4 text-xs sm:text-sm font-medium text-yellow-500 bg-gray-800 border border-gray-600 rounded-lg sm:rounded-s-lg hover:border-[rgb(255,215,0)] hover:text-[rgb(255,215,0)]
-            hover:[text-shadow:0_0_6px_rgb(255,215,0),0_0_12px_rgb(255,215,0),0_0_20px_rgb(212,175,55)] hover:bg-gray-900 focus:bg-gray-900 focus:border-[rgb(255,215,0)] transition-colors duration-300"
+          className="categories-button order-1 shrink-0 z-10 inline-flex h-10 items-center py-2 px-2.5 sm:px-4 text-xs sm:text-sm font-medium text-yellow-500 bg-[#1a1a2e] border border-[rgba(212,175,55,0.25)] rounded-lg hover:border-yellow-500 hover:text-[rgb(255,215,0)] hover:bg-[#1e1e3a] focus:outline-none focus:border-yellow-500 transition-all duration-300 whitespace-nowrap"
         >
           หมวดหมู่
           <svg className="w-2.5 h-2.5 ml-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
@@ -149,13 +148,12 @@ export default function NavSearchBar() {
 
         {/* Categories dropdown list */}
         {isDropdownOpenCategories && (
-          <div className="categories-dropdown absolute left-2 sm:left-auto top-[52px] z-50 bg-gray-800 border border-gray-600 rounded-lg divide-y divide-gray-100 shadow-sm w-40 sm:w-[125px] h-auto overflow-y-auto">
-            <ul className="text-sm text-yellow-500">
+          <div className="categories-dropdown absolute left-0 top-[44px] z-50 bg-[#1a1a2e] border border-[rgba(212,175,55,0.3)] rounded-lg shadow-[0_4px_20px_rgba(0,0,0,0.5)] w-36 max-h-60 overflow-y-auto">
+            <ul className="text-sm text-yellow-500 py-1">
               <li>
                 <button
                   type="button"
-                  className="flex w-full justify-start text-left px-4 py-2 font-semibold hover:text-[rgb(255,215,0)]
-                    hover:[text-shadow:0_0_6px_rgb(255,215,0),0_0_12px_rgb(255,215,0),0_0_20px_rgb(212,175,55)] hover:bg-gray-900 focus:bg-gray-900 transition-colors duration-300"
+                  className="flex w-full justify-start text-left px-4 py-2 text-xs font-medium hover:text-[rgb(255,215,0)] hover:bg-[rgba(212,175,55,0.1)] transition-colors duration-200"
                   onClick={() => { router.push(`/product`); setIsDropdownOpenCategories(false); }}
                 >
                   ทั้งหมด
@@ -165,8 +163,7 @@ export default function NavSearchBar() {
                 <li key={cat}>
                   <button
                     type="button"
-                    className="flex w-full justify-start text-left px-4 py-2 font-semibold hover:text-[rgb(255,215,0)]
-                      hover:[text-shadow:0_0_6px_rgb(255,215,0),0_0_12px_rgb(255,215,0),0_0_20px_rgb(212,175,55)] hover:bg-gray-900 focus:bg-gray-900 transition-colors duration-300"
+                    className="flex w-full justify-start text-left px-4 py-2 text-xs font-medium hover:text-[rgb(255,215,0)] hover:bg-[rgba(212,175,55,0.1)] transition-colors duration-200"
                     onClick={() => { router.push(`/product?category=${encodeURIComponent(cat)}`); setIsDropdownOpenCategories(false); }}
                   >
                     {cat}
@@ -181,8 +178,8 @@ export default function NavSearchBar() {
         <div className="relative order-2 w-full min-w-0">
           <input
             type="search"
-            className="search-bar block p-2.5 w-full z-10 text-sm rounded-lg border-s-2 border border-gray-700 focus:border-yellow-500 bg-gray-800 border-gray-600 placeholder-yellow-500 text-white hover:bg-gray-900 focus:bg-gray-900 transition-colors duration-300"
-            placeholder="ค้นหาสินค้าที่นี่..."
+            className="search-bar block p-2.5 w-full z-10 text-sm rounded-lg border border-[rgba(212,175,55,0.2)] bg-[#1a1a2e] placeholder-gray-500 text-gray-200 focus:border-yellow-500 focus:bg-[#1e1e3a] focus:outline-none hover:border-[rgba(212,175,55,0.4)] transition-all duration-300"
+            placeholder="ค้นหาสินค้า..."
             value={searchProductName}
             onChange={handleSearchChange}
             onClick={handleClick}
@@ -190,10 +187,8 @@ export default function NavSearchBar() {
 
           <button
             type="submit"
-            className="absolute top-0 right-0 h-full px-4 text-sm font-medium text-black bg-yellow-400 rounded-e-lg border border-gray-700
-              transition-all duration-300 ease-out hover:bg-[rgb(255,215,0)] hover:border-[rgb(255,215,0)]
-              hover:shadow-[0_0_8px_rgba(255,215,0,0.7),0_0_16px_rgba(255,215,0,0.5),0_0_24px_rgba(212,175,55,0.6)]
-              hover:scale-105"
+            className="absolute top-0 right-0 h-full px-3 sm:px-4 text-sm font-medium text-black bg-yellow-500 rounded-e-lg border border-yellow-500
+              transition-all duration-300 hover:bg-[rgb(255,215,0)] hover:shadow-[0_0_10px_rgba(255,215,0,0.5)]"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 20 20">
               <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
@@ -203,11 +198,11 @@ export default function NavSearchBar() {
 
           {/* Search suggestions dropdown */}
           {isDropdownOpen && suggestions.length > 0 && (
-            <ul className="dropdown-suggestions absolute left-0 right-0 mt-1 max-h-64 overflow-y-auto bg-gray-800 border border-yellow-500 rounded-lg shadow-md text-sm text-yellow-500 z-50">
+            <ul className="dropdown-suggestions absolute left-0 right-0 mt-1 max-h-64 overflow-y-auto bg-[#1a1a2e] border border-[rgba(212,175,55,0.4)] rounded-lg shadow-[0_4px_20px_rgba(0,0,0,0.5)] text-sm text-yellow-500 z-50">
               {suggestions.map((item: any) => (
                 <li
                   key={item.id_products}
-                  className="px-3 py-2 hover:text-[rgb(255,215,0)] hover:[text-shadow:0_0_6px_rgb(255,215,0),0_0_12px_rgb(255,215,0),0_0_20px_rgb(212,175,55)] hover:bg-gray-900 transition-colors duration-300 cursor-pointer flex items-center gap-2"
+                  className="px-3 py-2 hover:text-[rgb(255,215,0)] hover:bg-[rgba(212,175,55,0.1)] transition-colors duration-200 cursor-pointer flex items-center gap-2"
                   onClick={() => handleSelectProduct(item.name)}
                 >
                   {item.images && item.images.length > 0 && (
@@ -233,10 +228,8 @@ export default function NavSearchBar() {
         {/* Cart and Wishlist buttons */}
         <div className="relative order-3 ml-0 flex items-center gap-1.5 sm:gap-3">
           <Link href="/shoppingcart">
-            <button className="relative p-2 text-black bg-yellow-400 rounded-lg border border-gray-700
-              transition-all duration-300 ease-out hover:bg-[rgb(255,215,0)] hover:border-[rgb(255,215,0)]
-              hover:shadow-[0_0_8px_rgba(255,215,0,0.7),0_0_16px_rgba(255,215,0,0.5),0_0_24px_rgba(212,175,55,0.6)]
-              hover:scale-105 hover:text-blue-500">
+            <button className="relative p-2 text-black bg-yellow-500 rounded-lg border border-yellow-500
+              transition-all duration-300 hover:bg-[rgb(255,215,0)] hover:shadow-[0_0_10px_rgba(255,215,0,0.4)] hover:scale-105">
               <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h18l-2 9H5L3 3z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 17a2 2 0 11-4 0 2 2 0 014 0zM8 17a2 2 0 114 0 2 2 0 01-4 0z" />
@@ -250,10 +243,8 @@ export default function NavSearchBar() {
           </Link>
 
           <Link href="/wishlist">
-            <button className="relative p-2 text-black bg-yellow-400 rounded-lg border border-gray-700
-              transition-all duration-300 ease-out hover:bg-[rgb(255,215,0)] hover:border-[rgb(255,215,0)]
-              hover:shadow-[0_0_8px_rgba(255,215,0,0.7),0_0_16px_rgba(255,215,0,0.5),0_0_24px_rgba(212,175,55,0.6)]
-              hover:scale-105 hover:text-pink-500">
+            <button className="relative p-2 text-black bg-yellow-500 rounded-lg border border-yellow-500
+              transition-all duration-300 hover:bg-[rgb(255,215,0)] hover:shadow-[0_0_10px_rgba(255,215,0,0.4)] hover:scale-105">
               <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>

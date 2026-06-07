@@ -4,115 +4,523 @@
 @tailwind components;
 @tailwind utilities;
 
-html,
-body {
+/* ═══════════════════════════════════════════════
+   DESIGN TOKENS — LED Panel + Premium Gold
+═══════════════════════════════════════════════ */
+:root {
+  /* LED panel dark base */
+  --bg-base:    #08090d;
+  --bg-surface: #0d0f14;
+  --bg-raised:  #131720;
+  --bg-card:    rgba(14, 16, 22, 0.85);
+
+  /* Gold palette */
+  --gold:       #D4AF37;
+  --gold-warm:  #E8C040;
+  --gold-bright:#FFD700;
+  --gold-dim:   rgba(212, 175, 55, 0.14);
+  --gold-glow:  rgba(212, 175, 55, 0.22);
+  --gold-border:rgba(212, 175, 55, 0.35);
+
+  /* LED cyan accent — control card indicator color */
+  --cyan:       #00CFFF;
+  --cyan-bright:#40E0FF;
+  --cyan-dim:   rgba(0, 207, 255, 0.10);
+  --cyan-glow:  rgba(0, 207, 255, 0.22);
+  --cyan-border:rgba(0, 207, 255, 0.35);
+
+  /* Text */
+  --text-primary:   #E8F0F8;
+  --text-secondary: #7A9AB8;
+  --text-muted:     #445566;
+}
+
+html, body {
   max-width: 100%;
   overflow-x: hidden;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
 }
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  min-width: 0;
+/* ═══════════════════════════════════════════════
+   BACKGROUND PATTERNS
+═══════════════════════════════════════════════ */
+
+/* LED pixel module grid — represents the LED matrix structure */
+.bg-led-grid {
+  background-image:
+    linear-gradient(rgba(0, 207, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 207, 255, 0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
 }
 
-img,
-video,
-canvas,
-svg {
-  max-width: 100%;
-  height: auto;
+/* Warm dot grid (keep for some sections) */
+.bg-dot-pattern {
+  background-image: radial-gradient(rgba(0, 207, 255, 0.07) 1px, transparent 1px);
+  background-size: 28px 28px;
 }
 
-pre {
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-/* Function Slider Achive and Hover Pause And Play slider On Path src/app/components/Achievement.tsx */
-@keyframes marquee {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
-}
-
-.animate-marquee {
-  animation: marquee 35s linear infinite;
-}
-
-.animate-marquee:hover {
-  animation-play-state: paused;
-}
-
-
-/* Function Slider Image and Text Categories path src/app/about/section_about/Ourmission.tsx */
-@keyframes slideDown {
-  0% {
-    transform: translateY(-110%);
-  }
-  100% {
-    transform: translateY(0);
-  }
-}
-
-@keyframes slideLeft {
-  0% {
-    transform: translateX(-110%);
-  }
-  100% {
-    transform: translateX(0);
-  }
-}
-
-/* 🔥 Smooth แบบธรรมชาติ */
-.animate-slide-down {
-  animation: slideDown 0.9s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.animate-slide-left {
-  animation: slideLeft 0.9s cubic-bezier(0.22, 1, 0.36, 1);
-  animation-delay: 0.05s; /* ให้ text ตามภาพนิดนึง */
-}
-
-/* Setting menu: unify all button styles to black-gold theme */
-.setting-menu-theme button:not(.keep-original-btn) {
-  position: relative;
-  overflow: hidden;
-  background: #000;
-  color: rgb(234 179 8);
-  border-radius: 0.375rem;
-  text-shadow: 0 0 0 rgba(255, 215, 0, 0);
-  transition: all 0.5s ease-out;
-}
-
-.setting-menu-theme button:not(.keep-original-btn)::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(
-    to top,
-    rgba(212, 175, 55, 0.16) 0%,
-    rgba(212, 175, 55, 0.06) 25%,
-    rgba(212, 175, 55, 0) 60%
+/* Stage lighting: mixed cyan+gold glow */
+.section-glow {
+  background: radial-gradient(ellipse 80% 40% at 50% 110%,
+    rgba(0, 207, 255, 0.06) 0%,
+    rgba(212, 175, 55, 0.05) 40%,
+    transparent 70%
   );
 }
 
-.setting-menu-theme button:not(.keep-original-btn):hover:not(:disabled),
-.setting-menu-theme button:not(.keep-original-btn):focus-visible:not(:disabled) {
-  color: rgb(255 215 0);
-  background: rgb(17 24 39);
-  text-shadow: 0 0 6px rgba(255, 215, 0, 0.45),
-    0 0 12px rgba(255, 215, 0, 0.3), 0 0 20px rgba(212, 175, 55, 0.2);
+/* Ambient orbs */
+.glow-orb-warm {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(90px);
+  background: rgba(212, 175, 55, 0.07);
+  pointer-events: none;
+}
+.glow-orb-amber {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(110px);
+  background: rgba(180, 120, 20, 0.07);
+  pointer-events: none;
+}
+/* LED cyan glow orb */
+.glow-orb-cyan {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(100px);
+  background: rgba(0, 207, 255, 0.06);
+  pointer-events: none;
 }
 
-.setting-menu-theme button:not(.keep-original-btn):disabled {
-  background: #9ca3af;
-  color: #f3f4f6;
-  text-shadow: none;
-  cursor: not-allowed;
+/* ═══════════════════════════════════════════════
+   LED SCREEN FRAME — bezel with corner brackets
+═══════════════════════════════════════════════ */
+.led-screen-frame {
+  position: relative;
+  border: 1px solid rgba(0, 207, 255, 0.18);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(0, 207, 255, 0.06),
+    0 0 30px rgba(0, 207, 255, 0.08),
+    inset 0 0 40px rgba(0, 0, 0, 0.5);
 }
+
+/* Scan-line overlay for LED authenticity */
+.led-screen-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    180deg,
+    transparent 0px,
+    transparent 3px,
+    rgba(0, 0, 0, 0.08) 3px,
+    rgba(0, 0, 0, 0.08) 4px
+  );
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* Corner brackets */
+.led-corner-tl,
+.led-corner-tr,
+.led-corner-bl,
+.led-corner-br {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  z-index: 10;
+  pointer-events: none;
+}
+.led-corner-tl { top: 6px; left: 6px; border-top: 2px solid var(--cyan); border-left: 2px solid var(--cyan); }
+.led-corner-tr { top: 6px; right: 6px; border-top: 2px solid var(--cyan); border-right: 2px solid var(--cyan); }
+.led-corner-bl { bottom: 6px; left: 6px; border-bottom: 2px solid var(--cyan); border-left: 2px solid var(--cyan); }
+.led-corner-br { bottom: 6px; right: 6px; border-bottom: 2px solid var(--cyan); border-right: 2px solid var(--cyan); }
+
+/* ═══════════════════════════════════════════════
+   LED BADGES — pixel pitch product categories
+═══════════════════════════════════════════════ */
+.led-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid rgba(0, 207, 255, 0.35);
+  border-radius: 0.25rem;
+  background: rgba(0, 207, 255, 0.07);
+  backdrop-filter: blur(8px);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #00CFFF;
+  transition: all 0.25s ease;
+}
+.led-badge:hover {
+  border-color: rgba(0, 207, 255, 0.7);
+  background: rgba(0, 207, 255, 0.14);
+  box-shadow: 0 0 12px rgba(0, 207, 255, 0.25);
+  color: #40E0FF;
+}
+.led-badge-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: #00CFFF;
+  box-shadow: 0 0 6px rgba(0, 207, 255, 0.9);
+  animation: led-blink 2s ease-in-out infinite;
+}
+@keyframes led-blink {
+  0%, 100% { opacity: 1; box-shadow: 0 0 6px rgba(0, 207, 255, 0.9); }
+  50% { opacity: 0.4; box-shadow: 0 0 2px rgba(0, 207, 255, 0.3); }
+}
+
+/* Section separator line — cyan LED */
+.section-divider {
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(0, 207, 255, 0.12) 20%,
+    rgba(0, 207, 255, 0.28) 40%,
+    rgba(212, 175, 55, 0.35) 50%,
+    rgba(0, 207, 255, 0.28) 60%,
+    rgba(0, 207, 255, 0.12) 80%,
+    transparent 100%
+  );
+}
+
+/* ═══════════════════════════════════════════════
+   GLASS PRODUCT CARD — LED panel style
+═══════════════════════════════════════════════ */
+.product-card {
+  background: rgba(10, 12, 18, 0.85);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(0, 207, 255, 0.08);
+  border-top: 1.5px solid rgba(0, 207, 255, 0.3);
+  border-radius: 0.75rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+.product-card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(0,207,255,0.6) 50%, transparent 100%);
+  pointer-events: none;
+}
+.product-card:hover {
+  border-color: rgba(0, 207, 255, 0.28);
+  border-top-color: rgba(0, 207, 255, 0.8);
+  box-shadow:
+    0 0 0 1px rgba(0, 207, 255, 0.04),
+    0 0 24px rgba(0, 207, 255, 0.1),
+    0 0 40px rgba(212, 175, 55, 0.06),
+    0 12px 40px rgba(0, 0, 0, 0.6);
+  transform: translateY(-5px);
+}
+
+/* ═══════════════════════════════════════════════
+   GLASS SERVICE CARD — LED panel premium
+═══════════════════════════════════════════════ */
+.card-service {
+  background: rgba(10, 12, 18, 0.80);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 207, 255, 0.09);
+  border-top: 2.5px solid rgba(0, 207, 255, 0.45);
+  border-radius: 1rem;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+.card-service::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 80px;
+  background: linear-gradient(180deg, rgba(0,207,255,0.04) 0%, transparent 100%);
+  pointer-events: none;
+}
+.card-service:hover {
+  border-top-color: rgba(0, 207, 255, 0.9);
+  border-color: rgba(0, 207, 255, 0.22);
+  box-shadow:
+    0 0 28px rgba(0, 207, 255, 0.1),
+    0 0 20px rgba(212, 175, 55, 0.06),
+    0 16px 48px rgba(0, 0, 0, 0.65);
+  transform: translateY(-6px);
+}
+
+/* ═══════════════════════════════════════════════
+   GLASS BRAND CARD — LED style
+═══════════════════════════════════════════════ */
+.brand-card {
+  background: rgba(10, 12, 18, 0.75);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(0, 207, 255, 0.08);
+  border-top: 2px solid rgba(0, 207, 255, 0.32);
+  border-radius: 1rem;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+.brand-card:hover {
+  border-top-color: rgba(0, 207, 255, 0.85);
+  border-color: rgba(0, 207, 255, 0.25);
+  box-shadow: 0 0 24px rgba(0, 207, 255, 0.12), 0 10px 36px rgba(0,0,0,0.65);
+  transform: translateY(-5px);
+}
+
+/* ═══════════════════════════════════════════════
+   STAT CARD — LED panel indicator
+═══════════════════════════════════════════════ */
+.stat-card {
+  background: rgba(10, 12, 18, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 207, 255, 0.1);
+  border-radius: 0.875rem;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+.stat-card::before {
+  content: "";
+  position: absolute;
+  bottom: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent 0%, rgba(0,207,255,0.5) 50%, transparent 100%);
+  pointer-events: none;
+}
+.stat-card:hover {
+  border-color: rgba(0, 207, 255, 0.3);
+  box-shadow: 0 0 20px rgba(0, 207, 255, 0.1);
+}
+
+/* ═══════════════════════════════════════════════
+   SECTION HEADING SYSTEM
+═══════════════════════════════════════════════ */
+.section-heading {
+  font-size: clamp(1.85rem, 4vw, 2.9rem);
+  font-weight: 900;
+  line-height: 1.08;
+  background: linear-gradient(135deg, #C8981A 0%, #D4AF37 28%, #F5CC40 58%, #D4AF37 88%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.025em;
+  filter: drop-shadow(0 0 18px rgba(212, 175, 55, 0.22));
+}
+
+/* Eyebrow with lines */
+.section-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: #D4AF37;
+}
+.section-eyebrow::before {
+  content: "";
+  display: block; width: 1.5rem; height: 1px;
+  background: linear-gradient(90deg, transparent, #D4AF37);
+}
+.section-eyebrow::after {
+  content: "";
+  display: block; width: 1.5rem; height: 1px;
+  background: linear-gradient(90deg, #D4AF37, transparent);
+}
+
+/* LED cyan eyebrow variant */
+.section-eyebrow-led {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: #00CFFF;
+}
+.section-eyebrow-led::before {
+  content: "";
+  display: block; width: 1.5rem; height: 1px;
+  background: linear-gradient(90deg, transparent, #00CFFF);
+}
+.section-eyebrow-led::after {
+  content: "";
+  display: block; width: 1.5rem; height: 1px;
+  background: linear-gradient(90deg, #00CFFF, transparent);
+}
+
+/* Gold dot separator */
+.gold-dot-sep {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+.gold-dot-sep::before, .gold-dot-sep::after {
+  content: "";
+  display: block; width: 2.5rem; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(212,175,55,0.45));
+}
+.gold-dot-sep::after {
+  background: linear-gradient(90deg, rgba(212,175,55,0.45), transparent);
+}
+
+/* ═══════════════════════════════════════════════
+   SECTION TITLE (inline-block with underline)
+═══════════════════════════════════════════════ */
+.section-title {
+  position: relative;
+  display: inline-block;
+  color: var(--text-primary);
+}
+.section-title::after {
+  content: "";
+  position: absolute;
+  bottom: -8px; left: 0;
+  width: 40px; height: 2px;
+  background: linear-gradient(90deg, var(--gold), transparent);
+  border-radius: 2px;
+}
+.section-title.center::after {
+  left: 50%;
+  transform: translateX(-50%);
+  width: 56px;
+}
+
+/* ═══════════════════════════════════════════════
+   GOLD DIVIDER
+═══════════════════════════════════════════════ */
+.gold-divider {
+  width: 80px; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  margin: 0 auto;
+}
+
+/* ═══════════════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════════════ */
+.btn-gold {
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  padding: 0.7rem 1.75rem;
+  background: linear-gradient(135deg, #C8981A 0%, #D4AF37 40%, #F5CC40 70%, #D4AF37 100%);
+  color: #0d0b08; font-weight: 700; font-size: 0.875rem;
+  border-radius: 999px;
+  transition: all 0.3s ease;
+  letter-spacing: 0.01em;
+  box-shadow: 0 2px 12px rgba(212,175,55,0.25);
+}
+.btn-gold:hover {
+  box-shadow: 0 0 24px rgba(212,175,55,0.55), 0 0 48px rgba(212,175,55,0.2);
+  transform: translateY(-2px);
+}
+
+.btn-outline-gold {
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  padding: 0.7rem 1.75rem;
+  border: 1.5px solid rgba(212,175,55,0.6);
+  color: #D4AF37; font-weight: 600; font-size: 0.875rem;
+  border-radius: 999px;
+  transition: all 0.3s ease; background: transparent;
+  letter-spacing: 0.01em;
+}
+.btn-outline-gold:hover {
+  background: rgba(212,175,55,0.08);
+  border-color: var(--gold);
+  box-shadow: 0 0 18px rgba(212,175,55,0.2);
+  transform: translateY(-2px);
+}
+
+/* ═══════════════════════════════════════════════
+   ICON CIRCLE — LED style with cyan glow
+═══════════════════════════════════════════════ */
+.icon-circle-gold {
+  width: 3.25rem; height: 3.25rem; border-radius: 0.5rem;
+  background: linear-gradient(135deg, rgba(0,207,255,0.12) 0%, rgba(212,175,55,0.06) 100%);
+  border: 1px solid rgba(0,207,255,0.22);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem;
+  transition: all 0.3s ease; flex-shrink: 0;
+  box-shadow: 0 0 0 rgba(0,207,255,0);
+}
+.card-service:hover .icon-circle-gold {
+  background: linear-gradient(135deg, rgba(0,207,255,0.2) 0%, rgba(212,175,55,0.08) 100%);
+  border-color: rgba(0,207,255,0.6);
+  box-shadow: 0 0 16px rgba(0,207,255,0.25);
+}
+
+/* ═══════════════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════════════ */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-marquee { animation: marquee 35s linear infinite; }
+.animate-marquee:hover { animation-play-state: paused; }
+
+@keyframes slideDown {
+  0% { transform: translateY(-110%); }
+  100% { transform: translateY(0); }
+}
+@keyframes slideLeft {
+  0% { transform: translateX(-110%); }
+  100% { transform: translateX(0); }
+}
+.animate-slide-down { animation: slideDown 0.9s cubic-bezier(0.22, 1, 0.36, 1); }
+.animate-slide-left {
+  animation: slideLeft 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  animation-delay: 0.05s;
+}
+
+/* Float animation for hero badge */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+.animate-float { animation: float 3s ease-in-out infinite; }
+
+/* Pulse ring for live badge — cyan LED indicator */
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(0,207,255,0.5); }
+  70% { box-shadow: 0 0 0 10px rgba(0,207,255,0); }
+  100% { box-shadow: 0 0 0 0 rgba(0,207,255,0); }
+}
+.pulse-ring { animation: pulse-ring 2s ease-out infinite; }
+
+/* Setting menu theme */
+.setting-menu-theme button:not(.keep-original-btn) {
+  position: relative; overflow: hidden;
+  background: #000; color: rgb(234 179 8);
+  border-radius: 0.375rem;
+  text-shadow: 0 0 0 rgba(255,215,0,0);
+  transition: all 0.5s ease-out;
+}
+.setting-menu-theme button:not(.keep-original-btn)::before {
+  content: "";
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(to top, rgba(212,175,55,0.16) 0%, rgba(212,175,55,0.06) 25%, rgba(212,175,55,0) 60%);
+}
+.setting-menu-theme button:not(.keep-original-btn):hover:not(:disabled),
+.setting-menu-theme button:not(.keep-original-btn):focus-visible:not(:disabled) {
+  color: rgb(255 215 0); background: rgb(17 24 39);
+  text-shadow: 0 0 6px rgba(255,215,0,0.45), 0 0 12px rgba(255,215,0,0.3), 0 0 20px rgba(212,175,55,0.2);
+}
+.setting-menu-theme button:not(.keep-original-btn):disabled {
+  background: #9ca3af; color: #f3f4f6; text-shadow: none; cursor: not-allowed;
+}
+
+*, *::before, *::after { box-sizing: border-box; min-width: 0; }
+img, video, canvas, svg { max-width: 100%; height: auto; }
+pre { white-space: pre-wrap; word-break: break-word; }
