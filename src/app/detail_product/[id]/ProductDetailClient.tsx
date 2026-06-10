@@ -22,6 +22,10 @@ export default function ProductDetailClient({ id }: ProductDetailClientProps) {
   const handledIdRef = useRef<string | null>(null);
 
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [id]);
+
+  useEffect(() => {
     function handleLogout() {
       router.replace(`/login?redirect=/detail_product/${id}`);
     }

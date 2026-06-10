@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 
 import { Product } from "@/types/Productdisplay"
 import { isSellableProduct } from "@/app/utils/productVisibility";
-import PreorderBadge from "@/app/components/PreorderBadge";
+import PriceTag from "@/app/components/PriceTag";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 const ITEMS_PER_PAGE = 20; // แสดง 20 ชิ้นต่อหน้า
@@ -117,6 +117,10 @@ export default function Productdisplay() {
             price = `${min.toLocaleString()} - ${max.toLocaleString()}`;
           }
 
+          const finalPrices: number[] = Array.isArray(p.discount?.finalPrices)
+            ? p.discount.finalPrices.map((x: any) => Number(x)).filter((n: number) => Number.isFinite(n) && n > 0)
+            : [];
+
           return {
             id: p.id_products ?? p.id ?? 0,
             name: p.name ?? "No name",
@@ -130,6 +134,7 @@ export default function Productdisplay() {
             category: p.category?.name || "",
             quality: p.quality ?? "",
             numericPrices: prices,
+            finalPrices,
             preorder: p.preorder ?? null,
           };
         });
@@ -301,7 +306,12 @@ export default function Productdisplay() {
                     </div>
                     <div className="flex-1 flex flex-col">
                       <h3 className="text-xs sm:text-sm font-semibold line-clamp-2 text-gray-100">{product.name}</h3>
-                      <p className="text-yellow-400 font-medium text-xs sm:text-sm mt-1">฿ {product.price}</p>
+                      <PriceTag
+                        prices={product.numericPrices}
+                        finalPrices={product.finalPrices}
+                        preorder={product.preorder}
+                        size="sm"
+                      />
                       <p className="text-[10px] sm:text-xs text-gray-500 mt-0.5">{product.brand}</p>
                     </div>
                   </div>
@@ -342,11 +352,12 @@ export default function Productdisplay() {
                 <h3 className="text-xs sm:text-sm font-semibold line-clamp-2 min-h-[2rem] sm:min-h-[2.8rem] leading-snug text-gray-100">
                   {product.name}
                 </h3>
-                {product.preorder ? (
-                  <PreorderBadge preorder={product.preorder} />
-                ) : (
-                  <p className="text-yellow-400 font-medium text-[11px] sm:text-sm mt-1">฿ {product.price}</p>
-                )}
+                <PriceTag
+                  prices={product.numericPrices}
+                  finalPrices={product.finalPrices}
+                  preorder={product.preorder}
+                  size="lg"
+                />
                 <p className="text-[10px] sm:text-xs text-gray-500 mt-0.5 break-words">{product.brand}</p>
               </div>
             </div>

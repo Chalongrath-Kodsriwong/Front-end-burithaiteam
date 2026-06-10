@@ -4,8 +4,12 @@ export interface Product {
   name: string;
   branch: string;
   price: number;
+  originalPrice?: number;
+  discountedPrice?: number | null;
+  discountPct?: number;
   description: string;
   avatar: string;
   quantity: number;
   inventoryId: number | null;
+  isPreorder?: boolean;
 }

@@ -28,7 +28,8 @@ export interface ProductUI {
   brand: string;
   avatar: string;
   priceText: string;
-  finalPriceText?: string;
+  rawPrices?: number[];
+  finalPrices?: number[];
   preorder?: PreorderInfo | null;
   soldQty?: number;
 }

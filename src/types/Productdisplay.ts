@@ -9,5 +9,6 @@ export interface Product {
   category?: string;
   quality?: string;
   numericPrices?: number[];
+  finalPrices?: number[];
   preorder?: PreorderInfo | null;
 }

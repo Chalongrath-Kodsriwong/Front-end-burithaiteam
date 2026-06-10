@@ -82,6 +82,18 @@ export default function DetailOfProductShort({ product }: any) {
     ? Math.round((selectedInventory?.price ?? 0) * (1 - preorderDiscount / 100))
     : null;
 
+  // Discount: per-inventory regular_discount OR product-level campaign discount (PERCENTAGE type)
+  const regularDiscountPct: number = selectedInventory?.regular_discount ?? 0;
+  const campaignDiscountPct: number =
+    product?.discount?.discountType?.toLowerCase() === "percentage"
+      ? (product?.discount?.discountValue ?? 0)
+      : 0;
+  const bestDiscountPct = Math.max(regularDiscountPct, campaignDiscountPct);
+  const discountedPrice =
+    bestDiscountPct > 0 && selectedInventory
+      ? Math.round((selectedInventory.price ?? 0) * (1 - bestDiscountPct / 100))
+      : null;
+
   const displayPrice = selectedInventory
     ? selectedInventory.price.toLocaleString()
     : priceText;
@@ -189,7 +201,7 @@ export default function DetailOfProductShort({ product }: any) {
       return;
     }
     try {
-      await addToCart(currentProductId, quantity, variantId, inventoryId);
+      await addToCart(currentProductId, quantity, variantId, inventoryId, true);
       sessionStorage.setItem("buynow_inventory_id", String(inventoryId));
       sessionStorage.setItem("buynow_is_preorder", "true");
       router.push("/shoppingcart");
@@ -298,11 +310,25 @@ export default function DetailOfProductShort({ product }: any) {
       </h2>
 
       {/* Price */}
-      <div className="flex items-baseline gap-2 mb-5">
-        <span className="text-xs text-[#5A7A98] font-medium">ราคา</span>
-        <span className="text-2xl sm:text-3xl font-black text-[#D4AF37]">
-          ฿ {displayPrice}
-        </span>
+      <div className="mb-5">
+        <span className="text-xs text-[#5A7A98] font-medium block mb-1">ราคา</span>
+        {discountedPrice != null ? (
+          <div className="flex flex-wrap items-baseline gap-2">
+            <span className="text-sm text-[#445566] line-through">
+              ฿ {displayPrice}
+            </span>
+            <span className="text-2xl sm:text-3xl font-black text-[#D4AF37]">
+              ฿ {discountedPrice.toLocaleString()}
+            </span>
+            <span className="text-xs font-bold bg-[rgba(212,175,55,0.2)] border border-[rgba(212,175,55,0.6)] text-[#F5CC40] px-2 py-0.5 rounded-sm shadow-[0_0_6px_rgba(212,175,55,0.3)]">
+              ลด {bestDiscountPct}%
+            </span>
+          </div>
+        ) : (
+          <span className="text-2xl sm:text-3xl font-black text-[#D4AF37]">
+            ฿ {displayPrice}
+          </span>
+        )}
       </div>
 
       {/* Variants */}
@@ -355,23 +381,7 @@ export default function DetailOfProductShort({ product }: any) {
 
       {/* CTA Buttons */}
       <div className="flex flex-col gap-3 mb-5">
-        {/* Row 1: Buy Now (hidden for preorder_only) or Preorder-only */}
-        {purchaseMode === "preorder_only" ? (
-          <div className="flex flex-col sm:flex-row gap-3">
-            <button onClick={handlePreorder}
-              className="btn-gold flex-1 text-sm font-bold flex items-center justify-center gap-2">
-              <span>Preorder</span>
-              {preorderPrice != null && (
-                <span className="text-xs font-normal opacity-90">
-                  ฿{preorderPrice.toLocaleString()} (ลด {preorderDiscount}%)
-                </span>
-              )}
-            </button>
-            <button onClick={handleAddToCartClick} className="btn-outline-gold flex-1 text-sm font-bold">
-              เพิ่มลงตะกร้า ({quantity})
-            </button>
-          </div>
-        ) : (
+        {purchaseMode !== "preorder_only" && (
           <div className="flex flex-col sm:flex-row gap-3">
             <button onClick={handleBuyNow} className="btn-gold flex-1 text-sm font-bold">
               ซื้อสินค้า
@@ -382,29 +392,71 @@ export default function DetailOfProductShort({ product }: any) {
           </div>
         )}
 
-        {/* Row 2: Preorder button (shown for "both" mode) */}
-        {purchaseMode === "both" && (
-          <button onClick={handlePreorder}
-            className="w-full border border-[rgba(212,175,55,0.5)] text-[#D4AF37] hover:bg-[rgba(212,175,55,0.1)] rounded-sm py-2.5 text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2">
-            <span>Preorder</span>
-            {preorderPrice != null && (
-              <span className="text-xs font-normal opacity-80">
-                ฿{preorderPrice.toLocaleString()} (ลด {preorderDiscount}%)
+        {/* Preorder section — shown for both & preorder_only modes */}
+        {(purchaseMode === "both" || purchaseMode === "preorder_only") && (
+          <div className="mt-1">
+            {/* Separator */}
+            <div className="flex items-center gap-3 mb-3">
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[rgba(212,175,55,0.5)] to-[rgba(212,175,55,0.5)]" />
+              <span className="text-[11px] font-black tracking-[0.2em] text-[#D4AF37] uppercase whitespace-nowrap">
+                ✦ &nbsp;Preorder&nbsp; ✦
               </span>
-            )}
-            {preorderReleaseDate && (
-              <span className="text-xs text-[#5A7A98] font-normal">
-                · วางขาย {new Date(preorderReleaseDate).toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" })}
-              </span>
-            )}
-          </button>
-        )}
+              <div className="flex-1 h-px bg-gradient-to-l from-transparent via-[rgba(212,175,55,0.5)] to-[rgba(212,175,55,0.5)]" />
+            </div>
 
-        {/* Release date for preorder_only */}
-        {purchaseMode === "preorder_only" && preorderReleaseDate && (
-          <p className="text-xs text-[#5A7A98] text-center">
-            วันวางขาย: {new Date(preorderReleaseDate).toLocaleDateString("th-TH", { day: "numeric", month: "long", year: "numeric" })}
-          </p>
+            {/* Preorder card */}
+            <div className="relative overflow-hidden rounded-xl border border-[rgba(212,175,55,0.45)] bg-[rgba(212,175,55,0.05)] shadow-[0_0_20px_rgba(212,175,55,0.12)]">
+              {/* Shimmer top border */}
+              <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent opacity-60" />
+              <div className="p-4 flex flex-col sm:flex-row sm:items-center gap-4">
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] font-bold tracking-widest text-[#D4AF37]/60 uppercase mb-1.5">
+                    ราคา Preorder พิเศษ
+                  </p>
+                  {preorderPrice != null ? (
+                    <div className="flex flex-wrap items-baseline gap-2 mb-1.5">
+                      {selectedInventory?.price != null && (
+                        <span className="text-sm text-[#445566] line-through">
+                          ฿{selectedInventory.price.toLocaleString()}
+                        </span>
+                      )}
+                      <span className="text-2xl font-black text-[#F5CC40]">
+                        ฿{preorderPrice.toLocaleString()}
+                      </span>
+                      {preorderDiscount != null && preorderDiscount > 0 && (
+                        <span className="text-xs font-black bg-[rgba(212,175,55,0.2)] border border-[rgba(212,175,55,0.6)] text-[#F5CC40] px-2 py-0.5 rounded-sm shadow-[0_0_8px_rgba(212,175,55,0.25)]">
+                          ลด {preorderDiscount}%
+                        </span>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-[#D4AF37] font-bold mb-1.5">ราคาพิเศษสำหรับ Preorder</p>
+                  )}
+                  {preorderReleaseDate && (
+                    <p className="text-[11px] text-[#5A7A98]">
+                      สิ้นสุด&nbsp;
+                      <span className="text-[#7A9AB8] font-medium">
+                        {new Date(preorderReleaseDate).toLocaleDateString("th-TH", { day: "numeric", month: "long", year: "numeric" })}
+                      </span>
+                    </p>
+                  )}
+                </div>
+
+                {/* Preorder button */}
+                <button
+                  onClick={handlePreorder}
+                  className="shrink-0 px-6 py-3 rounded-lg font-black text-sm tracking-wide
+                    bg-gradient-to-r from-[#B8942A] via-[#D4AF37] to-[#B8942A]
+                    text-[#08090d] shadow-[0_0_16px_rgba(212,175,55,0.4)]
+                    hover:shadow-[0_0_24px_rgba(212,175,55,0.6)] hover:brightness-110
+                    active:scale-95 transition-all duration-200"
+                >
+                  สั่ง Preorder
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
 

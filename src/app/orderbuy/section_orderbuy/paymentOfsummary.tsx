@@ -16,10 +16,8 @@ export default function PaymentSummary({ addressId }: { addressId: number | null
   const itemcartIds: number[] = (() => {
     try {
       const raw = JSON.parse(searchParams.get("itemcart_ids") || "[]");
-      // กันพัง + บังคับเป็น number
       return Array.isArray(raw) ? raw.map((x) => Number(x)).filter((x) => !Number.isNaN(x)) : [];
-    } catch (err) {
-      console.error("[orderbuy] Failed to parse itemcart_ids:", err);
+    } catch {
       return [];
     }
   })();
@@ -30,67 +28,35 @@ export default function PaymentSummary({ addressId }: { addressId: number | null
   const [loading, setLoading] = useState(false);
 
   async function handleOrder() {
-    console.log("[orderbuy] addressId:", addressId);
-    console.log("[orderbuy] itemcartIds:", itemcartIds);
-    console.log("[orderbuy] total:", total, "shippingFee:", shippingFee, "grandTotal:", grandTotal);
-
     const address_id = Number(addressId);
     if (!addressId || Number.isNaN(address_id)) {
       alert("กรุณาเลือกที่อยู่จัดส่ง");
       return;
     }
-
     if (!Array.isArray(itemcartIds) || itemcartIds.length === 0) {
       alert("ไม่พบสินค้าในตะกร้าที่เลือก");
-      console.error("[orderbuy] itemcart_ids invalid:", itemcartIds);
       return;
     }
 
     try {
       setLoading(true);
-
-      const payload = {
-        address_id,
-        shipping_fee: shippingFee,
-        itemcart_ids: itemcartIds,
-      };
-
-      console.log("[orderbuy] create order payload:", payload);
-
       const res = await fetch(`${API_URL}/api/orders`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ address_id, shipping_fee: shippingFee, itemcart_ids: itemcartIds }),
       });
 
       const json = await res.json().catch(() => null);
-      console.log("[orderbuy] create order response:", json);
-
       if (!res.ok) {
         alert(json?.message || json?.data?.message || `เกิดข้อผิดพลาดในการสั่งซื้อ (${res.status})`);
         return;
       }
 
-      // ✅ รองรับหลายรูปแบบ response
-      // แบบที่คุณบอก: { status, message, data: { status, message, data: order } }
-      // หรือบางทีอาจเป็น: { status, data: order }
-      const createdOrder =
-        json?.data?.data?.data || // ซ้อน 3 ชั้น (เผื่อบางที)
-        json?.data?.data ||      // ซ้อน 2 ชั้น (ตามที่คุณคอมเมนต์)
-        json?.data ||            // ไม่ซ้อน
-        null;
-
+      const createdOrder = json?.data?.data?.data || json?.data?.data || json?.data || null;
       const id_order = createdOrder?.id_order;
-      const total_price_raw = createdOrder?.total_price;
-
-      const total_price = Number(total_price_raw);
-      const finalTotalForPayment =
-        !Number.isNaN(total_price) && total_price > 0 ? total_price : grandTotal;
-
-      console.log("[orderbuy] createdOrder:", createdOrder);
-      console.log("[orderbuy] extracted id_order:", id_order);
-      console.log("[orderbuy] extracted total_price:", total_price_raw, "=> final:", finalTotalForPayment);
+      const total_price = Number(createdOrder?.total_price);
+      const finalTotal = !Number.isNaN(total_price) && total_price > 0 ? total_price : grandTotal;
 
       if (!id_order) {
         alert("สร้างออเดอร์ไม่สำเร็จ (ไม่พบ id_order จาก backend)");
@@ -98,11 +64,8 @@ export default function PaymentSummary({ addressId }: { addressId: number | null
       }
 
       await refreshCart();
-
-      // ✅ ส่งทั้ง id_order และ total_price ไปหน้า payment
-      router.replace(`/payment?order_id=${id_order}&total_price=${finalTotalForPayment}`);
-    } catch (err) {
-      console.error("[orderbuy] Order error:", err);
+      router.replace(`/payment?order_id=${id_order}&total_price=${finalTotal}`);
+    } catch {
       alert("Server error. กรุณาลองใหม่");
     } finally {
       setLoading(false);
@@ -110,38 +73,40 @@ export default function PaymentSummary({ addressId }: { addressId: number | null
   }
 
   return (
-    <div className="text-right mt-6">
-      <h2 className="text-lg font-semibold">
-        รวมสินค้า: <span className="text-yellow-600">{total} THB</span>
-      </h2>
+    <div className="bg-[rgba(6,8,14,0.95)] border border-[rgba(0,207,255,0.1)] rounded-xl overflow-hidden">
+      {/* Header */}
+      <div className="flex items-center gap-2 px-4 py-3 border-b border-[rgba(0,207,255,0.08)]">
+        <span className="text-xs font-bold tracking-widest text-[#00CFFF] uppercase">สรุปยอดชำระ</span>
+      </div>
 
-      <h2 className="text-lg font-semibold">
-        ค่าจัดส่ง: <span className="text-yellow-600">{shippingFee} THB</span>
-      </h2>
+      <div className="px-4 py-4 space-y-2">
+        <div className="flex justify-between items-center text-sm">
+          <span className="text-[#5A7A98]">รวมสินค้า</span>
+          <span className="text-[#C8D8E8]">฿{total.toLocaleString()}</span>
+        </div>
+        <div className="flex justify-between items-center text-sm">
+          <span className="text-[#5A7A98]">ค่าจัดส่ง</span>
+          <span className="text-[#00CFFF]">ฟรี</span>
+        </div>
+        <div className="border-t border-[rgba(0,207,255,0.1)] pt-3 mt-1 flex justify-between items-center">
+          <span className="text-sm font-semibold text-[#7A9AB8]">ยอดสุทธิ</span>
+          <span className="text-2xl font-black text-[#D4AF37]">฿{grandTotal.toLocaleString()}</span>
+        </div>
+      </div>
 
-      <h2 className="text-xl font-bold">
-        ยอดสุทธิ: <span className="text-yellow-600">{grandTotal.toFixed(2)} THB</span>
-      </h2>
-
-      <button
-        onClick={handleOrder}
-        disabled={loading}
-        className={`relative inline-block mt-4 px-4 py-2 rounded overflow-hidden transition-all duration-500 ease-out ${
-          loading
-            ? "bg-gray-400 text-gray-100 cursor-not-allowed"
-            : "bg-black text-yellow-500 [text-shadow:0_0_0_rgba(255,215,0,0)] hover:text-[rgb(255,215,0)] hover:[text-shadow:0_0_6px_rgba(255,215,0,0.45),0_0_12px_rgba(255,215,0,0.30),0_0_20px_rgba(212,175,55,0.20)] hover:bg-gray-900 focus:bg-gray-900"
-        }`}
-      >
-        {!loading && (
-          <div
-            className="absolute inset-0 pointer-events-none
-        bg-[linear-gradient(to_top,_rgba(212,175,55,0.16)_0%,_rgba(212,175,55,0.06)_25%,_rgba(212,175,55,0)_60%)]"
-          ></div>
-        )}
-        <span className="relative z-10">
+      <div className="px-4 pb-4">
+        <button
+          onClick={handleOrder}
+          disabled={loading}
+          className={`w-full py-3 rounded-lg text-sm font-bold transition-all duration-200 active:scale-[0.98] ${
+            loading
+              ? "bg-[rgba(0,207,255,0.05)] text-[#5A7A98] cursor-not-allowed border border-[rgba(0,207,255,0.1)]"
+              : "btn-gold"
+          }`}
+        >
           {loading ? "กำลังดำเนินการ..." : "ยืนยันการสั่งซื้อ"}
-        </span>
-      </button>
+        </button>
+      </div>
     </div>
   );
 }

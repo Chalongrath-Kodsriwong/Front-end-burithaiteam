@@ -5,20 +5,11 @@ import Link from "next/link";
 
 import { ApiProduct, ProductUI } from "@/types/Mostseller";
 import { isSellableProduct } from "@/app/utils/productVisibility";
-import PreorderBadge from "@/app/components/PreorderBadge";
+import PriceTag from "@/app/components/PriceTag";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 const ITEMS_PER_PAGE = 4;
 
-function formatPriceRange(prices?: number[]) {
-  if (!Array.isArray(prices) || prices.length === 0) return "0";
-  const nums = prices.map((x) => Number(x)).filter((n) => !isNaN(n));
-  if (nums.length === 0) return "0";
-  if (nums.length === 1) return nums[0].toLocaleString();
-  const min = Math.min(...nums);
-  const max = Math.max(...nums);
-  return `${min.toLocaleString()} - ${max.toLocaleString()}`;
-}
 
 export default function Mostsell() {
   const [products, setProducts] = useState<ProductUI[]>([]);
@@ -40,10 +31,8 @@ export default function Mostsell() {
           : [];
 
         const mapped: ProductUI[] = data.map((p) => {
-          const priceText = formatPriceRange(p.prices);
-          const finalPriceText = p.discount?.finalPrices
-            ? formatPriceRange(p.discount.finalPrices)
-            : undefined;
+          const rawPrices = (p.prices ?? []).map(Number).filter((n) => Number.isFinite(n) && n > 0);
+          const finalPrices = (p.discount?.finalPrices ?? []).map(Number).filter((n) => Number.isFinite(n) && n > 0);
 
           return {
             id: p.id_products,
@@ -53,8 +42,9 @@ export default function Mostsell() {
               p.images && p.images.length > 0
                 ? p.images[0].url
                 : "/image/logo_white.jpeg",
-            priceText,
-            finalPriceText,
+            priceText: rawPrices.length > 0 ? rawPrices[0].toLocaleString() : "0",
+            rawPrices,
+            finalPrices,
             preorder: p.preorder ?? null,
             soldQty: p.soldQuantity ?? 0,
           };
@@ -143,24 +133,12 @@ export default function Mostsell() {
                     {product.name}
                   </h3>
 
-                  <div className="mt-1.5 min-h-[2rem]">
-                    {product.preorder ? (
-                      <PreorderBadge preorder={product.preorder} />
-                    ) : product.finalPriceText ? (
-                      <div className="space-y-0.5">
-                        <p className="text-xs text-[#445566] line-through">
-                          ฿ {product.priceText}
-                        </p>
-                        <p className="font-bold text-red-400 text-sm md:text-base">
-                          ฿ {product.finalPriceText}
-                        </p>
-                      </div>
-                    ) : (
-                      <p className="font-bold text-[#D4AF37] text-sm md:text-base">
-                        ฿ {product.priceText}
-                      </p>
-                    )}
-                  </div>
+                  <PriceTag
+                    prices={product.rawPrices}
+                    finalPrices={product.finalPrices}
+                    preorder={product.preorder}
+                    size="lg"
+                  />
 
                   <p className="text-[10px] sm:text-xs text-[#445566] mt-1 break-words">
                     {product.brand}

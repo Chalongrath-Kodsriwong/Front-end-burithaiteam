@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import { Product } from "@/types/Normalproducts";
 import { isSellableProduct } from "@/app/utils/productVisibility";
+import PriceTag from "@/app/components/PriceTag";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 const ITEMS_PER_PAGE = 20;
@@ -27,32 +28,26 @@ export default function Productdisplay() {
           : [];
 
         const mapped: Product[] = productData.map((p: any) => {
-          let price = "0";
-
-          if (Array.isArray(p.prices) && p.prices.length > 0) {
-            const prices = p.prices
-              .map((x: any) => Number(x))
-              .filter((n: number) => !isNaN(n));
-
-            if (prices.length === 1) {
-              price = prices[0].toLocaleString();
-            } else if (prices.length > 1) {
-              const min = Math.min(...prices);
-              const max = Math.max(...prices);
-              price = `${min.toLocaleString()} - ${max.toLocaleString()}`;
-            }
-          }
+          const rawPrices: number[] = Array.isArray(p.prices)
+            ? p.prices.map((x: any) => Number(x)).filter((n: number) => !isNaN(n) && n > 0)
+            : [];
+          const finalPrices: number[] = Array.isArray(p.discount?.finalPrices)
+            ? p.discount.finalPrices.map((x: any) => Number(x)).filter((n: number) => !isNaN(n) && n > 0)
+            : [];
 
           return {
             id: p.id_products ?? p.id ?? 0,
             name: p.name ?? "No name",
-            price,
+            price: rawPrices.length > 0 ? rawPrices[0].toLocaleString() : "0",
             brand: p.brand ?? "-",
             avatar:
               p.avatar ??
               (p.images && p.images.length > 0
                 ? p.images[0].url
                 : "/image/logo_white.jpeg"),
+            preorder: p.preorder ?? null,
+            rawPrices,
+            finalPrices,
           };
         });
 
@@ -131,9 +126,14 @@ export default function Productdisplay() {
                 <h3 className="font-semibold text-[10px] sm:text-xs md:text-sm leading-snug line-clamp-3 min-h-[2.5rem] sm:min-h-[2.8rem] text-[#E8F0F8]">
                   {product.name}
                 </h3>
-                <p className="font-bold text-[10px] sm:text-xs md:text-sm text-[#D4AF37] mt-1">
-                  ฿ {product.price}
-                </p>
+
+                <PriceTag
+                  prices={product.rawPrices}
+                  finalPrices={product.finalPrices}
+                  preorder={product.preorder}
+                  size="lg"
+                />
+
                 <p className="text-[9px] sm:text-[10px] md:text-xs text-[#445566] mt-0.5 break-words">
                   {product.brand}
                 </p>

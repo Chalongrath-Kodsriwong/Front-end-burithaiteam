@@ -52,28 +52,22 @@ export function CartProvider({ children }: { children: ReactNode }) {
     productId: number,
     qty: number,
     variantId: number,
-    inventoryId: number
+    inventoryId: number,
+    isPreorder?: boolean
   ) => {
-    const exist = cartItems.find(
-      (i) => i.id === productId && i.variantId === variantId && i.inventoryId === inventoryId
-    );
-
     try {
-      if (exist) {
-        await fetchWithTimeout(`${API_URL}/api/carts/items/${exist.cartItemId}`, {
-          method: "PUT",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ quantity: exist.quantity + qty }),
-        });
-      } else {
-        await fetchWithTimeout(`${API_URL}/api/carts/items`, {
-          method: "POST",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ productId, quantity: qty, variantId, inventoryId }),
-        });
-      }
+      await fetchWithTimeout(`${API_URL}/api/carts/items`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productId,
+          quantity: qty,
+          variantId,
+          inventoryId,
+          isPreorder: isPreorder === true,
+        }),
+      });
       await refreshCart();
     } catch (err: any) {
       if (err?.name !== "AbortError") console.error("addToCart error:", err);

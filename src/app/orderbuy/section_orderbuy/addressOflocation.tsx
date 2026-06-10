@@ -27,46 +27,34 @@ function setSelectedAddressId(id: number | null) {
   window.dispatchEvent(new Event(ADDRESS_SELECTED_EVENT));
 }
 
-/* ──────────────────────────────────────────────────────────
-   Format address for display
-────────────────────────────────────────────────────────── */
 function formatAddress(addr: any) {
   if (!addr) return null;
   const parts = [addr.amphoe, addr.district].filter(Boolean);
   return (
     <div className="leading-relaxed">
-      <p className="font-semibold text-gray-800">{addr.label}</p>
-      <p className="text-gray-700">{addr.address_text}</p>
+      <p className="font-semibold text-[#E8F0F8]">{addr.label}</p>
+      <p className="text-[#C8D8E8] text-sm mt-0.5">{addr.address_text}</p>
       {parts.length > 0 && (
-        <p className="text-gray-600 text-sm">
-          {parts.join(" › ")}
-        </p>
+        <p className="text-[#5A7A98] text-xs mt-0.5">{parts.join(" › ")}</p>
       )}
-      <p className="text-gray-600 text-sm">
+      <p className="text-[#5A7A98] text-xs">
         {addr.province} {addr.postal_code}
       </p>
-      <p className="mt-1 text-sm text-blue-600">โทร: {addr.phone}</p>
+      <p className="mt-1 text-xs text-[#00CFFF]">โทร: {addr.phone}</p>
     </div>
   );
 }
 
-/* ──────────────────────────────────────────────────────────
-   Overlay — defined OUTSIDE main component so React never
-   unmounts it on re-render (prevents input focus loss)
-────────────────────────────────────────────────────────── */
 function Overlay({ children }: { children: React.ReactNode }) {
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-start justify-center z-[999] px-4 pt-44 pb-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-y-auto max-h-[85vh]">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-start justify-center z-[999] px-4 pt-36 pb-4">
+      <div className="bg-[rgba(4,5,10,0.99)] border border-[rgba(0,207,255,0.2)] rounded-2xl shadow-[0_0_40px_rgba(0,207,255,0.1)] w-full max-w-sm overflow-y-auto max-h-[85vh]">
         {children}
       </div>
     </div>
   );
 }
 
-/* ──────────────────────────────────────────────────────────
-   Main component
-────────────────────────────────────────────────────────── */
 export default function AddressLocation({ onAddressSelect }: any) {
   const db = useThaiAddressDB();
   const [addresses, setAddresses] = useState<any[]>([]);
@@ -80,7 +68,6 @@ export default function AddressLocation({ onAddressSelect }: any) {
   const [editAddress, setEditAddress] = useState<AddressFields>(EMPTY_FIELDS);
   const [editId, setEditId] = useState<number | null>(null);
 
-  /* ── Load addresses ── */
   useEffect(() => {
     async function loadAddresses() {
       try {
@@ -109,7 +96,6 @@ export default function AddressLocation({ onAddressSelect }: any) {
     loadAddresses();
   }, []);
 
-  /* ── Sync from storage/other tab ── */
   useEffect(() => {
     function syncFromStorage() {
       const saved = getSelectedAddressId();
@@ -127,7 +113,6 @@ export default function AddressLocation({ onAddressSelect }: any) {
     };
   }, [addresses, onAddressSelect]);
 
-  /* ── Add ── */
   async function handleAdd() {
     if (!newAddress.address_text.trim() || !newAddress.province.trim()) {
       return alert("กรุณากรอกข้อมูลให้ครบถ้วน (ที่อยู่และจังหวัด)");
@@ -152,7 +137,6 @@ export default function AddressLocation({ onAddressSelect }: any) {
     }
   }
 
-  /* ── Edit ── */
   function openEditPopup(addr: any) {
     setEditAddress({
       label: addr.label || "",
@@ -188,7 +172,6 @@ export default function AddressLocation({ onAddressSelect }: any) {
     }
   }
 
-  /* ── Delete ── */
   async function handleDelete(id: number) {
     if (!confirm("ต้องการลบที่อยู่นี้จริงหรือไม่?")) return;
     const res = await fetch(`${API_URL}/api/address/${id}`, {
@@ -210,37 +193,36 @@ export default function AddressLocation({ onAddressSelect }: any) {
   }
 
   return (
-    <div>
-      <h2 className="text-xl font-semibold mb-4">เลือกที่อยู่การจัดส่ง</h2>
+    <div className="bg-[rgba(6,8,14,0.95)] border border-[rgba(0,207,255,0.1)] rounded-xl overflow-hidden">
+      {/* Section header */}
+      <div className="flex items-center gap-2 px-4 py-3 border-b border-[rgba(0,207,255,0.08)]">
+        <span className="text-xs font-bold tracking-widest text-[#00CFFF] uppercase">ที่อยู่จัดส่ง</span>
+      </div>
 
-      <div className="border border-gray-300 rounded-xl p-4">
+      <div className="px-4 py-4">
         {addresses.length === 0 ? (
           <div className="text-center py-6">
             <div className="text-4xl mb-3">📦</div>
-            <p className="text-gray-500 mb-4">ยังไม่มีที่อยู่จัดส่ง</p>
+            <p className="text-[#5A7A98] mb-4 text-sm">ยังไม่มีที่อยู่จัดส่ง</p>
             <button
               onClick={() => setShowAddPopup(true)}
-              className="relative w-full flex items-center justify-center gap-2 bg-black text-yellow-500 py-3 rounded-lg overflow-hidden
-                hover:text-[rgb(255,215,0)] hover:[text-shadow:0_0_6px_rgba(255,215,0,0.45),0_0_12px_rgba(255,215,0,0.30)]
-                hover:bg-gray-900 transition-all duration-500"
+              className="btn-gold text-sm px-6 py-2.5"
             >
-              <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(to_top,_rgba(212,175,55,0.16)_0%,_rgba(212,175,55,0)_60%)]" />
-              <span className="text-xl font-bold">＋</span>
-              เพิ่มที่อยู่ใหม่
+              + เพิ่มที่อยู่ใหม่
             </button>
           </div>
         ) : (
           <>
-            <div className="mb-3">{formatAddress(addresses.find((a) => a.id_address === selectedId))}</div>
+            <div className="mb-4">{formatAddress(addresses.find((a) => a.id_address === selectedId))}</div>
             <div className="flex gap-2 flex-wrap">
               <button
-                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 text-sm transition-all duration-200 active:scale-95"
+                className="px-4 py-2 text-sm border border-[rgba(0,207,255,0.3)] text-[#00CFFF] rounded-lg hover:bg-[rgba(0,207,255,0.08)] transition-all duration-200 active:scale-95"
                 onClick={() => setShowPopup(true)}
               >
                 เปลี่ยนที่อยู่
               </button>
               <button
-                className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 text-sm transition-all duration-200 active:scale-95"
+                className="btn-gold text-sm px-4 py-2"
                 onClick={() => setShowAddPopup(true)}
               >
                 + เพิ่มที่อยู่
@@ -250,40 +232,41 @@ export default function AddressLocation({ onAddressSelect }: any) {
         )}
       </div>
 
-      {/* ── Popup: เลือกที่อยู่ ── */}
+      {/* Popup: เลือกที่อยู่ */}
       {showPopup && (
         <Overlay>
-          <div className="p-6">
-            <h3 className="text-lg font-bold mb-4 text-gray-800">เลือกที่อยู่จัดส่ง</h3>
+          <div className="p-5">
+            <h3 className="text-base font-bold mb-4 text-[#E8F0F8]">เลือกที่อยู่จัดส่ง</h3>
             <div className="space-y-3 max-h-[55vh] overflow-y-auto pr-1">
               {addresses.map((addr) => (
                 <div
                   key={addr.id_address}
-                  className={`border-2 rounded-xl p-3 cursor-pointer transition-all ${
+                  className={`border rounded-xl p-3 cursor-pointer transition-all ${
                     selectedId === addr.id_address
-                      ? "border-blue-500 bg-blue-50"
-                      : "border-gray-200 hover:border-gray-300"
+                      ? "border-[#00CFFF] bg-[rgba(0,207,255,0.06)]"
+                      : "border-[rgba(0,207,255,0.15)] hover:border-[rgba(0,207,255,0.35)]"
                   }`}
                   onClick={() => setSelectedId(addr.id_address)}
                 >
                   <div className="flex items-start gap-3">
-                    <input
-                      type="radio"
-                      className="mt-1 accent-blue-500"
-                      checked={selectedId === addr.id_address}
-                      onChange={() => setSelectedId(addr.id_address)}
-                    />
+                    <div className={`mt-1 w-4 h-4 shrink-0 rounded-full border-2 flex items-center justify-center transition-all ${
+                      selectedId === addr.id_address ? "border-[#00CFFF]" : "border-[rgba(0,207,255,0.3)]"
+                    }`}>
+                      {selectedId === addr.id_address && (
+                        <div className="w-2 h-2 rounded-full bg-[#00CFFF]" />
+                      )}
+                    </div>
                     <div className="flex-1">{formatAddress(addr)}</div>
                   </div>
-                  <div className="flex gap-2 mt-2 ml-6">
+                  <div className="flex gap-2 mt-2 ml-7">
                     <button
-                      className="text-xs bg-amber-100 text-amber-700 px-3 py-1 rounded-lg hover:bg-amber-200 transition-all duration-200 active:scale-95"
+                      className="text-xs px-3 py-1 rounded-lg border border-[rgba(212,175,55,0.3)] text-[#D4AF37] hover:bg-[rgba(212,175,55,0.08)] transition-all active:scale-95"
                       onClick={(e) => { e.stopPropagation(); openEditPopup(addr); }}
                     >
                       แก้ไข
                     </button>
                     <button
-                      className="text-xs bg-red-100 text-red-600 px-3 py-1 rounded-lg hover:bg-red-200 transition-all duration-200 active:scale-95"
+                      className="text-xs px-3 py-1 rounded-lg border border-[rgba(255,80,80,0.3)] text-[#FF6060] hover:bg-[rgba(255,80,80,0.06)] transition-all active:scale-95"
                       onClick={(e) => { e.stopPropagation(); handleDelete(addr.id_address); }}
                     >
                       ลบ
@@ -292,15 +275,15 @@ export default function AddressLocation({ onAddressSelect }: any) {
                 </div>
               ))}
             </div>
-            <div className="flex gap-2 justify-end mt-5 pt-4 border-t border-gray-100">
+            <div className="flex gap-2 justify-end mt-5 pt-4 border-t border-[rgba(0,207,255,0.08)]">
               <button
-                className="px-4 py-2 rounded-lg text-gray-600 bg-gray-100 hover:bg-gray-200 text-sm transition-all duration-200 active:scale-95"
+                className="px-4 py-2 rounded-lg text-sm text-[#5A7A98] border border-[rgba(0,207,255,0.15)] hover:border-[rgba(0,207,255,0.3)] transition-all active:scale-95"
                 onClick={() => setShowPopup(false)}
               >
                 ยกเลิก
               </button>
               <button
-                className="px-5 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 text-sm font-medium transition-all duration-200 active:scale-95"
+                className="btn-gold text-sm px-5 py-2"
                 onClick={() => {
                   setSelectedAddressId(selectedId);
                   onAddressSelect(selectedId);
@@ -314,31 +297,29 @@ export default function AddressLocation({ onAddressSelect }: any) {
         </Overlay>
       )}
 
-      {/* ── Popup: เพิ่มที่อยู่ ── */}
+      {/* Popup: เพิ่มที่อยู่ */}
       {showAddPopup && (
         <Overlay>
-          <div className="p-6">
+          <div className="p-5">
             <div className="flex items-center justify-between mb-5">
-              <h3 className="text-lg font-bold text-gray-800">เพิ่มที่อยู่ใหม่</h3>
+              <h3 className="text-base font-bold text-[#E8F0F8]">เพิ่มที่อยู่ใหม่</h3>
               <button
-                className="text-gray-400 hover:text-gray-600 text-2xl leading-none"
+                className="text-[#5A7A98] hover:text-[#E8F0F8] text-2xl leading-none transition-colors"
                 onClick={() => setShowAddPopup(false)}
               >
                 ×
               </button>
             </div>
-
             <ThaiAddressInput value={newAddress} onChange={setNewAddress} db={db} />
-
-            <div className="flex gap-2 justify-end mt-6 pt-4 border-t border-gray-100">
+            <div className="flex gap-2 justify-end mt-6 pt-4 border-t border-[rgba(0,207,255,0.08)]">
               <button
-                className="px-4 py-2 rounded-lg text-white bg-black hover:bg-gray-800 text-sm transition-all duration-200 active:scale-95"
+                className="px-4 py-2 rounded-lg text-sm text-[#5A7A98] border border-[rgba(0,207,255,0.15)] hover:border-[rgba(0,207,255,0.3)] transition-all active:scale-95"
                 onClick={() => { setNewAddress(EMPTY_FIELDS); setShowAddPopup(false); }}
               >
                 ยกเลิก
               </button>
               <button
-                className="px-5 py-2 rounded-lg bg-yellow-500 text-black hover:bg-yellow-400 text-sm font-medium transition-all duration-200 active:scale-95"
+                className="btn-gold text-sm px-5 py-2"
                 onClick={handleAdd}
               >
                 บันทึก
@@ -348,31 +329,29 @@ export default function AddressLocation({ onAddressSelect }: any) {
         </Overlay>
       )}
 
-      {/* ── Popup: แก้ไขที่อยู่ ── */}
+      {/* Popup: แก้ไขที่อยู่ */}
       {showEditPopup && (
         <Overlay>
-          <div className="p-6">
+          <div className="p-5">
             <div className="flex items-center justify-between mb-5">
-              <h3 className="text-lg font-bold text-gray-800">แก้ไขที่อยู่</h3>
+              <h3 className="text-base font-bold text-[#E8F0F8]">แก้ไขที่อยู่</h3>
               <button
-                className="text-gray-400 hover:text-gray-600 text-2xl leading-none"
+                className="text-[#5A7A98] hover:text-[#E8F0F8] text-2xl leading-none transition-colors"
                 onClick={() => setShowEditPopup(false)}
               >
                 ×
               </button>
             </div>
-
             <ThaiAddressInput value={editAddress} onChange={setEditAddress} db={db} />
-
-            <div className="flex gap-2 justify-end mt-6 pt-4 border-t border-gray-100">
+            <div className="flex gap-2 justify-end mt-6 pt-4 border-t border-[rgba(0,207,255,0.08)]">
               <button
-                className="px-4 py-2 rounded-lg text-gray-600 bg-gray-100 hover:bg-gray-200 text-sm transition-all duration-200 active:scale-95"
+                className="px-4 py-2 rounded-lg text-sm text-[#5A7A98] border border-[rgba(0,207,255,0.15)] hover:border-[rgba(0,207,255,0.3)] transition-all active:scale-95"
                 onClick={() => setShowEditPopup(false)}
               >
                 ยกเลิก
               </button>
               <button
-                className="px-5 py-2 rounded-lg bg-amber-500 text-white hover:bg-amber-600 text-sm font-medium transition-all duration-200 active:scale-95"
+                className="btn-gold text-sm px-5 py-2"
                 onClick={handleUpdate}
               >
                 อัปเดต

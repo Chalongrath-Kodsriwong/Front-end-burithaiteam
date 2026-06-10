@@ -13,7 +13,8 @@ export interface CartContextType {
     productId: number,
     qty: number,
     variantId: number,
-    inventoryId: number
+    inventoryId: number,
+    isPreorder?: boolean
   ) => Promise<void>;
   increaseQuantity: (cartItemId: number) => Promise<void>;
   decreaseQuantity: (cartItemId: number) => Promise<void>;
