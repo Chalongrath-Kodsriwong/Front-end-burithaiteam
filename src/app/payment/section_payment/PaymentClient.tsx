@@ -733,7 +733,7 @@ export default function PaymentPage() {
                 <input
                   type="file"
                   onChange={handleFileChange}
-                  accept="image/*,application/pdf"
+                  accept="image/*"
                   className="mb-4 border-2 border-gray-400 rounded-lg p-2 pr-10 w-full text-sm hover:bg-gray-200 cursor-pointer"
                 />
 
