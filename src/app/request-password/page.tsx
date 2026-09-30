@@ -56,12 +56,12 @@ export default function ResetPasswordRequestPage() {
       {/* ---------------- Success Popup ---------------- */}
       {successPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-xl shadow-lg w-80 max-w-[92vw] text-center">
+          <div className="bg-[#0d0f14] p-6 rounded-xl shadow-lg w-80 max-w-[92vw] text-center">
             <h2 className="text-xl font-bold mb-3 text-green-700">
               ส่งลิงก์รีเซ็ตรหัสผ่านแล้ว!
             </h2>
 
-            <p className="text-gray-700 text-sm mb-4">
+            <p className="text-[#A9C0D6] text-sm mb-4">
               กรุณาตรวจสอบอีเมลของคุณเพื่อทำการตั้งรหัสผ่านใหม่
             </p>
 
@@ -73,10 +73,10 @@ export default function ResetPasswordRequestPage() {
               ไปที่ Gmail
             </a>
 
-            <div className="flex items-center justify-center mb-4 text-sm text-gray-600">
-              <span className="flex-grow h-px bg-gray-500"></span>
+            <div className="flex items-center justify-center mb-4 text-sm text-[#7A9AB8]">
+              <span className="flex-grow h-px bg-[#131720]0"></span>
               <span className="px-3">Reset Password</span>
-              <span className="flex-grow h-px bg-gray-500"></span>
+              <span className="flex-grow h-px bg-[#131720]0"></span>
             </div>
 
             {/* กลับไป Login */}
@@ -92,12 +92,12 @@ export default function ResetPasswordRequestPage() {
 
       <form
         onSubmit={handleSubmit}
-        className="max-w-md mx-auto bg-gray-100 p-6 rounded-lg shadow-md"
+        className="max-w-md mx-auto bg-[#131720] p-6 rounded-lg shadow-md"
       >
         <div className="mb-5">
           <label
             htmlFor="email"
-            className="block mb-2 text-sm font-medium text-gray-900"
+            className="block mb-2 text-sm font-medium text-[#E8F0F8]"
           >
             Email
           </label>
@@ -106,7 +106,7 @@ export default function ResetPasswordRequestPage() {
             id="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
+            className="shadow-xs bg-[#131720] border border-[rgba(0,207,255,0.2)] text-[#E8F0F8] text-sm rounded-lg block w-full p-2.5"
             placeholder="Enter your email"
             required
           />

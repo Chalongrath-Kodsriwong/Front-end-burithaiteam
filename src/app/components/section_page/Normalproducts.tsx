@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Product } from "@/types/Normalproducts";
 import { isSellableProduct } from "@/app/utils/productVisibility";
 import PriceTag from "@/app/components/PriceTag";
+import ProductBadges from "@/app/components/ProductBadges";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 const ITEMS_PER_PAGE = 20;
@@ -46,6 +47,8 @@ export default function Productdisplay() {
                 ? p.images[0].url
                 : "/image/logo_white.jpeg"),
             preorder: p.preorder ?? null,
+            bestDiscount: (p as any).bestDiscount ?? null,
+            availability: (p as any).availability ?? null,
             rawPrices,
             finalPrices,
           };
@@ -111,7 +114,7 @@ export default function Productdisplay() {
             className="h-full"
           >
             <div className="product-card h-full w-full p-1.5 sm:p-2.5 cursor-pointer flex flex-col">
-              <div className="w-full h-24 sm:h-32 md:h-[180px] rounded-sm overflow-hidden bg-[#0a0c10] border border-[rgba(0,207,255,0.06)]">
+              <div className="relative w-full h-24 sm:h-32 md:h-[180px] rounded-sm overflow-hidden bg-[#0a0c10] border border-[rgba(0,207,255,0.06)]">
                 <img
                   src={product.avatar}
                   alt={product.name}
@@ -120,6 +123,7 @@ export default function Productdisplay() {
                   }
                   className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                 />
+                <ProductBadges discountPercent={(product as any).bestDiscount?.discountPercent} availability={(product as any).availability} />
               </div>
 
               <div className="p-1 flex-1 flex flex-col mt-1">
@@ -130,6 +134,7 @@ export default function Productdisplay() {
                 <PriceTag
                   prices={product.rawPrices}
                   finalPrices={product.finalPrices}
+                  bestDiscount={(product as any).bestDiscount}
                   preorder={product.preorder}
                   size="lg"
                 />

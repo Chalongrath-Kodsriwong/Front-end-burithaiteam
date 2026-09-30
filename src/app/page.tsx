@@ -7,12 +7,15 @@ import Achievement from "./components/section_page/Achievement";
 import Mostsell from "./components/section_page/Mostsell";
 import Normalproducts from "./components/section_page/Normalproducts";
 
-const trustStats = [
-  { num: "20+", label: "ปีประสบการณ์",   sub: "Years in Business",   icon: "📅" },
-  { num: "500+", label: "โปรเจกต์สำเร็จ", sub: "Projects Completed",  icon: "🏆" },
-  { num: "5",   label: "แบรนด์พรีเมียม",  sub: "Premium Brands",      icon: "⭐" },
-  { num: "100%", label: "ใส่ใจทุกงาน",    sub: "Service Quality",     icon: "✅" },
-];
+// ── ปิดแถบตัวเลขไว้ก่อน (16 ก.ย. 2026) ──────────────────────────
+// user ให้เอาออกเพราะ "ยังไงก็ดูเหมือน AI ทำ" — คอมเมนต์ไว้ ยังไม่ลบ
+// ถ้าจะเปิดกลับมา ต้องเอาคอมเมนต์ออกทั้งตรงนี้และบล็อก TRUST STATS STRIP ข้างล่าง
+// const trustStats = [
+//   { num: "20+", label: "ปีประสบการณ์",   sub: "Years in Business",   icon: "📅" },
+//   { num: "500+", label: "โปรเจกต์สำเร็จ", sub: "Projects Completed",  icon: "🏆" },
+//   { num: "5",   label: "แบรนด์พรีเมียม",  sub: "Premium Brands",      icon: "⭐" },
+//   { num: "100%", label: "ใส่ใจทุกงาน",    sub: "Service Quality",     icon: "✅" },
+// ];
 
 export default function Home() {
   return (
@@ -22,8 +25,9 @@ export default function Home() {
       <Banner />
 
       {/* ══════════════════════════════
-          TRUST STATS STRIP
-      ══════════════════════════════ */}
+          TRUST STATS STRIP — ปิดไว้ก่อน 16 ก.ย. 2026 ตามที่ user สั่ง
+          (ถ้าจะเปิดกลับ ต้องเอาคอมเมนต์ trustStats ด้านบนออกด้วย)
+      ══════════════════════════════
       <div className="relative bg-[#0a0c10] border-y border-[rgba(0,207,255,0.1)]">
         <div className="absolute inset-0 bg-led-grid opacity-30 pointer-events-none" />
         <div className="container mx-auto px-4 py-5 sm:py-6">
@@ -41,6 +45,7 @@ export default function Home() {
           </div>
         </div>
       </div>
+      ══════════════════════════════ */}
 
       {/* ══════════════════════════════
           NEW PRODUCTS

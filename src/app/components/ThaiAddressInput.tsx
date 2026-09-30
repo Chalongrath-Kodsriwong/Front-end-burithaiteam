@@ -154,22 +154,22 @@ export function ThaiAddressInput({ value, onChange, db }: ThaiAddressInputProps)
   }
 
   const inputClass =
-    "border border-gray-300 rounded-lg px-2.5 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition bg-white text-gray-900 placeholder:text-gray-300 text-sm";
+    "border border-[rgba(0,207,255,0.2)] rounded-lg px-2.5 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[rgba(0,207,255,0.55)] focus:border-transparent transition bg-[#0d0f14] text-[#E8F0F8] placeholder:text-[#445566] text-sm";
   const dropdownClass =
-    "absolute z-30 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto mt-1";
+    "absolute z-30 w-full bg-[#0d0f14] border border-[rgba(0,207,255,0.15)] rounded-lg shadow-lg max-h-48 overflow-y-auto mt-1";
   const dropdownItemClass =
-    "px-3 py-2 hover:bg-blue-50 cursor-pointer text-sm text-gray-800 border-b border-gray-50 last:border-0";
+    "px-3 py-2 hover:bg-[rgba(0,207,255,0.12)] cursor-pointer text-sm text-[#E8F0F8] border-b border-[rgba(0,207,255,0.08)] last:border-0";
 
   return (
     <div className="space-y-2.5">
       {/* ── Label ── */}
       <div ref={labelRef} className="relative">
-        <label className="block mb-0.5 text-sm font-medium text-gray-700">
-          ป้ายกำกับ <span className="text-gray-800">(บ้าน / ที่ทำงาน)</span>
+        <label className="block mb-0.5 text-sm font-medium text-[#A9C0D6]">
+          ป้ายกำกับ <span className="text-[#E8F0F8]">(บ้าน / ที่ทำงาน)</span>
         </label>
         <input
           type="text"
-          className={`${inputClass} text-gray-500`}
+          className={`${inputClass} text-[#5A7A98]`}
           placeholder="กรอกข้อมูล เช่น บ้าน, ที่ทำงาน"
           value={value.label}
           onChange={(e) => {
@@ -198,7 +198,7 @@ export function ThaiAddressInput({ value, onChange, db }: ThaiAddressInputProps)
 
       {/* ── Province ── */}
       <div ref={provinceRef} className="relative">
-        <label className={`block mb-0.5 text-sm font-medium ${warnProvince ? "text-red-500" : "text-gray-700"}`}>
+        <label className={`block mb-0.5 text-sm font-medium ${warnProvince ? "text-red-500" : "text-[#A9C0D6]"}`}>
           จังหวัด {warnProvince && <span className="text-xs font-normal">← กรุณากรอกจังหวัดก่อน</span>}
         </label>
         <input
@@ -230,13 +230,13 @@ export function ThaiAddressInput({ value, onChange, db }: ThaiAddressInputProps)
 
       {/* ── Amphoe (อำเภอ/เขต) ── */}
       <div ref={amphoeRef} className="relative">
-        <label className={`block mb-0.5 text-sm font-medium ${warnProvince && !value.province ? "text-red-500" : "text-gray-700"}`}>
+        <label className={`block mb-0.5 text-sm font-medium ${warnProvince && !value.province ? "text-red-500" : "text-[#A9C0D6]"}`}>
           {value.province === "กรุงเทพมหานคร" ? "เขต" : "อำเภอ"}
         </label>
         <input
           ref={amphoeInputRef}
           type="text"
-          className={`${inputClass} ${!value.province ? (warnProvince ? "bg-red-50 border-red-500 placeholder:text-red-400" : "bg-gray-50") : ""}`}
+          className={`${inputClass} ${!value.province ? (warnProvince ? "bg-[rgba(239,68,68,0.10)] border-[rgba(239,68,68,0.65)] text-[#FCA5A5] placeholder:text-[#FCA5A5]" : "bg-[#131720]") : ""}`}
           placeholder={value.province ? "พิมพ์ชื่ออำเภอ/เขต..." : (warnProvince ? "⚠ กรุณากรอกจังหวัดก่อน" : "เลือกจังหวัดก่อน")}
           disabled={!value.province}
           value={amphoeQuery}
@@ -266,7 +266,7 @@ export function ThaiAddressInput({ value, onChange, db }: ThaiAddressInputProps)
       {/* ── District (ตำบล/แขวง) ── */}
       <div ref={districtRef} className="relative">
         <label className={`block mb-0.5 text-sm font-medium ${
-          (warnProvince && !value.province) || (warnAmphoe && !value.amphoe) ? "text-red-500" : "text-gray-700"
+          (warnProvince && !value.province) || (warnAmphoe && !value.amphoe) ? "text-red-500" : "text-[#A9C0D6]"
         }`}>
           {value.province === "กรุงเทพมหานคร" ? "แขวง" : "ตำบล"}
         </label>
@@ -275,8 +275,8 @@ export function ThaiAddressInput({ value, onChange, db }: ThaiAddressInputProps)
           type="text"
           className={`${inputClass} ${!value.amphoe ? (
             (warnProvince && !value.province) || warnAmphoe
-              ? "bg-red-50 border-red-500 placeholder:text-red-400"
-              : "bg-gray-50"
+              ? "bg-[rgba(239,68,68,0.10)] border-[rgba(239,68,68,0.65)] text-[#FCA5A5] placeholder:text-[#FCA5A5]"
+              : "bg-[#131720]"
           ) : ""}`}
           placeholder={
             value.amphoe ? "พิมพ์ชื่อตำบล/แขวง..." :
@@ -306,7 +306,7 @@ export function ThaiAddressInput({ value, onChange, db }: ThaiAddressInputProps)
             {filteredDistricts.map((d) => (
               <li key={d} className={dropdownItemClass} onMouseDown={() => selectDistrict(d)}>
                 <span>{d}</span>
-                <span className="ml-2 text-xs text-gray-400">
+                <span className="ml-2 text-xs text-[#445566]">
                   {db?.[value.province]?.[value.amphoe]?.[d]}
                 </span>
               </li>
@@ -317,12 +317,16 @@ export function ThaiAddressInput({ value, onChange, db }: ThaiAddressInputProps)
 
       {/* ── Postal code (auto-filled) ── */}
       <div>
-        <label className="block mb-0.5 text-sm font-medium text-gray-700">
+        <label className="block mb-0.5 text-sm font-medium text-[#A9C0D6]">
           รหัสไปรษณีย์
         </label>
         <input
           type="text"
-          className={`${inputClass} ${value.district ? "bg-green-50 border-green-300" : "text-gray-400"}`}
+          className={`${inputClass} ${
+            value.district
+              ? "bg-[rgba(0,207,255,0.08)] border-[rgba(0,207,255,0.5)] text-[#E8F0F8] font-semibold"
+              : "text-[#445566]"
+          }`}
           placeholder="รหัสไปรษณีย์จะถูกกรอกอัตโนมัติ"
           maxLength={5}
           value={value.postal_code}
@@ -332,7 +336,7 @@ export function ThaiAddressInput({ value, onChange, db }: ThaiAddressInputProps)
 
       {/* ── Address text ── */}
       <div>
-        <label className="block mb-0.5 text-sm font-medium text-gray-700">
+        <label className="block mb-0.5 text-sm font-medium text-[#A9C0D6]">
           บ้านเลขที่ / ถนน / ซอย
         </label>
         <textarea
@@ -348,7 +352,7 @@ export function ThaiAddressInput({ value, onChange, db }: ThaiAddressInputProps)
 
       {/* ── Phone ── */}
       <div>
-        <label className="block mb-0.5 text-sm font-medium text-gray-700">
+        <label className="block mb-0.5 text-sm font-medium text-[#A9C0D6]">
           เบอร์โทรศัพท์
         </label>
         <input

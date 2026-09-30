@@ -127,7 +127,7 @@ export default function WishlistPage() {
     return (
       <div className="container mx-auto p-4">
         <h1 className="text-2xl font-bold mb-4">Wishlist</h1>
-        <div className="text-gray-600">กำลังโหลด...</div>
+        <div className="text-[#7A9AB8]">กำลังโหลด...</div>
       </div>
     );
   }
@@ -136,7 +136,7 @@ export default function WishlistPage() {
     <div className="container mx-auto p-4">
       <div className="flex items-end justify-between gap-3 mb-4">
         <h1 className="text-2xl font-bold">Wishlist</h1>
-        <div className="text-sm text-gray-600">
+        <div className="text-sm text-[#7A9AB8]">
           ทั้งหมด: <span className="font-semibold">{total}</span> รายการ
         </div>
       </div>
@@ -148,8 +148,8 @@ export default function WishlistPage() {
       )}
 
       {items.length === 0 ? (
-        <div className="bg-white border rounded-lg p-6 text-center">
-          <p className="text-gray-600 mb-4">ยังไม่มีสินค้าใน Wishlist</p>
+        <div className="bg-[#0d0f14] border rounded-lg p-6 text-center">
+          <p className="text-[#7A9AB8] mb-4">ยังไม่มีสินค้าใน Wishlist</p>
           <Link
             href="/"
             className="inline-flex items-center justify-center px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800"
@@ -165,12 +165,12 @@ export default function WishlistPage() {
             return (
               <div
                 key={p.id}
-                className="bg-white border rounded-lg overflow-hidden shadow-sm"
+                className="bg-[#0d0f14] border rounded-lg overflow-hidden shadow-sm"
               >
                 <div className="flex flex-col sm:flex-row">
                   {/* Image */}
                   <div className="sm:w-44 sm:min-w-44 w-full">
-                    <div className="aspect-[4/3] sm:aspect-square bg-gray-100 flex items-center justify-center">
+                    <div className="aspect-[4/3] sm:aspect-square bg-[#131720] flex items-center justify-center">
                       {p.imageUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
@@ -179,7 +179,7 @@ export default function WishlistPage() {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div className="text-gray-400 text-sm">No Image</div>
+                        <div className="text-[#445566] text-sm">No Image</div>
                       )}
                     </div>
                   </div>
@@ -196,21 +196,21 @@ export default function WishlistPage() {
                     </div>
 
                     {p.description && (
-                      <p className="text-sm text-gray-600 mt-2 line-clamp-2">
+                      <p className="text-sm text-[#7A9AB8] mt-2 line-clamp-2">
                         {p.description}
                       </p>
                     )}
 
-                    <div className="text-sm text-gray-700 mt-3 space-y-1">
+                    <div className="text-sm text-[#A9C0D6] mt-3 space-y-1">
                       {p.variant && (
                         <p>
-                          <span className="text-gray-500">Variant:</span>{" "}
+                          <span className="text-[#5A7A98]">Variant:</span>{" "}
                           {p.variant}
                         </p>
                       )}
                       {p.inventory && (
                         <p>
-                          <span className="text-gray-500">Inventory:</span>{" "}
+                          <span className="text-[#5A7A98]">Inventory:</span>{" "}
                           {p.inventory}
                         </p>
                       )}
@@ -247,13 +247,13 @@ export default function WishlistPage() {
           onClick={closeDeleteConfirm} // คลิกฉากหลัง = ปิด
         >
           <div
-            className="w-full max-w-md rounded-xl bg-white p-5 shadow-lg"
+            className="w-full max-w-md rounded-xl bg-[#0d0f14] p-5 shadow-lg"
             onClick={(e) => e.stopPropagation()} // กันคลิกทะลุ
           >
             <h3 className="text-lg font-semibold">ยืนยันการลบ</h3>
-            <p className="mt-2 text-sm text-gray-700">
+            <p className="mt-2 text-sm text-[#A9C0D6]">
               ต้องการลบ{" "}
-              <span className="font-semibold text-gray-900">
+              <span className="font-semibold text-[#E8F0F8]">
                 {pendingDeleteName || "สินค้านี้"}
               </span>{" "}
               ออกจาก Wishlist หรือไม่?
@@ -265,8 +265,8 @@ export default function WishlistPage() {
                 disabled={deleting}
                 className={`px-4 py-2 rounded-md border text-sm ${
                   deleting
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                    : "bg-white hover:bg-gray-50"
+                    ? "bg-[#131720] text-[#445566] cursor-not-allowed"
+                    : "bg-[#0d0f14] hover:bg-[#131720]"
                 }`}
               >
                 No

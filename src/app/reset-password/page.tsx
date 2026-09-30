@@ -60,9 +60,9 @@ export default function ResetPasswordNewPage() {
     <div className="container mx-auto p-4">
       <h1 className="text-3xl font-bold mb-6">Reset Password</h1>
 
-      <form onSubmit={handleSubmit} className="max-w-md mx-auto bg-gray-100 p-6 rounded-lg shadow-md">
+      <form onSubmit={handleSubmit} className="max-w-md mx-auto bg-[#131720] p-6 rounded-lg shadow-md">
         <div className="mb-5">
-          <label htmlFor="newPassword" className="block mb-2 text-sm font-medium text-gray-900">
+          <label htmlFor="newPassword" className="block mb-2 text-sm font-medium text-[#E8F0F8]">
             New Password
           </label>
           <input
@@ -70,14 +70,14 @@ export default function ResetPasswordNewPage() {
             id="newPassword"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
-            className="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
+            className="shadow-xs bg-[#131720] border border-[rgba(0,207,255,0.2)] text-[#E8F0F8] text-sm rounded-lg block w-full p-2.5"
             placeholder="Enter new password"
             required
           />
         </div>
 
         <div className="mb-5">
-          <label htmlFor="confirmPassword" className="block mb-2 text-sm font-medium text-gray-900">
+          <label htmlFor="confirmPassword" className="block mb-2 text-sm font-medium text-[#E8F0F8]">
             Confirm Password
           </label>
           <input
@@ -85,7 +85,7 @@ export default function ResetPasswordNewPage() {
             id="confirmPassword"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            className="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
+            className="shadow-xs bg-[#131720] border border-[rgba(0,207,255,0.2)] text-[#E8F0F8] text-sm rounded-lg block w-full p-2.5"
             placeholder="Confirm new password"
             required
           />

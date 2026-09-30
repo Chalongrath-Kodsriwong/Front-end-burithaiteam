@@ -7,6 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { Product } from "@/types/Productdisplay"
 import { isSellableProduct } from "@/app/utils/productVisibility";
 import PriceTag from "@/app/components/PriceTag";
+import ProductBadges from "@/app/components/ProductBadges";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 const ITEMS_PER_PAGE = 20; // แสดง 20 ชิ้นต่อหน้า
@@ -136,6 +137,8 @@ export default function Productdisplay() {
             numericPrices: prices,
             finalPrices,
             preorder: p.preorder ?? null,
+            bestDiscount: (p as any).bestDiscount ?? null,
+            availability: (p as any).availability ?? null,
           };
         });
 
@@ -309,6 +312,7 @@ export default function Productdisplay() {
                       <PriceTag
                         prices={product.numericPrices}
                         finalPrices={product.finalPrices}
+                  bestDiscount={(product as any).bestDiscount}
                         preorder={product.preorder}
                         size="sm"
                       />
@@ -340,13 +344,14 @@ export default function Productdisplay() {
         {visibleItems.map((product) => (
           <Link key={product.id} href={`/detail_product/${product.id}`} className="h-full">
             <div className="product-card h-full p-1.5 sm:p-2.5 cursor-pointer flex flex-col">
-              <div className="w-full h-20 sm:h-36 rounded-lg mb-1.5 sm:mb-2 overflow-hidden bg-[#1a1a2e]">
+              <div className="relative w-full h-20 sm:h-36 rounded-lg mb-1.5 sm:mb-2 overflow-hidden bg-[#1a1a2e]">
                 <img
                   src={product.avatar}
                   alt={product.name}
                   onError={(e) => (e.currentTarget.src = "/image/logo_white.jpeg")}
                   className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                 />
+                <ProductBadges discountPercent={(product as any).bestDiscount?.discountPercent} availability={(product as any).availability} />
               </div>
               <div className="flex-1 flex flex-col px-0.5">
                 <h3 className="text-xs sm:text-sm font-semibold line-clamp-2 min-h-[2rem] sm:min-h-[2.8rem] leading-snug text-gray-100">
@@ -355,6 +360,7 @@ export default function Productdisplay() {
                 <PriceTag
                   prices={product.numericPrices}
                   finalPrices={product.finalPrices}
+                  bestDiscount={(product as any).bestDiscount}
                   preorder={product.preorder}
                   size="lg"
                 />

@@ -205,10 +205,10 @@ export default function EditAccount({ user }: { user: any }) {
 
   return (
     <div>
-      <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Profile Settings</h1>
+      <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-[#E8F0F8]">Profile Settings</h1>
 
       <div className="flex flex-col sm:flex-row gap-4 sm:gap-8">
-        <div className="w-28 h-28 sm:w-48 sm:h-48 bg-gray-300 rounded-full flex items-center justify-center text-white text-xs sm:text-base font-bold overflow-hidden mx-auto sm:mx-0">
+        <div className="w-28 h-28 sm:w-48 sm:h-48 bg-[#131720] border border-[rgba(0,207,255,0.2)] rounded-full flex items-center justify-center text-[#7A9AB8] text-xs sm:text-base font-bold overflow-hidden mx-auto sm:mx-0">
           {user?.avatar ? (
             <img
               src={user.avatar}
@@ -220,8 +220,8 @@ export default function EditAccount({ user }: { user: any }) {
           )}
         </div>
 
-        <div className="flex-1 text-sm sm:text-base">
-          <h3 className="text-lg sm:text-xl font-semibold mb-2">User Information</h3>
+        <div className="flex-1 text-sm sm:text-base text-[#A9C0D6] [&_strong]:text-[#D4AF37] [&_strong]:font-semibold space-y-1">
+          <h3 className="text-lg sm:text-xl font-semibold mb-2 text-[#E8F0F8]">User Information</h3>
           <p className="break-words">
             <strong>ชื่อ:</strong> {user?.firstName} {user?.lastName}
           </p>
@@ -285,7 +285,7 @@ export default function EditAccount({ user }: { user: any }) {
       {/* ---------------- Popup แก้ไขข้อมูล ---------------- */}
       {showPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50 px-3">
-          <div className="bg-white p-4 sm:p-6 rounded-xl shadow-lg w-full max-w-md max-h-[85vh] overflow-y-auto">
+          <div className="led-panel text-[#E8F0F8] p-4 sm:p-6 rounded-xl shadow-lg w-full max-w-md max-h-[85vh] overflow-y-auto">
             <h2 className="text-lg sm:text-xl font-bold mb-4">แก้ไขข้อมูลส่วนตัว</h2>
 
             <div className="space-y-3">
@@ -408,7 +408,7 @@ export default function EditAccount({ user }: { user: any }) {
       {/* ---------------- Popup เปลี่ยนรหัสผ่าน ---------------- */}
       {showPasswordPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50 px-3">
-          <div className="bg-white p-4 sm:p-6 rounded-xl shadow-lg w-full max-w-md max-h-[85vh] overflow-y-auto">
+          <div className="led-panel text-[#E8F0F8] p-4 sm:p-6 rounded-xl shadow-lg w-full max-w-md max-h-[85vh] overflow-y-auto">
             <h2 className="text-lg sm:text-xl font-bold mb-4">เปลี่ยนรหัสผ่าน</h2>
 
             <div className="space-y-3">

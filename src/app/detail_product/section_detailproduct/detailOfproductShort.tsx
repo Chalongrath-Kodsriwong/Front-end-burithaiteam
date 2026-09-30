@@ -6,6 +6,7 @@ import { Heart, Share2, Copy, Check } from "lucide-react";
 import { FaFacebook, FaInstagram, FaWeixin } from "react-icons/fa";
 import { SiLine } from "react-icons/si";
 import { useCart } from "@/app/context/CartContext";
+import ProductDownloads from "./ProductDownloads";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
@@ -76,6 +77,29 @@ export default function DetailOfProductShort({ product }: any) {
   const inventoryId = Number(selectedInventory?.inventory_id);
 
   const purchaseMode: string = selectedInventory?.purchase_mode ?? "normal";
+
+  // สินค้าที่มีหลายตัวเลือกจะยังไม่มี selectedInventory จนกว่าลูกค้าจะกดเลือก
+  const hasSelection: boolean = !!selectedInventory;
+
+  // ภาพรวมของสินค้าทั้งชิ้น — ใช้ตอนที่ลูกค้ายังไม่ได้เลือกตัวเลือกไหน
+  const allOutOfStock: boolean =
+    allInventories.length > 0 &&
+    allInventories.every((inv: any) => Number(inv?.stock ?? 0) <= 0);
+  const anyPreorderAvailable: boolean = allInventories.some((inv: any) => {
+    const m = inv?.purchase_mode ?? "normal";
+    return m === "both" || m === "preorder_only";
+  });
+
+  // เลือกแล้ว → ดูของตัวที่เลือก · ยังไม่เลือก → ดูภาพรวมทั้งสินค้า
+  // (ทุกตัวเลือกหมด = บอกว่าหมดได้เลย ไม่ต้องรอให้กดเลือกก่อน)
+  const outOfStock: boolean = hasSelection
+    ? Number(selectedInventory?.stock ?? 0) <= 0
+    : allOutOfStock;
+  const preorderAvailable: boolean = hasSelection
+    ? purchaseMode === "both" || purchaseMode === "preorder_only"
+    : anyPreorderAvailable;
+  const canBuyNormal: boolean = purchaseMode !== "preorder_only" && !outOfStock;
+
   const preorderDiscount: number | null = selectedInventory?.preorder_discount ?? null;
   const preorderReleaseDate: string | null = selectedInventory?.preorder_release_date ?? null;
   const preorderPrice = preorderDiscount != null
@@ -83,7 +107,13 @@ export default function DetailOfProductShort({ product }: any) {
     : null;
 
   // Discount: per-inventory regular_discount OR product-level campaign discount (PERCENTAGE type)
-  const regularDiscountPct: number = selectedInventory?.regular_discount ?? 0;
+  // ส่วนลดปกติหมดอายุแล้วไม่แสดง (ว่างไว้ = ลดตลอดไม่มีกำหนด)
+  const regularDiscountEnd = selectedInventory?.regular_discount_end_date;
+  const regularDiscountActive: boolean =
+    !regularDiscountEnd || new Date(regularDiscountEnd).getTime() > Date.now();
+  const regularDiscountPct: number = regularDiscountActive
+    ? (selectedInventory?.regular_discount ?? 0)
+    : 0;
   const campaignDiscountPct: number =
     product?.discount?.discountType?.toLowerCase() === "percentage"
       ? (product?.discount?.discountValue ?? 0)
@@ -338,21 +368,49 @@ export default function DetailOfProductShort({ product }: any) {
             {product.variants?.[0]?.variant_name || "ตัวเลือกสินค้า"}
           </div>
           <div className="flex flex-wrap gap-2">
-            {allInventories.map((inv: any) => (
-              <button
-                key={inv.inventory_id}
-                onClick={() => setSelectedInventory(inv)}
-                disabled={inv.stock === 0}
-                className={`px-3 py-1.5 text-sm font-semibold rounded-sm border transition-all duration-200
-                  ${selectedInventory?.inventory_id === inv.inventory_id
-                    ? "border-[#00CFFF] bg-[rgba(0,207,255,0.12)] text-[#00CFFF] shadow-[0_0_10px_rgba(0,207,255,0.2)]"
-                    : "border-[rgba(0,207,255,0.2)] text-[#7A9AB8] hover:border-[rgba(0,207,255,0.45)] hover:text-[#B0CEEA]"
+            {allInventories.map((inv: any) => {
+              // ตัวเลือกที่ของหมดแต่เปิดสั่งจอง ต้องยังกดเลือกได้ ไม่งั้นลูกค้าไปต่อไม่ได้เลย
+              const invMode = inv?.purchase_mode ?? "normal";
+              const invPreorderable = invMode === "both" || invMode === "preorder_only";
+              const invOutOfStock = Number(inv?.stock ?? 0) <= 0;
+              const invDisabled = invOutOfStock && !invPreorderable;
+              const isSelected = selectedInventory?.inventory_id === inv.inventory_id;
+
+              return (
+                <button
+                  key={inv.inventory_id}
+                  onClick={() => setSelectedInventory(inv)}
+                  disabled={invDisabled}
+                  title={
+                    invDisabled
+                      ? "สินค้าหมด"
+                      : invOutOfStock
+                        ? "สินค้าหมด — สั่งจองล่วงหน้าได้"
+                        : undefined
                   }
-                  ${inv.stock === 0 ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}
-              >
-                {inv.inventory_name}
-              </button>
-            ))}
+                  className={`px-3 py-1.5 text-sm font-semibold rounded-sm border transition-all duration-200 flex items-center gap-1.5
+                    ${isSelected
+                      ? "border-[#00CFFF] bg-[rgba(0,207,255,0.12)] text-[#00CFFF] shadow-[0_0_10px_rgba(0,207,255,0.2)]"
+                      : invOutOfStock && invPreorderable
+                        ? "border-[rgba(212,175,55,0.45)] text-[#B99A46] hover:border-[rgba(212,175,55,0.8)] hover:text-[#F5CC40]"
+                        : "border-[rgba(0,207,255,0.2)] text-[#7A9AB8] hover:border-[rgba(0,207,255,0.45)] hover:text-[#B0CEEA]"
+                    }
+                    ${invDisabled ? "opacity-40 cursor-not-allowed line-through" : "cursor-pointer"}`}
+                >
+                  {inv.inventory_name}
+                  {invOutOfStock && invPreorderable && (
+                    <span className="text-[9px] font-bold px-1 py-[1px] rounded-sm bg-[rgba(212,175,55,0.18)] border border-[rgba(212,175,55,0.5)] text-[#F5CC40] whitespace-nowrap">
+                      จองได้
+                    </span>
+                  )}
+                  {invDisabled && (
+                    <span className="text-[9px] font-bold px-1 py-[1px] rounded-sm bg-[rgba(148,163,184,0.15)] border border-[rgba(148,163,184,0.4)] text-[#94A3B8] whitespace-nowrap no-underline">
+                      หมด
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
@@ -381,7 +439,7 @@ export default function DetailOfProductShort({ product }: any) {
 
       {/* CTA Buttons */}
       <div className="flex flex-col gap-3 mb-5">
-        {purchaseMode !== "preorder_only" && (
+        {canBuyNormal && (
           <div className="flex flex-col sm:flex-row gap-3">
             <button onClick={handleBuyNow} className="btn-gold flex-1 text-sm font-bold">
               ซื้อสินค้า
@@ -392,8 +450,48 @@ export default function DetailOfProductShort({ product }: any) {
           </div>
         )}
 
-        {/* Preorder section — shown for both & preorder_only modes */}
-        {(purchaseMode === "both" || purchaseMode === "preorder_only") && (
+        {/* ของหมดแต่เปิดสั่งจอง และยังไม่ได้เลือกตัวเลือก — ชวนให้เลือกก่อน */}
+        {!hasSelection && outOfStock && preorderAvailable && (
+          <div className="rounded-xl border border-[rgba(212,175,55,0.45)] bg-[rgba(212,175,55,0.06)] px-4 py-3.5 text-center">
+            <p className="text-sm font-bold text-[#D4AF37]">สินค้าหมด — เปิดให้สั่งจอง (Preorder)</p>
+            <p className="mt-0.5 text-[11px] text-[#7A9AB8]">
+              กดเลือกตัวเลือกที่มีป้าย “จองได้” ด้านบน เพื่อดูราคาและเงื่อนไขการสั่งจอง
+            </p>
+          </div>
+        )}
+
+        {/* เลือกตัวเลือกแล้ว ของหมด แต่ยังสั่งจองได้ — อธิบายให้ชัดว่าทำไมยังกดสั่งได้ */}
+        {hasSelection && outOfStock && preorderAvailable && (
+          <div className="rounded-xl border border-[rgba(212,175,55,0.45)] bg-[rgba(212,175,55,0.06)] px-4 py-3.5">
+            <div className="flex items-center justify-center gap-2 flex-wrap">
+              <span className="rounded-full bg-[#c62222] px-2.5 py-0.5 text-[10px] font-extrabold tracking-widest text-white">
+                SOLD OUT
+              </span>
+              <span className="text-sm font-bold text-[#D4AF37]">
+                ของหมด แต่ยังสั่งจองล่วงหน้าได้
+              </span>
+            </div>
+            <p className="mt-2 text-center text-[11px] leading-relaxed text-[#7A9AB8]">
+              สินค้ารุ่นนี้หมดสต็อกชั่วคราว แต่ยังเปิดให้สั่งจอง (Preorder) ได้
+              <br className="hidden sm:block" />
+              ขั้นตอน: สั่งจอง → ชำระเงิน → ทางร้านสั่งของเข้า → จัดส่งตามรอบที่แจ้งด้านล่าง
+            </p>
+          </div>
+        )}
+
+        {/* สินค้าหมดและไม่เปิด preorder — ซื้อไม่ได้เลย */}
+        {outOfStock && !preorderAvailable && (
+          <div className="rounded-xl border border-[rgba(239,68,68,0.35)] bg-[rgba(239,68,68,0.07)] px-4 py-3.5 text-center">
+            <p className="text-sm font-bold text-[#FCA5A5]">สินค้าหมดชั่วคราว</p>
+            <p className="mt-0.5 text-[11px] text-[#7A9AB8]">
+              ขออภัย สินค้ารุ่นนี้หมดสต็อก กรุณาติดต่อร้านหรือเลือกสินค้าอื่น
+            </p>
+          </div>
+        )}
+
+        {/* Preorder section — โหมด both / preorder_only
+            ถ้าของหมด ส่วนซื้อปกติจะถูกซ่อน เหลือแค่ส่วนนี้ */}
+        {preorderAvailable && hasSelection && (
           <div className="mt-1">
             {/* Separator */}
             <div className="flex items-center gap-3 mb-3">
@@ -412,7 +510,7 @@ export default function DetailOfProductShort({ product }: any) {
                 {/* Info */}
                 <div className="flex-1 min-w-0">
                   <p className="text-[10px] font-bold tracking-widest text-[#D4AF37]/60 uppercase mb-1.5">
-                    ราคา Preorder พิเศษ
+                    {preorderPrice != null ? "ราคา Preorder พิเศษ" : "ราคาสั่งจอง"}
                   </p>
                   {preorderPrice != null ? (
                     <div className="flex flex-wrap items-baseline gap-2 mb-1.5">
@@ -431,7 +529,13 @@ export default function DetailOfProductShort({ product }: any) {
                       )}
                     </div>
                   ) : (
-                    <p className="text-sm text-[#D4AF37] font-bold mb-1.5">ราคาพิเศษสำหรับ Preorder</p>
+                    // ไม่ได้ตั้งส่วนลด Preorder ไว้ → จ่ายราคาปกติ ต้องบอกตัวเลขให้ชัด ไม่ปล่อยให้เดา
+                    <div className="mb-1.5">
+                      <span className="text-2xl font-black text-[#F5CC40]">
+                        ฿{Number(selectedInventory?.price ?? 0).toLocaleString()}
+                      </span>
+                      <span className="ml-2 text-[11px] text-[#7A9AB8]">ราคาเท่าราคาปกติ</span>
+                    </div>
                   )}
                   {preorderReleaseDate && (
                     <p className="text-[11px] text-[#5A7A98]">
@@ -543,6 +647,9 @@ export default function DetailOfProductShort({ product }: any) {
       {wishlistMsg && (
         <p className="mt-2 text-sm text-green-400">{wishlistMsg}</p>
       )}
+
+      {/* ไฟล์ดาวน์โหลด — RCG / Software Config / Document */}
+      <ProductDownloads downloads={product?.downloads} />
     </div>
   );
 }

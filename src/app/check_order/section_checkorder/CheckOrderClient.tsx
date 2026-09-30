@@ -120,16 +120,16 @@ const CheckOrderPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-[#08090d]">
       <div className="max-w-5xl mx-auto px-4 md:px-6 py-8">
-        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="rounded-xl border border-[rgba(0,207,255,0.15)] bg-[#0d0f14] p-6 shadow-sm">
           <h1 className="text-2xl md:text-3xl font-bold">ที่อยู่การจัดส่ง</h1>
-          <div className="mt-4 text-base md:text-lg text-gray-700 whitespace-pre-wrap">
+          <div className="mt-4 text-base md:text-lg text-[#A9C0D6] whitespace-pre-wrap">
             {loading ? "กําลังโหลด..." : order?.shipping_address || "-"}
           </div>
         </div>
 
-        <div className="mt-8 rounded-xl border border-gray-200 bg-white p-6 md:p-8 shadow-sm">
+        <div className="mt-8 rounded-xl border border-[rgba(0,207,255,0.15)] bg-[#0d0f14] p-6 md:p-8 shadow-sm">
           <div className="text-center">
             <div className="text-2xl md:text-3xl font-bold">สถานะสินค้า</div>
             <div className="mt-3 text-lg md:text-xl font-semibold text-yellow-600">
@@ -139,13 +139,13 @@ const CheckOrderPage = () => {
           </div>
 
           <div className="mt-8">
-            <div className="h-3 w-full rounded-full border border-gray-300 bg-gray-100 overflow-hidden">
+            <div className="h-3 w-full rounded-full border border-[rgba(0,207,255,0.2)] bg-[#131720] overflow-hidden">
               <div
                 className="h-full bg-yellow-500 transition-all duration-500"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
-            <div className="mt-3 flex justify-between text-sm md:text-base font-semibold text-gray-700">
+            <div className="mt-3 flex justify-between text-sm md:text-base font-semibold text-[#A9C0D6]">
               <span>เริ่มดําเนินการ</span>
               <span>เสร็จสิ้น</span>
             </div>
@@ -153,17 +153,17 @@ const CheckOrderPage = () => {
 
           <div className="mt-8 space-y-4">
             {items.length === 0 ? (
-              <div className="text-center text-gray-600 text-lg">
+              <div className="text-center text-[#7A9AB8] text-lg">
                 {loading ? "กําลังโหลดรายการสินค้า..." : "ไม่พบรายการสินค้า"}
               </div>
             ) : (
               items.map((it: any) => (
                 <div
                   key={it.id_orderitem}
-                  className="rounded-lg border border-gray-200 bg-gray-50 p-4 md:p-5"
+                  className="rounded-lg border border-[rgba(0,207,255,0.15)] bg-[#131720] p-4 md:p-5"
                 >
                   <div className="flex flex-col md:flex-row md:items-start gap-4 md:gap-6">
-                    <div className="w-full md:w-40 h-40 bg-white border border-gray-300 overflow-hidden flex items-center justify-center rounded">
+                    <div className="w-full md:w-40 h-40 bg-[#0d0f14] border border-[rgba(0,207,255,0.2)] overflow-hidden flex items-center justify-center rounded">
                       {it?.product_image ? (
                         <img
                           src={it.product_image}
@@ -171,7 +171,7 @@ const CheckOrderPage = () => {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <span className="text-base font-semibold text-gray-600">รูปสินค้า</span>
+                        <span className="text-base font-semibold text-[#7A9AB8]">รูปสินค้า</span>
                       )}
                     </div>
 
@@ -179,16 +179,16 @@ const CheckOrderPage = () => {
                       <div className="text-lg md:text-xl font-semibold">
                         {it?.product_name || "-"}
                       </div>
-                      <div className="mt-1 text-sm md:text-base text-gray-600">
+                      <div className="mt-1 text-sm md:text-base text-[#7A9AB8]">
                         {it?.variant_name || "-"}
                         {it?.inventory_name ? ` • ${it.inventory_name}` : ""}
                       </div>
 
                       <div className="mt-4 grid grid-cols-2 gap-3 text-sm md:text-base">
-                        <div className="font-semibold text-gray-700">
+                        <div className="font-semibold text-[#A9C0D6]">
                           จํานวน: {it?.quantity ?? "-"}
                         </div>
-                        <div className="font-semibold text-gray-700 text-right">
+                        <div className="font-semibold text-[#A9C0D6] text-right">
                           ราคา: {it?.dynamic_total ?? "-"}
                         </div>
                       </div>
@@ -198,13 +198,13 @@ const CheckOrderPage = () => {
               ))
             )}
 
-            <div className="border-t border-gray-300 pt-6 flex justify-end text-lg md:text-xl font-semibold">
+            <div className="border-t border-[rgba(0,207,255,0.2)] pt-6 flex justify-end text-lg md:text-xl font-semibold">
               ราคารวมทั้งหมด: {order?.dynamic_total_price ?? "-"}
             </div>
           </div>
         </div>
 
-        <div className="mt-8 rounded-xl border border-gray-200 bg-white p-6 md:p-8 shadow-sm">
+        <div className="mt-8 rounded-xl border border-[rgba(0,207,255,0.15)] bg-[#0d0f14] p-6 md:p-8 shadow-sm">
           <div className="text-center text-2xl md:text-3xl font-bold">ข้อมูลการจัดส่ง</div>
 
           <div className="mt-6 text-base md:text-xl">
@@ -217,7 +217,7 @@ const CheckOrderPage = () => {
               <button
                 onClick={handleCopyTracking}
                 disabled={!order?.tracking_number}
-                className="inline-flex items-center gap-1 whitespace-nowrap text-sm text-gray-600 underline disabled:opacity-50"
+                className="inline-flex items-center gap-1 whitespace-nowrap text-sm text-[#7A9AB8] underline disabled:opacity-50"
               >
                <Copy className="shrink-0" size={16} />
                 {copied ? "คัดลอกแล้ว" : "คัดลอกหมายเลขพัสดุ"}

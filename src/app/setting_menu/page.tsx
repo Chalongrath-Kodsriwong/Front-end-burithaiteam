@@ -67,13 +67,18 @@ export default function SettingMenuPage() {
     router.replace(`/setting_menu?menu=${menu}`);
   };
 
-  if (loading) return <div className="px-4 py-6 text-sm md:text-base">กำลังโหลดข้อมูล...</div>;
+  if (loading)
+    return (
+      <div className="min-h-screen bg-[#08090d] px-4 py-6 text-sm md:text-base text-[#7A9AB8]">
+        กำลังโหลดข้อมูล...
+      </div>
+    );
 
   return (
-    <div className="setting-menu-theme min-h-screen flex flex-row bg-gray-100">
+    <div className="setting-menu-theme led-form-scope min-h-screen flex flex-row bg-[#08090d]">
       {/* Sidebar */}
-      <div className="w-[118px] sm:w-[136px] md:w-64 shrink-0 bg-gray-200 p-2 sm:p-3 md:p-5">
-        <h2 className="text-sm sm:text-base md:text-xl font-semibold mb-2 sm:mb-3 md:mb-4">ตั้งค่า</h2>
+      <div className="w-[118px] sm:w-[136px] md:w-64 shrink-0 bg-[#0d0f14] border-r border-[rgba(0,207,255,0.12)] p-2 sm:p-3 md:p-5">
+        <h2 className="text-sm sm:text-base md:text-xl font-semibold mb-2 sm:mb-3 md:mb-4 text-[#E8F0F8]">ตั้งค่า</h2>
 
         <ul className="space-y-1.5 md:space-y-2">
           <li>

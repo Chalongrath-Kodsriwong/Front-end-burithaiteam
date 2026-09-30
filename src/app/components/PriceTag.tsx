@@ -2,10 +2,19 @@
 
 import { PreorderInfo } from "@/types/Mostseller";
 
+/** ส่วนลดที่ลึกที่สุดของสินค้า คำนวณจาก backend (เทียบ regular / preorder / campaign แล้ว) */
+export type BestDiscount = {
+  originalPrice: number;
+  finalPrice: number;
+  discountPercent: number;
+  source: "regular" | "preorder" | "campaign";
+};
+
 type Props = {
   prices?: number[];          // ราคาปกติ (raw)
   finalPrices?: number[];     // ราคาหลัง campaign discount
   preorder?: PreorderInfo | null;
+  bestDiscount?: BestDiscount | null;
   size?: "sm" | "md" | "lg";
 };
 
@@ -17,7 +26,7 @@ function fmt(n: number) {
   return `฿ ${Math.round(n).toLocaleString()}`;
 }
 
-export default function PriceTag({ prices = [], finalPrices = [], preorder, size = "md" }: Props) {
+export default function PriceTag({ prices = [], finalPrices = [], preorder, bestDiscount, size = "md" }: Props) {
   const validPrices = prices.filter((n) => Number.isFinite(n) && n > 0);
   const validFinal = finalPrices.filter((n) => Number.isFinite(n) && n > 0);
 
@@ -30,6 +39,30 @@ export default function PriceTag({ prices = [], finalPrices = [], preorder, size
   let bestPrice: number | null = null;
   let label: "preorder" | "discount" | null = null;
   let strikePrice: number | null = null;
+
+  // backend คำนวณส่วนลดที่ลึกที่สุดมาให้แล้ว (เทียบ regular / preorder / campaign ทุก inventory)
+  // ใช้ตัวนี้ก่อนเสมอ เพราะเห็นข้อมูลครบกว่าที่ฝั่งนี้มี
+  if (bestDiscount && bestDiscount.discountPercent > 0 && bestDiscount.finalPrice > 0) {
+    const textSm2 = size === "sm" ? "text-[10px]" : size === "lg" ? "text-sm sm:text-base" : "text-xs sm:text-sm";
+    const textXs2 = size === "sm" ? "text-[9px]" : size === "lg" ? "text-xs sm:text-sm" : "text-[10px] sm:text-xs";
+    const badge =
+      bestDiscount.source === "preorder"
+        ? `Preorder ลด ${bestDiscount.discountPercent}%`
+        : `ลด ${bestDiscount.discountPercent}%`;
+    return (
+      <div className="mt-1 space-y-0.5">
+        <p className={`${textXs2} text-[#445566] line-through`}>{fmt(bestDiscount.originalPrice)}</p>
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <p className={`font-bold ${textSm2} text-[#D4AF37]`}>{fmt(bestDiscount.finalPrice)}</p>
+          <span
+            className={`${textXs2} font-bold bg-[rgba(212,175,55,0.2)] border border-[rgba(212,175,55,0.6)] text-[#F5CC40] px-1.5 py-0.5 rounded-sm shadow-[0_0_6px_rgba(212,175,55,0.3)]`}
+          >
+            {badge}
+          </span>
+        </div>
+      </div>
+    );
+  }
 
   const regularBest = minCampaign ?? minOriginal;
 

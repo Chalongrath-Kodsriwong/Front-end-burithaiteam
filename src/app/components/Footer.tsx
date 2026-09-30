@@ -20,7 +20,7 @@ const Footer: React.FC = () => (
             />
             <span className="text-xl font-bold text-yellow-500">BuriThaiTeam</span>
           </Link>
-          <p className="text-sm text-gray-400 leading-relaxed max-w-xs">
+          <p className="text-sm text-[#5A7A98] leading-relaxed max-w-xs">
             ผู้เชี่ยวชาญด้านจอ LED Module อุปกรณ์ควบคุม และงานติดตั้งระบบจอ LED
             คุณภาพสูง ประสบการณ์มากกว่า 20 ปี
           </p>
@@ -41,7 +41,7 @@ const Footer: React.FC = () => (
             <Link
               key={href}
               href={href}
-              className="text-sm text-gray-400 hover:text-yellow-400 transition-colors duration-200"
+              className="text-sm text-[#5A7A98] hover:text-yellow-400 transition-colors duration-200"
             >
               {label}
             </Link>
@@ -55,7 +55,7 @@ const Footer: React.FC = () => (
           </h3>
           <a
             href="tel:+66873683548"
-            className="flex items-center gap-3 text-sm text-gray-400 hover:text-yellow-400 transition-colors duration-200"
+            className="flex items-center gap-3 text-sm text-[#5A7A98] hover:text-yellow-400 transition-colors duration-200"
           >
             <Phone className="w-4 h-4 text-yellow-600 shrink-0" />
             087-368-3548
@@ -64,12 +64,12 @@ const Footer: React.FC = () => (
             href="https://mail.google.com/mail/?view=cm&fs=1&to=burithiateamstore.info@gmail.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 text-sm text-gray-400 hover:text-yellow-400 transition-colors duration-200"
+            className="flex items-center gap-3 text-sm text-[#5A7A98] hover:text-yellow-400 transition-colors duration-200"
           >
             <Mail className="w-4 h-4 text-yellow-600 shrink-0" />
             burithiateamstore.info@gmail.com
           </a>
-          <p className="flex items-start gap-3 text-sm text-gray-400">
+          <p className="flex items-start gap-3 text-sm text-[#5A7A98]">
             <MapPin className="w-4 h-4 text-yellow-600 shrink-0 mt-0.5" />
             <span>หมู่บ้านนราอิลิแกนซ์ 300/81 ซอย 3 หมู่ 5 ต.บ้านกรด อ.บางปะอิน จ.พระนครศรีอยุธยา 13160</span>
           </p>
@@ -77,12 +77,12 @@ const Footer: React.FC = () => (
       </div>
 
       <div className="mt-10 pt-6 border-t border-[rgba(212,175,55,0.1)] flex flex-col sm:flex-row items-center justify-between gap-3">
-        <p className="text-xs text-gray-600">
+        <p className="text-xs text-[#7A9AB8]">
           © {new Date().getFullYear()} BuriThaiTeam Store. All Rights Reserved.
         </p>
         <div className="flex gap-5">
-          <Link href="/privacy" className="text-xs text-gray-600 hover:text-yellow-500 transition-colors">Privacy Policy</Link>
-          <Link href="/licensing" className="text-xs text-gray-600 hover:text-yellow-500 transition-colors">Licensing</Link>
+          <Link href="/privacy" className="text-xs text-[#7A9AB8] hover:text-yellow-500 transition-colors">Privacy Policy</Link>
+          <Link href="/licensing" className="text-xs text-[#7A9AB8] hover:text-yellow-500 transition-colors">Licensing</Link>
         </div>
       </div>
     </div>

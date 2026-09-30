@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ApiProduct, ProductUI } from "@/types/Mostseller";
 import { isSellableProduct } from "@/app/utils/productVisibility";
 import PriceTag from "@/app/components/PriceTag";
+import ProductBadges from "@/app/components/ProductBadges";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 const ITEMS_PER_PAGE = 4;
@@ -46,6 +47,8 @@ export default function Mostsell() {
             rawPrices,
             finalPrices,
             preorder: p.preorder ?? null,
+            bestDiscount: (p as any).bestDiscount ?? null,
+            availability: (p as any).availability ?? null,
             soldQty: p.soldQuantity ?? 0,
           };
         });
@@ -122,10 +125,12 @@ export default function Mostsell() {
                     }
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                   />
-                  {/* Hot badge */}
-                  <span className="absolute top-2 left-2 led-badge text-[9px] px-1.5 py-0.5">
-                    <span className="led-badge-dot" />Hot
-                  </span>
+                  {/* ป้ายลอย: ขายดี + ลดราคา (ถ้ามี) */}
+                  <ProductBadges
+                    availability={(product as any).availability}
+                    topSeller
+                    discountPercent={(product as any).bestDiscount?.discountPercent}
+                  />
                 </div>
 
                 <div className="p-1.5 flex-1 flex flex-col mt-1">
@@ -136,6 +141,7 @@ export default function Mostsell() {
                   <PriceTag
                     prices={product.rawPrices}
                     finalPrices={product.finalPrices}
+                  bestDiscount={(product as any).bestDiscount}
                     preorder={product.preorder}
                     size="lg"
                   />

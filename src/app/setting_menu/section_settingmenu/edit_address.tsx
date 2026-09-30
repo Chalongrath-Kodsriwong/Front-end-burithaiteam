@@ -82,14 +82,14 @@ export default function EditAddress({ user }: { user: any }) {
         <p className="font-semibold">{addr.label || "ที่อยู่"}</p>
         <p>{addr.address_text}</p>
         {(addr.amphoe || addr.district) && (
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-[#7A9AB8]">
             {[addr.amphoe, addr.district].filter(Boolean).join(" › ")}
           </p>
         )}
         <p>
           {addr.province || "-"} {addr.postal_code || ""}
         </p>
-        <p className="mt-1 text-sm text-gray-600">โทร: {addr.phone || "-"}</p>
+        <p className="mt-1 text-sm text-[#7A9AB8]">โทร: {addr.phone || "-"}</p>
       </div>
     );
   }
@@ -289,7 +289,7 @@ export default function EditAddress({ user }: { user: any }) {
   return (
     <div>
       <h1 className="text-xl sm:text-2xl font-bold mb-2">My Address</h1>
-      {/* <p className="text-gray-700 mb-4">จัดการที่อยู่ของคุณ (user_id: {user?.user_id})</p> */}
+      {/* <p className="text-[#A9C0D6] mb-4">จัดการที่อยู่ของคุณ (user_id: {user?.user_id})</p> */}
 
       {errorMsg && (
         <div className="mb-4 rounded-md bg-red-50 border border-red-200 p-3 text-red-700">
@@ -299,10 +299,10 @@ export default function EditAddress({ user }: { user: any }) {
 
       {/* ========================= MOBILE (เหมือนเดิมก่อนหน้า) ========================= */}
       <div className="block md:hidden">
-        <div className="border border-gray-300 rounded-md p-4 bg-white">
+        <div className="border border-[rgba(0,207,255,0.2)] rounded-md p-4 bg-[#0d0f14]">
           {addresses.length === 0 ? (
             <div className="text-center py-4">
-              <p className="text-gray-600 mb-4">ยังไม่มีที่อยู่จัดส่งตอนนี้</p>
+              <p className="text-[#7A9AB8] mb-4">ยังไม่มีที่อยู่จัดส่งตอนนี้</p>
 
               <button
                 onClick={() => setShowAddPopup(true)}
@@ -343,7 +343,7 @@ export default function EditAddress({ user }: { user: any }) {
           {/* Popup เลือกที่อยู่ (Mobile) */}
           {showPopup && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-3">
-              <div className="bg-white p-4 rounded-md shadow-md w-full max-w-sm max-h-[85vh] overflow-y-auto">
+              <div className="bg-[#0d0f14] p-4 rounded-md shadow-md w-full max-w-sm max-h-[85vh] overflow-y-auto">
                 <h3 className="text-base font-semibold mb-4">เลือกที่อยู่ใหม่</h3>
 
                 {addresses.map((addr) => (
@@ -423,7 +423,7 @@ export default function EditAddress({ user }: { user: any }) {
           </button>
 
           {selectedAddress && (
-            <div className="text-sm text-gray-600">
+            <div className="text-sm text-[#7A9AB8]">
               ที่อยู่ที่เลือกตอนนี้:{" "}
               <span className="font-semibold">
                 {selectedAddress.label || `#${selectedAddress.id_address}`}
@@ -433,8 +433,8 @@ export default function EditAddress({ user }: { user: any }) {
         </div>
 
         {addresses.length === 0 ? (
-          <div className="border border-gray-300 rounded-md p-6 bg-white text-center">
-            <p className="text-gray-600 mb-4">ยังไม่มีที่อยู่</p>
+          <div className="border border-[rgba(0,207,255,0.2)] rounded-md p-6 bg-[#0d0f14] text-center">
+            <p className="text-[#7A9AB8] mb-4">ยังไม่มีที่อยู่</p>
             <button
               onClick={() => setShowAddPopup(true)}
               className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700"
@@ -451,8 +451,8 @@ export default function EditAddress({ user }: { user: any }) {
               return (
                 <div
                   key={addr.id_address}
-                  className={`rounded-lg border p-4 bg-white ${
-                    isSelected ? "border-blue-500 ring-2 ring-blue-200" : "border-gray-200"
+                  className={`rounded-lg border p-4 bg-[#0d0f14] ${
+                    isSelected ? "border-blue-500 ring-2 ring-blue-200" : "border-[rgba(0,207,255,0.15)]"
                   }`}
                 >
                   {/* ✅ คลิกพื้นที่นี้ = เลือก + ไปหน้า orderbuy */}
@@ -512,11 +512,11 @@ export default function EditAddress({ user }: { user: any }) {
       {/* ========================= POPUP ADD ========================= */}
       {showAddPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 px-4 pt-44 pb-4">
-          <div className="bg-white p-4 rounded-2xl shadow-2xl w-full max-w-sm max-h-[80vh] overflow-y-auto">
+          <div className="bg-[#0d0f14] p-4 rounded-2xl shadow-2xl w-full max-w-sm max-h-[80vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-base font-semibold">เพิ่มที่อยู่ใหม่</h3>
               <button
-                className="keep-original-btn text-gray-400 hover:text-gray-600 text-2xl leading-none bg-transparent"
+                className="keep-original-btn text-[#5A7A98] hover:text-[#7A9AB8] text-2xl leading-none bg-transparent"
                 onClick={() => setShowAddPopup(false)}
               >
                 ×
@@ -546,11 +546,11 @@ export default function EditAddress({ user }: { user: any }) {
       {/* ========================= POPUP EDIT ========================= */}
       {showEditPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 px-4 pt-44 pb-4">
-          <div className="bg-white p-4 rounded-2xl shadow-2xl w-full max-w-sm max-h-[80vh] overflow-y-auto">
+          <div className="bg-[#0d0f14] p-4 rounded-2xl shadow-2xl w-full max-w-sm max-h-[80vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-base font-semibold">แก้ไขที่อยู่</h3>
               <button
-                className="keep-original-btn text-gray-400 hover:text-gray-600 text-2xl leading-none bg-transparent"
+                className="keep-original-btn text-[#5A7A98] hover:text-[#7A9AB8] text-2xl leading-none bg-transparent"
                 onClick={() => setShowEditPopup(false)}
               >
                 ×
@@ -561,7 +561,7 @@ export default function EditAddress({ user }: { user: any }) {
 
             <div className="flex justify-end mt-4 pt-3 border-t border-gray-100 gap-2">
               <button
-                className="keep-original-btn px-4 py-2 rounded-lg text-gray-600 bg-gray-100 hover:bg-gray-200 text-sm transition-all duration-200 active:scale-95"
+                className="keep-original-btn px-4 py-2 rounded-lg text-[#7A9AB8] bg-[#131720] hover:bg-[#131720] text-sm transition-all duration-200 active:scale-95"
                 onClick={() => setShowEditPopup(false)}
               >
                 ยกเลิก

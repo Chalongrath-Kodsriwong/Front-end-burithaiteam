@@ -43,6 +43,26 @@ html, body {
 }
 
 /* ═══════════════════════════════════════════════
+   BROWSER AUTOFILL
+   Chrome/Safari ทับพื้นหลังช่องที่กรอกอัตโนมัติเป็นสีขาวอมฟ้าเสมอ
+   ไม่ว่า CSS จะสั่งอะไรไว้ ต้องใช้ box-shadow inset ทับเอา
+   ไม่งั้นช่องที่เบราว์เซอร์จำค่าไว้ (เช่น รหัสไปรษณีย์ เบอร์โทร) จะขาวโพลนกลางหน้ามืด
+═══════════════════════════════════════════════ */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px #0d0f14 inset !important;
+  box-shadow: 0 0 0 1000px #0d0f14 inset !important;
+  -webkit-text-fill-color: #E8F0F8 !important;
+  caret-color: #E8F0F8;
+  border-color: rgba(0, 207, 255, 0.2);
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+/* ═══════════════════════════════════════════════
    BACKGROUND PATTERNS
 ═══════════════════════════════════════════════ */
 
@@ -174,6 +194,399 @@ html, body {
 @keyframes led-blink {
   0%, 100% { opacity: 1; box-shadow: 0 0 6px rgba(0, 207, 255, 0.9); }
   50% { opacity: 0.4; box-shadow: 0 0 2px rgba(0, 207, 255, 0.3); }
+}
+
+/* ═══════════════════════════════════════════════
+   CATEGORY CARD — หมวดหมู่ตามระยะพิกเซล (hero)
+   มีรูปพื้นหลังของแต่ละหมวด + ฉากมืดทับให้ตัวหนังสืออ่านออกเสมอ
+═══════════════════════════════════════════════ */
+.cat-card {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  aspect-ratio: 4 / 3;
+  border: 1px solid rgba(0, 207, 255, 0.22);
+  /* ลาย LED grid ใช้เป็นพื้นตอนยังไม่มีรูปจริง */
+  background-color: #0a0c10;
+  background-image:
+    linear-gradient(rgba(0, 207, 255, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 207, 255, 0.07) 1px, transparent 1px);
+  background-size: 10px 10px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.cat-card__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ไล่เข้มจากล่างขึ้นบน ตัวหนังสืออยู่ล่าง จึงอ่านออกไม่ว่ารูปจะสว่างแค่ไหน */
+.cat-card__scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg,
+    rgba(8, 9, 13, 0.25) 0%,
+    rgba(8, 9, 13, 0.72) 55%,
+    rgba(8, 9, 13, 0.94) 100%);
+}
+
+.cat-card__body {
+  position: absolute;
+  inset: auto 0 0 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem 0.55rem 0.55rem;
+  line-height: 1.15;
+}
+
+/* ชื่อหมวดมาจากหลังบ้าน ความยาวไม่แน่นอน — ตัดสองบรรทัดแล้วใส่ ... */
+.cat-card__name {
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1.25;
+  color: #E8F0F8;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.9);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cat-card:hover {
+  border-color: rgba(0, 207, 255, 0.75);
+  box-shadow: 0 0 18px rgba(0, 207, 255, 0.22), 0 8px 24px rgba(0, 0, 0, 0.55);
+  transform: translateY(-3px);
+}
+.cat-card:hover .cat-card__img { transform: scale(1.08); }
+
+@media (min-width: 640px) {
+  .cat-card__name { font-size: 0.85rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cat-card, .cat-card__img { transition: none; }
+  .cat-card:hover { transform: none; }
+  .cat-card:hover .cat-card__img { transform: none; }
+}
+
+/* ═══════════════════════════════════════════════
+   CATEGORY SHOWCASE — แผงหมวดหมู่กลาง hero
+═══════════════════════════════════════════════ */
+
+/* ปุ่มวงกลมของแต่ละหมวด — กระจกมืดขอบฟ้า LED ให้เข้าชุดกับเฟรมจอข้างๆ
+   ของเดิมเป็นวงกลมขาวสว่าง ลอยไม่เข้ากับธีมมืด */
+.cat-orb {
+  position: relative;
+  width: 88px;
+  height: 88px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem;
+  text-align: center;
+  background:
+    radial-gradient(circle at 32% 26%, rgba(0, 207, 255, 0.14) 0%, transparent 62%),
+    rgba(10, 12, 18, 0.92);
+  border: 1.5px solid rgba(0, 207, 255, 0.3);
+  color: #9FC2DE;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 4px 14px rgba(0, 0, 0, 0.5);
+  transition: all 0.3s cubic-bezier(0.34, 1.3, 0.64, 1);
+  transition-property: margin-left, transform, background, box-shadow, border-color, color;
+  flex-shrink: 0;
+}
+
+.cat-orb__text {
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: 0.01em;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cat-orb:hover {
+  transform: scale(1.08);
+  border-color: rgba(0, 207, 255, 0.75);
+  color: #E8F0F8;
+  box-shadow: 0 0 18px rgba(0, 207, 255, 0.25), 0 4px 14px rgba(0, 0, 0, 0.5);
+}
+
+/* หมวดที่เลือกอยู่ — ทองทึบ ตัวหนังสือเข้ม เห็นชัดว่ากำลังดูอันไหน */
+.cat-orb--active {
+  background: linear-gradient(140deg, #F5CC40 0%, #D4AF37 55%, #B8942A 100%);
+  border-color: rgba(255, 245, 200, 0.9);
+  color: #1A1408;
+  transform: scale(1.12);
+  box-shadow: 0 0 26px rgba(212, 175, 55, 0.5), 0 6px 18px rgba(0, 0, 0, 0.55);
+}
+.cat-orb--active:hover { transform: scale(1.14); color: #1A1408; }
+
+/* วงแหวนเรืองรอบปุ่มที่เลือก */
+.cat-orb--active::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 9999px;
+  border: 1.5px solid rgba(212, 175, 55, 0.5);
+  animation: orb-ring 2.4s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes orb-ring {
+  0%, 100% { opacity: 0.75; transform: scale(1); }
+  50%      { opacity: 0;    transform: scale(1.18); }
+}
+
+/* ลูกศรเลื่อนหมวด บน/ล่าง */
+.cat-nav {
+  width: 52px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.4rem;
+  line-height: 1;
+  color: #00CFFF;
+  background: rgba(6, 8, 14, 0.85);
+  border: 1px solid rgba(0, 207, 255, 0.3);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: all 0.25s ease;
+}
+.cat-nav:hover {
+  border-color: rgba(0, 207, 255, 0.85);
+  background: rgba(6, 8, 14, 0.96);
+  box-shadow: 0 0 14px rgba(0, 207, 255, 0.3);
+  color: #7FE3FF;
+}
+.cat-nav:active { transform: scale(0.94); }
+
+/* แถบปุ่ม — ห้ามใส่ overflow ตรงนี้เด็ดขาด
+   ปุ่มที่เลือกขยาย 1.12 เท่าและมีวงแหวนยื่นออกนอกตัว ถ้า clip จะโดนตัดขอบทันที */
+.cat-orb-rail { scrollbar-width: none; }
+.cat-orb-rail::-webkit-scrollbar { display: none; }
+
+/* ── กรอบรายละเอียดหมวด — ทำให้เป็นจอ LED เหมือนเฟรมแบนเนอร์ ── */
+.cat-stage {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  min-height: 460px;
+  border-radius: 0.6rem;
+  overflow: hidden;
+  border: 1px solid rgba(0, 207, 255, 0.28);
+  background-color: #0a0c10;
+  background-image:
+    linear-gradient(rgba(0, 207, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 207, 255, 0.05) 1px, transparent 1px);
+  background-size: 22px 22px;
+  box-shadow:
+    0 0 0 1px rgba(0, 207, 255, 0.05),
+    0 0 30px rgba(0, 207, 255, 0.12),
+    0 0 50px rgba(212, 175, 55, 0.05),
+    0 16px 44px rgba(0, 0, 0, 0.55);
+  animation: stage-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* เส้นสแกนบางๆ ให้รู้สึกเป็นจอ LED จริง (ชุดเดียวกับ .led-screen-frame) */
+.cat-stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    180deg,
+    transparent 0px, transparent 3px,
+    rgba(0, 0, 0, 0.07) 3px, rgba(0, 0, 0, 0.07) 4px
+  );
+  pointer-events: none;
+  z-index: 6;
+}
+
+/* ขีดเรืองด้านบนกรอบ */
+.cat-stage::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0,207,255,0.8) 45%, rgba(212,175,55,0.7) 70%, transparent);
+  z-index: 7;
+}
+
+.cat-stage__bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.55;
+  transition: transform 6s ease-out;
+}
+.cat-stage:hover .cat-stage__bg { transform: scale(1.05); }
+
+/* ไล่มืดจากซ้าย ตัวหนังสืออยู่ซ้าย จึงอ่านออกทุกรูป */
+.cat-stage__scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(8,9,13,0.96) 0%, rgba(8,9,13,0.82) 45%, rgba(8,9,13,0.5) 100%),
+    linear-gradient(0deg, rgba(8,9,13,0.92) 0%, transparent 58%);
+}
+
+@keyframes stage-in {
+  from { opacity: 0; transform: translateX(12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ขีดทองนำหน้าชื่อหมวด */
+.cat-stage__title {
+  position: relative;
+  padding-left: 0.7rem;
+}
+.cat-stage__title::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0.12em; bottom: 0.12em;
+  width: 3px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #F5CC40, #B8942A);
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.6);
+}
+
+/* ── การ์ดสินค้าเล็กในแผง ── */
+.cat-pick {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  border-radius: 0.45rem;
+  border: 1px solid rgba(0, 207, 255, 0.16);
+  background: rgba(8, 9, 13, 0.75);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  padding: 0.4rem;
+  transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+}
+.cat-pick:hover {
+  border-color: rgba(0, 207, 255, 0.6);
+  transform: translateY(-3px);
+  box-shadow: 0 0 16px rgba(0, 207, 255, 0.18), 0 8px 20px rgba(0, 0, 0, 0.5);
+}
+.cat-pick__thumb {
+  display: block;
+  width: 100%;
+  height: 76px;
+  border-radius: 0.3rem;
+  overflow: hidden;
+  background: #0a0c10;
+  border: 1px solid rgba(0, 207, 255, 0.08);
+}
+.cat-pick__thumb img {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.cat-pick:hover .cat-pick__thumb img { transform: scale(1.09); }
+.cat-pick__name {
+  font-size: 0.7rem;
+  line-height: 1.25;
+  color: #9FC2DE;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.cat-pick__price {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #F5CC40;
+  text-shadow: 0 0 8px rgba(212, 175, 55, 0.35);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cat-orb, .cat-stage, .cat-pick, .cat-stage__bg, .cat-pick__thumb img { transition: none; animation: none; }
+  .cat-orb--active::after { animation: none; }
+  .cat-orb:hover, .cat-pick:hover { transform: none; }
+}
+
+/* ═══════════════════════════════════════════════
+   ตารางไฟล์ดาวน์โหลดในหน้ารายละเอียดสินค้า
+═══════════════════════════════════════════════ */
+.download-table {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border: 1px solid rgba(0, 207, 255, 0.18);
+  border-radius: 0.6rem;
+  overflow: hidden;
+  background: rgba(10, 12, 18, 0.6);
+}
+
+/* หัวข้อที่ไม่มีไฟล์จะถูกซ่อน — ตารางจึงเหลือ 1-2 ช่อง ไม่ให้ยืดเต็มความกว้าง */
+.download-table[data-cols="1"] { grid-template-columns: minmax(0, 1fr); max-width: 320px; }
+.download-table[data-cols="2"] { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 620px; }
+
+.download-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 0.9rem 0.7rem 1rem;
+  border-right: 1px solid rgba(0, 207, 255, 0.12);
+}
+.download-cell:last-child { border-right: 0; }
+
+.download-cell__head { display: flex; flex-direction: column; gap: 0.15rem; }
+.download-cell__title {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #00CFFF;
+  letter-spacing: 0.02em;
+}
+.download-cell__sub { font-size: 0.62rem; color: #5A7A98; }
+
+/* ปุ่มดาวน์โหลด — ทองเข้าชุดกับปุ่มหลักของเว็บ */
+.btn-download {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-width: 7.5rem;
+  padding: 0.45rem 0.8rem;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #1A1408;
+  background: linear-gradient(140deg, #F5CC40 0%, #D4AF37 60%, #B8942A 100%);
+  border: 1px solid rgba(255, 245, 200, 0.55);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.45);
+  transition: all 0.25s ease;
+}
+.btn-download:hover {
+  filter: brightness(1.08);
+  box-shadow: 0 0 16px rgba(212, 175, 55, 0.45), 0 4px 14px rgba(0, 0, 0, 0.5);
+  transform: translateY(-1px);
+}
+.btn-download:active { transform: translateY(0) scale(0.97); }
+
+/* จอแคบ — เรียงลงมาทีละช่อง เส้นคั่นย้ายมาอยู่ด้านล่างแทน */
+@media (max-width: 640px) {
+  .download-table { grid-template-columns: 1fr; }
+  .download-cell {
+    border-right: 0;
+    border-bottom: 1px solid rgba(0, 207, 255, 0.12);
+  }
+  .download-cell:last-child { border-bottom: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-download { transition: none; }
+  .btn-download:hover, .btn-download:active { transform: none; }
 }
 
 /* Section separator line — cyan LED */
@@ -551,6 +964,201 @@ html, body {
   background: #9ca3af; color: #f3f4f6; text-shadow: none; cursor: not-allowed;
 }
 
+/* ═══════════════════════════════════════════════
+   LED dark theme สำหรับหน้าเก่าที่ยังเป็นธีมสว่าง
+   ใช้ .led-form-scope ครอบหน้าหรือ section แล้ว
+   input/select/textarea/table จะเข้าธีมอัตโนมัติ
+═══════════════════════════════════════════════ */
+.led-panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--cyan-border);
+  border-radius: 0.75rem;
+  box-shadow: 0 0 30px rgba(0, 207, 255, 0.05);
+}
+
+.led-form-scope input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.led-form-scope select,
+.led-form-scope textarea {
+  background: var(--bg-raised);
+  border: 1px solid rgba(0, 207, 255, 0.22);
+  color: var(--text-primary);
+  border-radius: 0.5rem;
+}
+.led-form-scope input::placeholder,
+.led-form-scope textarea::placeholder { color: var(--text-muted); }
+
+.led-form-scope input:focus,
+.led-form-scope select:focus,
+.led-form-scope textarea:focus {
+  outline: none;
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 2px rgba(0, 207, 255, 0.15);
+}
+
+/* option ใน dropdown ต้องกำหนดเองไม่งั้นบางเบราว์เซอร์ขาว */
+.led-form-scope select option { background: var(--bg-raised); color: var(--text-primary); }
+
+.led-form-scope label { color: var(--text-secondary); }
+.led-form-scope table { color: var(--text-primary); }
+.led-form-scope thead { background: var(--bg-raised); color: var(--gold); }
+.led-form-scope th, .led-form-scope td { border-color: rgba(0, 207, 255, 0.12); }
+
 *, *::before, *::after { box-sizing: border-box; min-width: 0; }
 img, video, canvas, svg { max-width: 100%; height: auto; }
 pre { white-space: pre-wrap; word-break: break-word; }
+
+/* ═══════════════════════════════════════════════
+   ป้ายลอยบนการ์ดสินค้า (ลดราคา / ขายดี)
+═══════════════════════════════════════════════ */
+.product-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 800;
+  text-align: center;
+  letter-spacing: 0.04em;
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  animation: badge-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* ป้ายลดราคา — วงกลม แดงสด เต้นเบาๆ ให้สะดุดตา */
+.product-badge--sale {
+  flex-direction: column;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 30% 25%, #ff5b4a 0%, #e8382a 55%, #c62222 100%);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.45), 0 0 16px rgba(232, 56, 42, 0.55);
+  animation: badge-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both,
+             badge-pulse 2.2s ease-in-out 0.4s infinite;
+}
+
+/* ป้ายขายดี — สี่เหลี่ยมมุมมน บรรทัดเดียว */
+.product-badge--seller {
+  border-radius: 0.3rem;
+  white-space: nowrap;
+  background: linear-gradient(135deg, #ff6a52 0%, #e34a30 55%, #b93317 100%);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.45), 0 0 14px rgba(227, 74, 48, 0.45);
+}
+
+@keyframes badge-pop {
+  from { opacity: 0; transform: scale(0.5) translateY(-6px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes badge-pulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 3px 10px rgba(0,0,0,0.45), 0 0 16px rgba(232,56,42,0.55); }
+  50%      { transform: scale(1.07); box-shadow: 0 3px 14px rgba(0,0,0,0.5), 0 0 26px rgba(232,56,42,0.8); }
+}
+
+/* การ์ดที่ hover ให้ป้ายเด้งรับนิดนึง (เฉพาะจอที่ชี้เมาส์ได้) */
+@media (hover: hover) {
+  .product-card:hover .product-badge { transform: scale(1.06); transition: transform 0.25s ease; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .product-badge, .product-badge--sale { animation: none; }
+  .product-card:hover .product-badge { transform: none; }
+}
+
+/* ═══════════════════════════════════════════════
+   ป้ายสถานะของกลางรูปสินค้า (สินค้าหมด / สั่งจองได้)
+═══════════════════════════════════════════════ */
+
+/* ของหมดจริง ซื้อไม่ได้ — ทับรูปให้มืดและเป็นขาวดำ สื่อว่า "จบแล้ว" */
+.product-stock-veil--out {
+  background: rgba(6, 8, 12, 0.62);
+  backdrop-filter: grayscale(1) saturate(0.2);
+  -webkit-backdrop-filter: grayscale(1) saturate(0.2);
+}
+
+/* ของหมดแต่ยังสั่งจองได้ — ทับบางกว่า ไม่ดูดสี ให้ยังรู้สึกว่าสินค้ายังมีชีวิต */
+.product-stock-veil--pre {
+  background: rgba(6, 8, 12, 0.42);
+}
+
+/* ── ตราประทับกลางรูป ─────────────────────────
+   ตัวใหญ่ ตัวหนา ไม่มีกรอบพื้นทึบ ให้อ่านออกทันทีตั้งแต่เหลือบตามอง */
+.product-stock-stamp {
+  display: inline-block;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  line-height: 1;
+  padding: 0.3em 0.55em;
+  border-radius: 0.3rem;
+  white-space: nowrap;
+  animation: badge-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.product-stock-stamp--out {
+  color: #E2E8F0;
+  border: 2.5px solid rgba(226, 232, 240, 0.85);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+  transform: rotate(-6deg);
+}
+
+.product-stock-stamp--pre {
+  color: #fff;
+  border: 2.5px solid #fff;
+  background: rgba(198, 34, 34, 0.9);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.6);
+  transform: rotate(-6deg);
+}
+
+/* ── แถบเต็มความกว้างที่ขอบล่างของรูป ─────────
+   กินความกว้างทั้งใบ จึงเด่นกว่าป้ายเล็กลอยกลางรูปมาก
+   และไม่บังตัวสินค้าตรงกลางด้วย */
+.product-stock-band {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4em;
+  font-weight: 800;
+  text-align: center;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  animation: band-rise 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
+}
+
+/* ทองทึบ ตัวหนังสือเข้ม — สลับขั้วคอนทราสต์ อ่านออกบนรูปสินค้าสีอะไรก็ได้ */
+.product-stock-band--pre {
+  color: #1A1408;
+  background: linear-gradient(180deg, #F5CC40 0%, #D4AF37 55%, #C09520 100%);
+  border-top: 2px solid rgba(255, 245, 200, 0.9);
+  box-shadow: 0 -4px 16px rgba(212, 175, 55, 0.4);
+  animation: band-rise 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both,
+             band-attention 2.6s ease-in-out 0.8s infinite;
+}
+
+.product-stock-band--out {
+  color: #CBD5E1;
+  background: rgba(15, 23, 42, 0.94);
+  border-top: 1.5px solid rgba(148, 163, 184, 0.5);
+}
+
+/* จุดกะพริบหน้าข้อความ สื่อว่า "ยังเปิดรับอยู่" */
+.product-stock-band__dot {
+  width: 0.45em;
+  height: 0.45em;
+  border-radius: 9999px;
+  background: #1A1408;
+  flex-shrink: 0;
+  animation: led-blink 1.6s ease-in-out infinite;
+}
+
+@keyframes band-rise {
+  from { opacity: 0; transform: translateY(100%); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes band-attention {
+  0%, 100% { box-shadow: 0 -4px 16px rgba(212, 175, 55, 0.4); }
+  50%      { box-shadow: 0 -4px 26px rgba(245, 204, 64, 0.85); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .product-stock-stamp,
+  .product-stock-band,
+  .product-stock-band--pre,
+  .product-stock-band__dot { animation: none; }
+}

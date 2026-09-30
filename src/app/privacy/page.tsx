@@ -2,18 +2,18 @@ import React from "react";
 
 export default function PrivacyPage() {
   return (
-    <div className="w-full bg-gray-100 px-4 py-8 md:py-10">
-      <div className="mx-auto max-w-4xl rounded-xl border border-gray-200 bg-white p-5 shadow-sm md:p-8">
-        <h1 className="text-2xl font-bold text-gray-900 md:text-3xl">
+    <div className="w-full bg-[#131720] px-4 py-8 md:py-10">
+      <div className="mx-auto max-w-4xl rounded-xl border border-[rgba(0,207,255,0.15)] bg-[#0d0f14] p-5 shadow-sm md:p-8">
+        <h1 className="text-2xl font-bold text-[#E8F0F8] md:text-3xl">
           นโยบายความเป็นส่วนตัว
         </h1>
-        <p className="mt-2 text-sm text-gray-500">
+        <p className="mt-2 text-sm text-[#5A7A98]">
           อัปเดตล่าสุด: 13 เมษายน 2026
         </p>
 
-        <div className="mt-6 space-y-5 text-sm leading-7 text-gray-700 md:text-base">
+        <div className="mt-6 space-y-5 text-sm leading-7 text-[#A9C0D6] md:text-base">
           <section>
-            <h2 className="text-lg font-semibold text-gray-900">
+            <h2 className="text-lg font-semibold text-[#E8F0F8]">
               1. ข้อมูลที่เราเก็บ
             </h2>
             <p>
@@ -24,7 +24,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-gray-900">
+            <h2 className="text-lg font-semibold text-[#E8F0F8]">
               2. วัตถุประสงค์การใช้ข้อมูล
             </h2>
             <p>
@@ -34,7 +34,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-gray-900">
+            <h2 className="text-lg font-semibold text-[#E8F0F8]">
               3. การเปิดเผยข้อมูล
             </h2>
             <p>
@@ -44,7 +44,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-gray-900">
+            <h2 className="text-lg font-semibold text-[#E8F0F8]">
               4. การเก็บรักษาและความปลอดภัยของข้อมูล
             </h2>
             <p>
@@ -54,7 +54,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-gray-900">
+            <h2 className="text-lg font-semibold text-[#E8F0F8]">
               5. คุกกี้ (Cookies)
             </h2>
             <p>
@@ -64,7 +64,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-gray-900">
+            <h2 className="text-lg font-semibold text-[#E8F0F8]">
               6. สิทธิของผู้ใช้งาน
             </h2>
             <p>
@@ -74,7 +74,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-gray-900">
+            <h2 className="text-lg font-semibold text-[#E8F0F8]">
               7. การติดต่อ
             </h2>
             <p>

@@ -11,4 +11,5 @@ export interface Product {
   numericPrices?: number[];
   finalPrices?: number[];
   preorder?: PreorderInfo | null;
+  bestDiscount?: { originalPrice: number; finalPrice: number; discountPercent: number; source: string } | null;
 }

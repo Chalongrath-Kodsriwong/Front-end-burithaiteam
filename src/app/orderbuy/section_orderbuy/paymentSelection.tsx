@@ -19,7 +19,7 @@ export default function PaymentSelection({ onSelect }: any) {
         {paymentMethods.map((pm) => (
           <label
             key={pm.id}
-            className="flex items-center gap-3 border p-3 rounded cursor-pointer hover:bg-gray-50"
+            className="flex items-center gap-3 border p-3 rounded cursor-pointer hover:bg-[rgba(0,207,255,0.08)]"
           >
             <input
               type="radio"

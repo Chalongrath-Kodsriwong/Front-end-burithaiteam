@@ -19,6 +19,7 @@ export type ApiProduct = {
     finalPrices?: number[];
   };
   preorder?: PreorderInfo | null;
+  bestDiscount?: { originalPrice: number; finalPrice: number; discountPercent: number; source: string } | null;
   soldQuantity?: number;
 };
 
@@ -31,5 +32,6 @@ export interface ProductUI {
   rawPrices?: number[];
   finalPrices?: number[];
   preorder?: PreorderInfo | null;
+  bestDiscount?: { originalPrice: number; finalPrice: number; discountPercent: number; source: string } | null;
   soldQty?: number;
 }

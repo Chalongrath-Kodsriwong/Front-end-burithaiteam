@@ -7,21 +7,27 @@ import Link from "next/link";
 import Image from "next/image";
 import { fetchWithTimeout } from "@/app/utils/fetchWithTimeout";
 import { BannerItem } from "@/types/Banner";
+import CategoryShowcase from "./CategoryShowcase";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
-const ledCategories = [
-  { code: "P3", label: "Indoor", color: "rgba(0,207,255,0.8)" },
-  { code: "P4", label: "Outdoor", color: "rgba(212,175,55,0.8)" },
-  { code: "P5", label: "Rental", color: "rgba(0,207,255,0.8)" },
-  { code: "P6", label: "Fixed", color: "rgba(212,175,55,0.8)" },
-];
+/**
+ * หมวดหมู่ที่โชว์ใน hero — มาจากหลังบ้าน ไม่ได้ hardcode แล้ว
+ * คุมได้ที่ management > Category > "หมวดหมู่ที่แสดงบนหน้าแรก"
+ * (เปิด/ปิดรายหมวด + อัปโหลดรูปพื้นหลังของแต่ละหมวด)
+ */
+type FeaturedCategory = {
+  id_category: number;
+  name: string | null;
+  image_url: string | null;
+};
 
 export default function HeroBanner() {
   const carouselRef = useRef<any>(null);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [images, setImages] = useState<{ src: string; alt: string }[]>([]);
   const [loading, setLoading] = useState(true);
+  const [categories, setCategories] = useState<FeaturedCategory[]>([]);
 
   const fallbackImages = useMemo(
     () => [
@@ -52,6 +58,25 @@ export default function HeroBanner() {
     return () => { alive = false; };
   }, [fallbackImages]);
 
+  // หมวดหมู่ที่แอดมินเปิดให้แสดง — ถ้ายังไม่เปิดสักอัน ส่วนนี้จะไม่ขึ้นเลย
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const res = await fetchWithTimeout(`${API_URL}/api/category/featured`, {
+          method: "GET",
+          cache: "no-store",
+        });
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok) return;
+        if (alive) setCategories(Array.isArray(json?.data) ? json.data : []);
+      } catch {
+        /* โหลดไม่ได้ก็แค่ไม่โชว์ ไม่ต้องรบกวนลูกค้า */
+      }
+    })();
+    return () => { alive = false; };
+  }, []);
+
   const slideImages = images.length > 0 ? images : fallbackImages;
 
   return (
@@ -68,7 +93,7 @@ export default function HeroBanner() {
       <div className="relative z-10 flex flex-col lg:flex-row min-h-[460px] sm:min-h-[520px] lg:min-h-[620px]">
 
         {/* LEFT — Text content */}
-        <div className="flex flex-col justify-center px-6 sm:px-10 lg:px-16 xl:px-20 py-12 lg:py-0 lg:w-[54%]">
+        <div className="flex flex-col justify-center px-6 sm:px-10 lg:px-8 xl:px-10 py-12 lg:py-0 lg:w-[24%]">
 
           {/* LED status badge */}
           <div className="inline-flex items-center gap-2 mb-6 self-start">
@@ -102,19 +127,6 @@ export default function HeroBanner() {
             ))}
           </div>
 
-          {/* LED Pixel Pitch Categories */}
-          <div className="flex flex-wrap gap-2 mb-7">
-            {ledCategories.map((cat) => (
-              <Link key={cat.code} href="/product">
-                <span className="led-badge">
-                  <span className="led-badge-dot" />
-                  <span className="font-black">{cat.code}</span>
-                  <span className="text-[#7A9AB8] font-normal normal-case tracking-normal text-[0.6rem]">{cat.label}</span>
-                </span>
-              </Link>
-            ))}
-          </div>
-
           {/* CTA Buttons */}
           <div className="flex flex-wrap gap-3 mb-4">
             <Link href="/product">
@@ -141,6 +153,11 @@ export default function HeroBanner() {
               </span>
             </Link>
           </div>
+        </div>
+
+        {/* MIDDLE — แผงหมวดหมู่ ใช้ช่องว่างระหว่างข้อความกับแบนเนอร์ */}
+        <div className="hidden lg:flex lg:w-[30%] items-center pr-3">
+          <CategoryShowcase />
         </div>
 
         {/* RIGHT — LED Screen Frame Carousel */}

@@ -109,7 +109,9 @@ export default function PaymentPage() {
         if (!res.ok) return;
         const json = await res.json();
         const orderStatus: string = json?.data?.order_status ?? "";
-        if (orderStatus === "checking" || orderStatus === "paid" || orderStatus === "shipped" || orderStatus === "delivered") {
+        // ค่าที่ enum StatusText มีจริง: pending | confirmed | checking | success | canceled
+        // confirmed = Slip2Go ยืนยันกับธนาคารผ่านแล้ว · checking = รอ admin ตรวจ
+        if (["confirmed", "checking", "success"].includes(orderStatus)) {
           stopPolling();
           setPollStatus("confirmed");
           setTimeout(() => {
@@ -270,16 +272,25 @@ export default function PaymentPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      <div className="max-w-md mx-auto px-4 py-2">
-        <h1 className="text-2xl font-extrabold text-center tracking-tight">🧾 ชำระเงิน</h1>
+    <div className="relative min-h-screen bg-[#08090d] overflow-hidden">
+      {/* LED grid background ให้เข้าธีมเดียวกับหน้าอื่น */}
+      <div className="absolute inset-0 bg-led-grid opacity-15 pointer-events-none" />
+
+      <div className="relative z-10 max-w-md mx-auto px-4 py-6">
+        <div className="text-center mb-4">
+          <div className="inline-flex items-center gap-2 mb-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#00CFFF] animate-pulse shadow-[0_0_6px_rgba(0,207,255,0.9)]" />
+            <span className="text-[10px] font-bold tracking-[0.2em] text-[#00CFFF]/70 uppercase">BuriThaiTeam Store</span>
+          </div>
+          <h1 className="text-2xl font-extrabold tracking-tight text-[#E8F0F8]">ชำระเงิน</h1>
+        </div>
 
         {errorText && (
-          <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{errorText}</div>
+          <div className="mt-4 rounded-xl border border-[rgba(239,68,68,0.4)] bg-[rgba(239,68,68,0.1)] p-3 text-sm text-[#FCA5A5]">{errorText}</div>
         )}
 
         {/* Card: QR + PromptPay info */}
-        <div className="mt-4 rounded-2xl border bg-white shadow-sm overflow-hidden">
+        <div className="mt-4 rounded-2xl border border-[rgba(0,207,255,0.15)] bg-[#0d0f14] shadow-sm overflow-hidden">
           <div className="relative px-4 py-3 bg-gradient-to-r from-[#213660] to-[#213660]">
             <div className="flex items-center justify-center">
               <div className="flex items-center gap-3">
@@ -293,7 +304,7 @@ export default function PaymentPage() {
           </div>
 
           <div className="p-4">
-            {loading && <div className="text-center text-sm text-gray-600 py-10">กำลังสร้าง QR Code…</div>}
+            {loading && <div className="text-center text-sm text-[#7A9AB8] py-10">กำลังสร้าง QR Code…</div>}
 
             {!loading && qrCodeUrl && (
               <div className="text-center">
@@ -308,28 +319,28 @@ export default function PaymentPage() {
                   </div>
                 </div>
 
-                <p className="mt-3 text-xs text-gray-500">เปิดแอปธนาคาร → สแกน QR → ตรวจสอบยอดก่อนกดยืนยัน</p>
+                <p className="mt-3 text-xs text-[#5A7A98]">เปิดแอปธนาคาร → สแกน QR → ตรวจสอบยอดก่อนกดยืนยัน</p>
 
                 <div className="mt-4 space-y-2 mb-4">
                   <p className="text-xl font-bold text-sky-800">แสกน QR เพื่อโอนเข้าบัญชี</p>
                   {activePromptPay ? (
                     <>
-                      <p className="text-[17px] font-bold text-gray-600">ชื่อ: {activePromptPay.first_name} {activePromptPay.last_name}</p>
-                      <p className="text-[17px] font-bold text-gray-600">บัญชี: {formatPayKey(activePromptPay.payKey || "")}</p>
+                      <p className="text-[17px] font-bold text-[#7A9AB8]">ชื่อ: {activePromptPay.first_name} {activePromptPay.last_name}</p>
+                      <p className="text-[17px] font-bold text-[#7A9AB8]">บัญชี: {formatPayKey(activePromptPay.payKey || "")}</p>
                     </>
                   ) : (
                     <p className="text-sm text-gray-400">กำลังโหลดข้อมูลบัญชี...</p>
                   )}
                 </div>
 
-                {isExpired && <div className="mt-3 text-sm text-red-600">QR นี้หมดอายุแล้ว กรุณากด "สร้าง QR ใหม่"</div>}
+                {isExpired && <div className="mt-3 text-sm text-[#FCA5A5]">QR นี้หมดอายุแล้ว กรุณากด "สร้าง QR ใหม่"</div>}
 
                 {expiresAt && (
                   <div className="mt-2 text-center">
                     {paymentId && (
                       <div className="text-[13px] font-semibold text-gray-400 break-all">หมายเลขการชำระเงิน: {paymentId}</div>
                     )}
-                    <div className={`mt-2 text-lg font-extrabold ${isExpired ? "text-red-600" : "text-emerald-700"}`}>
+                    <div className={`mt-2 text-lg font-extrabold ${isExpired ? "text-[#FCA5A5]" : "text-[#6EE7B7]"}`}>
                       {isExpired ? "หมดอายุแล้ว" : `เหลือเวลา ${remainingText}`}
                     </div>
                   </div>
@@ -343,30 +354,30 @@ export default function PaymentPage() {
         {!isExpired && paymentId && (
           <div className="mt-5">
             {pollStatus === "waiting" && (
-              <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-4 text-center">
+              <div className="rounded-xl border border-[rgba(0,207,255,0.25)] bg-[rgba(0,207,255,0.06)] px-4 py-4 text-center">
                 <div className="flex items-center justify-center gap-2 mb-1">
-                  <svg className="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <svg className="animate-spin h-5 w-5 text-[#00CFFF]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
                   </svg>
-                  <span className="text-sm font-semibold text-blue-700">รอการตรวจสอบการชำระเงิน...</span>
+                  <span className="text-sm font-semibold text-[#E8F0F8]">รอการตรวจสอบการชำระเงิน...</span>
                 </div>
-                <p className="text-xs text-blue-500">ระบบจะพาคุณไปหน้าถัดไปอัตโนมัติเมื่อได้รับการยืนยัน</p>
+                <p className="text-xs text-[#7A9AB8]">โอนแล้วกดปุ่มด้านล่างเพื่ออัปโหลดสลิป ระบบจะยืนยันกับธนาคารให้ทันที</p>
               </div>
             )}
             {pollStatus === "confirmed" && (
-              <div className="rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-4 text-center">
+              <div className="rounded-xl border border-[rgba(16,185,129,0.35)] bg-[rgba(16,185,129,0.08)] px-4 py-4 text-center">
                 <div className="flex items-center justify-center gap-2 mb-1">
-                  <svg className="h-6 w-6 text-emerald-500" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <svg className="h-6 w-6 text-[#34D399]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/>
                   </svg>
-                  <span className="text-sm font-bold text-emerald-700">ยืนยันการชำระเงินสำเร็จ!</span>
+                  <span className="text-sm font-bold text-[#6EE7B7]">ยืนยันการชำระเงินสำเร็จ!</span>
                 </div>
-                <p className="text-xs text-emerald-500">กำลังพาคุณไปหน้าตรวจสอบออเดอร์...</p>
+                <p className="text-xs text-[#34D399]">กำลังพาคุณไปหน้าตรวจสอบออเดอร์...</p>
               </div>
             )}
             {pollStatus === "redirecting" && (
-              <div className="rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-4 text-center text-sm font-semibold text-emerald-700">
+              <div className="rounded-xl border border-[rgba(16,185,129,0.35)] bg-[rgba(16,185,129,0.08)] px-4 py-4 text-center text-sm font-semibold text-[#6EE7B7]">
                 กำลังโหลด...
               </div>
             )}
@@ -385,22 +396,26 @@ export default function PaymentPage() {
           </div>
         )}
 
-        {/* ─── fallback: อัปโหลดสลิปด้วยตนเอง ────────────────────────────────── */}
+        {/* ─── อัปโหลดสลิป (ทางหลัก — ระบบยืนยันกับธนาคารอัตโนมัติ) ──────────── */}
         {!isExpired && paymentId && pollStatus === "waiting" && (
-          <div className="mt-3 text-center">
+          <div className="mt-4">
             <button
               onClick={() => setIsModalOpen(true)}
-              className="text-xs text-gray-400 underline hover:text-gray-600 transition"
+              className="w-full rounded-xl px-4 py-3.5 font-bold text-[#08090d] bg-gradient-to-r from-[#D4AF37] to-[#E8C040] shadow-[0_0_20px_rgba(212,175,55,0.25)] hover:shadow-[0_0_28px_rgba(212,175,55,0.4)] transition-all active:scale-[0.98] flex items-center justify-center gap-2"
             >
-              มีปัญหา? อัปโหลดสลิปด้วยตนเอง
+              <FolderUp size={20} />
+              โอนแล้ว? อัปโหลดสลิปที่นี่
             </button>
+            <p className="mt-2 text-center text-[11px] text-[#5A7A98]">
+              ระบบจะตรวจสอบกับธนาคารและยืนยันให้อัตโนมัติภายในไม่กี่วินาที
+            </p>
           </div>
         )}
 
         {/* ─── Popup: QR expired ─────────────────────────────────────────────── */}
         {isPopupOpen && (
           <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-            <div className="mx-4 w-full max-w-md bg-white p-4 sm:p-6 rounded-xl shadow-xl">
+            <div className="mx-4 w-full max-w-md bg-[#0d0f14] border border-[rgba(0,207,255,0.15)] text-[#E8F0F8] p-4 sm:p-6 rounded-xl shadow-xl">
               <h2 className="text-base sm:text-xl font-semibold mb-4 break-words">{popupMessage}</h2>
               <div className="flex flex-col-reverse sm:flex-row justify-center gap-2 sm:gap-4">
                 <Link href="/shoppingcart">
@@ -422,7 +437,7 @@ export default function PaymentPage() {
         {/* ─── Modal: อัปโหลดสลิป (fallback) ────────────────────────────────── */}
         {isModalOpen && (
           <div className="fixed inset-0 flex items-center justify-center z-40 bg-black bg-opacity-50">
-            <div className="mx-4 w-full max-w-md bg-white p-4 sm:p-6 rounded-xl shadow-xl">
+            <div className="mx-4 w-full max-w-md bg-[#0d0f14] border border-[rgba(0,207,255,0.15)] text-[#E8F0F8] p-4 sm:p-6 rounded-xl shadow-xl">
               <h2 className="text-lg sm:text-xl font-semibold mb-4">อัปโหลดสลิป</h2>
               {uploadError && <div className="text-red-500 text-sm mb-4 break-words">{uploadError}</div>}
               <div className="relative w-full">
@@ -430,9 +445,9 @@ export default function PaymentPage() {
                   type="file"
                   onChange={handleFileChange}
                   accept="image/*"
-                  className="mb-4 border-2 border-gray-400 rounded-lg p-2 pr-10 w-full text-sm hover:bg-gray-200 cursor-pointer"
+                  className="mb-4 border-2 border-[rgba(0,207,255,0.25)] rounded-lg p-2 pr-10 w-full text-sm text-[#A9C0D6] hover:bg-[rgba(0,207,255,0.08)] cursor-pointer"
                 />
-                <FolderUp className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" size={20} />
+                <FolderUp className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5A7A98] pointer-events-none" size={20} />
               </div>
               {uploading ? (
                 <div className="text-sm">กำลังอัปโหลด...</div>
@@ -457,7 +472,7 @@ export default function PaymentPage() {
         {/* ─── Processing overlay ─────────────────────────────────────────────── */}
         {isProcessing && (
           <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-            <div className="mx-4 w-full max-w-sm bg-white p-4 sm:p-6 rounded-xl shadow-xl">
+            <div className="mx-4 w-full max-w-sm bg-[#0d0f14] border border-[rgba(0,207,255,0.15)] text-[#E8F0F8] p-4 sm:p-6 rounded-xl shadow-xl">
               <h2 className="text-lg sm:text-xl font-semibold mb-3">กำลังประมวลผล...</h2>
               <p className="text-sm sm:text-base leading-relaxed">กำลังอัปโหลดสลิปและตรวจสอบข้อมูล กรุณารอสักครู่</p>
             </div>

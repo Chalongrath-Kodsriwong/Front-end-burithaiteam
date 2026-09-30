@@ -7,6 +7,7 @@ import Link from "next/link";
 import { ApiProduct, ProductUI } from "@/types/Newproduct";
 import { isSellableProduct } from "@/app/utils/productVisibility";
 import PriceTag from "@/app/components/PriceTag";
+import ProductBadges from "@/app/components/ProductBadges";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "" ;
 const ITEMS_PER_PAGE = 4;
@@ -47,6 +48,8 @@ export default function Newproducts() {
             rawPrices,
             finalPrices,
             preorder: p.preorder ?? null,
+            bestDiscount: (p as any).bestDiscount ?? null,
+            availability: (p as any).availability ?? null,
           };
         });
 
@@ -126,6 +129,7 @@ export default function Newproducts() {
                     }
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                   />
+                  <ProductBadges discountPercent={(product as any).bestDiscount?.discountPercent} availability={(product as any).availability} />
                 </div>
 
                 <div className="p-1.5 flex-1 flex flex-col mt-1">
@@ -136,6 +140,7 @@ export default function Newproducts() {
                   <PriceTag
                     prices={product.rawPrices}
                     finalPrices={product.finalPrices}
+                  bestDiscount={(product as any).bestDiscount}
                     preorder={product.preorder}
                     size="lg"
                   />

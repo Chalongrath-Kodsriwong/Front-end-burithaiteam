@@ -293,17 +293,8 @@ export default function DisplayItemCart() {
               )}
             </div>
 
-            {/* Qty controls + delete */}
-            <div className="flex flex-col items-end gap-2.5 shrink-0">
-              {/* Delete */}
-              <button
-                onClick={() => setConfirmDeleteId(product.cartItemId)}
-                className="text-[#3A5A78] hover:text-red-400 transition-colors"
-                title="ลบสินค้า"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-
+            {/* Qty controls + delete — อยู่แถวเดียวกัน ถังขยะต่อท้ายปุ่มเพิ่ม/ลด */}
+            <div className="flex items-center gap-2.5 shrink-0">
               {/* Qty */}
               <div className="flex items-center">
                 <button
@@ -322,6 +313,16 @@ export default function DisplayItemCart() {
                   +
                 </button>
               </div>
+
+              {/* Delete — สูง 28px เท่าแถวปุ่ม จะได้อยู่ระนาบเดียวกันพอดี */}
+              <button
+                onClick={() => setConfirmDeleteId(product.cartItemId)}
+                className="w-7 h-7 flex items-center justify-center text-[#3A5A78] hover:text-red-400 hover:bg-[rgba(239,68,68,0.1)] rounded-sm transition-colors"
+                title="ลบสินค้า"
+                aria-label="ลบสินค้าออกจากตะกร้า"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
             </div>
           </div>
         ))}

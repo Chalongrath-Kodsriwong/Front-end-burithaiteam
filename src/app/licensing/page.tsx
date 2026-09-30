@@ -2,18 +2,18 @@ import React from "react";
 
 export default function LicensingPage() {
   return (
-    <div className="w-full bg-gray-100 px-4 py-8 md:py-10">
-      <div className="mx-auto max-w-4xl rounded-xl border border-gray-200 bg-white p-5 shadow-sm md:p-8">
-        <h1 className="text-2xl font-bold text-gray-900 md:text-3xl">
+    <div className="w-full bg-[#131720] px-4 py-8 md:py-10">
+      <div className="mx-auto max-w-4xl rounded-xl border border-[rgba(0,207,255,0.15)] bg-[#0d0f14] p-5 shadow-sm md:p-8">
+        <h1 className="text-2xl font-bold text-[#E8F0F8] md:text-3xl">
           เงื่อนไขการใช้งานและลิขสิทธิ์
         </h1>
-        <p className="mt-2 text-sm text-gray-500">
+        <p className="mt-2 text-sm text-[#5A7A98]">
           อัปเดตล่าสุด: 13 เมษายน 2026
         </p>
 
-        <div className="mt-6 space-y-5 text-sm leading-7 text-gray-700 md:text-base">
+        <div className="mt-6 space-y-5 text-sm leading-7 text-[#A9C0D6] md:text-base">
           <section>
-            <h2 className="text-lg font-semibold text-gray-900">
+            <h2 className="text-lg font-semibold text-[#E8F0F8]">
               1. สิทธิในเนื้อหาเว็บไซต์
             </h2>
             <p>
@@ -24,7 +24,7 @@ export default function LicensingPage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-gray-900">
+            <h2 className="text-lg font-semibold text-[#E8F0F8]">
               2. การใช้งานที่อนุญาต
             </h2>
             <p>
@@ -35,7 +35,7 @@ export default function LicensingPage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-gray-900">
+            <h2 className="text-lg font-semibold text-[#E8F0F8]">
               3. ซอฟต์แวร์หรือบริการจากบุคคลที่สาม
             </h2>
             <p>
@@ -45,7 +45,7 @@ export default function LicensingPage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-gray-900">
+            <h2 className="text-lg font-semibold text-[#E8F0F8]">
               4. เอกสารและไฟล์ประกอบสินค้า
             </h2>
             <p>
@@ -55,7 +55,7 @@ export default function LicensingPage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-gray-900">
+            <h2 className="text-lg font-semibold text-[#E8F0F8]">
               5. การติดต่อเกี่ยวกับสิทธิ์การใช้งาน
             </h2>
             <p>
