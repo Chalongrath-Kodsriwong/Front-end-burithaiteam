@@ -1164,9 +1164,15 @@ pre { white-space: pre-wrap; word-break: break-word; }
 }
 
 /* ─── Radio / Checkbox ของฟอร์มในธีมมืด ───────────────────────────────
-   เดิมใช้ accent-color อย่างเดียว ซึ่งเบราว์เซอร์ยังวาดวงกลมพื้นขาว/เทาให้
-   พอวางบนพื้นดำเลยดูเป็นสีเทาจางๆ ไม่เข้ากับธีม และดูไม่ออกว่าเลือกอันไหน
-   จึงปิดการวาดของเบราว์เซอร์ด้วย appearance:none แล้ววาดเองทั้งหมด */
+   2 ปัญหาที่ต้องแก้พร้อมกัน:
+   1) accent-color อย่างเดียวไม่พอ เบราว์เซอร์ยังวาดวงกลมพื้นขาวของตัวเองอยู่
+      → ปิดด้วย appearance:none แล้ววาดเองทั้งหมด
+   2) Tailwind preflight ตั้ง `*,::before,::after { border: 0 solid #e5e7eb }`
+      คือกำหนดสีขอบเริ่มต้นเป็นเทาเกือบขาวให้ทุก element
+      ถ้าเราใส่สีทองแบบโปร่งแสงมากๆ สีขาวจะเด่นกว่าจนเห็นเป็นขอบขาว
+      → ใส่ค่าสีตรงๆ ไม่ใช้ตัวแปรโปร่งแสง และระบุ border-color ซ้ำให้ชัด
+
+   ใช้สีทองเป็นสีของสิ่งที่ถูกเลือก ให้ตรงกับปุ่มหลักและโลโก้ของร้าน */
 .led-radio,
 .led-check {
   appearance: none;
@@ -1175,8 +1181,12 @@ pre { white-space: pre-wrap; word-break: break-word; }
   height: 18px;
   flex-shrink: 0;
   margin: 0;
-  background: rgba(0, 207, 255, 0.04);
-  border: 1.5px solid var(--cyan-border);
+  padding: 0;
+  background: rgba(212, 175, 55, 0.06);
+  border: 1.5px solid rgba(212, 175, 55, 0.55);
+  border-color: rgba(212, 175, 55, 0.55);
+  outline: none;
+  box-shadow: none;
   cursor: pointer;
   display: grid;
   place-content: center;
@@ -1187,7 +1197,10 @@ pre { white-space: pre-wrap; word-break: break-word; }
 .led-check { border-radius: 5px; }
 
 .led-radio:hover,
-.led-check:hover { border-color: var(--cyan); background: var(--cyan-dim); }
+.led-check:hover {
+  border-color: #D4AF37;
+  background: rgba(212, 175, 55, 0.14);
+}
 
 /* จุดกลางของ radio — ใช้ scale เพื่อให้มีจังหวะตอนกด ไม่ใช่โผล่มาดื้อๆ */
 .led-radio::before {
@@ -1195,17 +1208,19 @@ pre { white-space: pre-wrap; word-break: break-word; }
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  background: var(--cyan);
+  background: #FFD700;
   transform: scale(0);
   transition: transform .15s cubic-bezier(.2, .9, .3, 1.4);
 }
 .led-radio:checked::before { transform: scale(1); }
 
+/* ตอนเลือกแล้วใช้ "เรืองแสงนุ่มๆ" อย่างเดียว ไม่ใส่วงแหวนทึบซ้อนอีกชั้น
+   เพราะวงแหวนซ้อนจะอ่านเป็นขอบที่สองซึ่งดูรก */
 .led-radio:checked,
 .led-check:checked {
-  border-color: var(--cyan);
-  background: rgba(0, 207, 255, 0.12);
-  box-shadow: 0 0 0 3px rgba(0, 207, 255, 0.12), 0 0 12px var(--cyan-glow);
+  border-color: #D4AF37;
+  background: rgba(212, 175, 55, 0.16);
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.45);
 }
 
 /* เครื่องหมายถูกของ checkbox วาดด้วย clip-path ไม่ต้องใช้ไอคอนหรือรูป */
@@ -1213,17 +1228,17 @@ pre { white-space: pre-wrap; word-break: break-word; }
   content: "";
   width: 11px;
   height: 11px;
-  background: var(--cyan);
+  background: #FFD700;
   transform: scale(0);
   transition: transform .15s cubic-bezier(.2, .9, .3, 1.4);
   clip-path: polygon(14% 44%, 0 65%, 40% 100%, 100% 16%, 82% 0%, 37% 70%);
 }
 .led-check:checked::before { transform: scale(1); }
 
-/* กดคีย์บอร์ด Tab มาต้องเห็นว่าอยู่ตรงไหน */
+/* กดคีย์บอร์ด Tab มาต้องเห็นว่าอยู่ตรงไหน (คลิกเมาส์จะไม่ขึ้น) */
 .led-radio:focus-visible,
 .led-check:focus-visible {
-  outline: 2px solid var(--cyan);
+  outline: 2px solid #E8C040;
   outline-offset: 2px;
 }
 

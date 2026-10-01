@@ -214,7 +214,7 @@ export default function RegisterPage() {
                   />
                   <span
                     className={`text-xs capitalize transition-colors ${
-                      formData.gender === g ? "text-[#00CFFF] font-semibold" : "text-[#7A9AB8]"
+                      formData.gender === g ? "text-[#E8C040] font-semibold" : "text-[#7A9AB8]"
                     }`}
                   >
                     {g}
