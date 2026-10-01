@@ -210,7 +210,7 @@ export default function RegisterPage() {
                   <input
                     type="radio" name="gender" value={g}
                     checked={formData.gender === g} onChange={handleChange}
-                    className="led-radio border-[rgba(0,207,255,0.2)] focus:border-[rgba(0,207,255,0.6)] outline-none transition-colors"
+                    className="led-radio"
                   />
                   <span
                     className={`text-xs capitalize transition-colors ${

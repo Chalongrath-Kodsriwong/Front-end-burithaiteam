@@ -1168,7 +1168,7 @@ export default function DesignPage() {
                           value={option}
                           checked={zoomMode === option}
                           onChange={() => setZoomMode(option)}
-                          className="h-3 w-3"
+                          className="led-radio"
                         />
                         <span>{option === "fit" ? "Fit" : `${option}%`}</span>
                       </label>

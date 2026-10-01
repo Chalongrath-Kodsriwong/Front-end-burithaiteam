@@ -125,7 +125,7 @@ export default function TopicMenu({ setSelectedCategory, onClose }: TopicMenuPro
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
-                  className="accent-yellow-500"
+                  className="led-check"
                   checked={selectedQuality === "new"}
                   onChange={(e) => handleQualityChange("new", e.target.checked)}
                 />
@@ -134,7 +134,7 @@ export default function TopicMenu({ setSelectedCategory, onClose }: TopicMenuPro
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
-                  className="accent-yellow-500"
+                  className="led-check"
                   checked={selectedQuality === "used"}
                   onChange={(e) => handleQualityChange("used", e.target.checked)}
                 />

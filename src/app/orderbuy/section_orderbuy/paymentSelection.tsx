@@ -24,6 +24,7 @@ export default function PaymentSelection({ onSelect }: any) {
             <input
               type="radio"
               name="payment"
+              className="led-radio"
               checked={selected === pm.id}
               onChange={() => {
                 setSelected(pm.id);

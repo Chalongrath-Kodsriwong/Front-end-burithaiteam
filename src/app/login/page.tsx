@@ -333,7 +333,7 @@ export default function LoginPage() {
                   setRememberMe(e.target.checked);
                   if (!e.target.checked && typeof window !== "undefined") window.localStorage.removeItem(REMEMBER_KEY);
                 }}
-                className="w-4 h-4 rounded border border-[rgba(0,207,255,0.3)] bg-[rgba(0,207,255,0.05)] accent-[#00CFFF]"
+                className="led-check"
               />
               <span className="text-xs text-[#5A7A98]">Remember me?</span>
             </label>

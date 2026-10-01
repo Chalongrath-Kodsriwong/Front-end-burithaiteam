@@ -352,6 +352,7 @@ export default function EditAddress({ user }: { user: any }) {
                       <input
                         type="radio"
                         name="address"
+                        className="led-radio mt-0.5"
                         checked={selectedId === addr.id_address}
                         onChange={() => {
                           setSelectedId(addr.id_address);
@@ -474,7 +475,7 @@ export default function EditAddress({ user }: { user: any }) {
                         name="selectedAddressDesktop"
                         checked={isSelected}
                         onChange={() => selectAddress(addr.id_address, true)}
-                        className="mt-1"
+                        className="led-radio mt-1"
                       />
                       <div className="flex-1">{formatAddress(addr)}</div>
                     </label>
