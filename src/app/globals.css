@@ -1162,3 +1162,74 @@ pre { white-space: pre-wrap; word-break: break-word; }
   .product-stock-band--pre,
   .product-stock-band__dot { animation: none; }
 }
+
+/* ─── Radio / Checkbox ของฟอร์มในธีมมืด ───────────────────────────────
+   เดิมใช้ accent-color อย่างเดียว ซึ่งเบราว์เซอร์ยังวาดวงกลมพื้นขาว/เทาให้
+   พอวางบนพื้นดำเลยดูเป็นสีเทาจางๆ ไม่เข้ากับธีม และดูไม่ออกว่าเลือกอันไหน
+   จึงปิดการวาดของเบราว์เซอร์ด้วย appearance:none แล้ววาดเองทั้งหมด */
+.led-radio,
+.led-check {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  margin: 0;
+  background: rgba(0, 207, 255, 0.04);
+  border: 1.5px solid var(--cyan-border);
+  cursor: pointer;
+  display: grid;
+  place-content: center;
+  transition: border-color .15s ease, background .15s ease, box-shadow .15s ease;
+}
+
+.led-radio { border-radius: 50%; }
+.led-check { border-radius: 5px; }
+
+.led-radio:hover,
+.led-check:hover { border-color: var(--cyan); background: var(--cyan-dim); }
+
+/* จุดกลางของ radio — ใช้ scale เพื่อให้มีจังหวะตอนกด ไม่ใช่โผล่มาดื้อๆ */
+.led-radio::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--cyan);
+  transform: scale(0);
+  transition: transform .15s cubic-bezier(.2, .9, .3, 1.4);
+}
+.led-radio:checked::before { transform: scale(1); }
+
+.led-radio:checked,
+.led-check:checked {
+  border-color: var(--cyan);
+  background: rgba(0, 207, 255, 0.12);
+  box-shadow: 0 0 0 3px rgba(0, 207, 255, 0.12), 0 0 12px var(--cyan-glow);
+}
+
+/* เครื่องหมายถูกของ checkbox วาดด้วย clip-path ไม่ต้องใช้ไอคอนหรือรูป */
+.led-check::before {
+  content: "";
+  width: 11px;
+  height: 11px;
+  background: var(--cyan);
+  transform: scale(0);
+  transition: transform .15s cubic-bezier(.2, .9, .3, 1.4);
+  clip-path: polygon(14% 44%, 0 65%, 40% 100%, 100% 16%, 82% 0%, 37% 70%);
+}
+.led-check:checked::before { transform: scale(1); }
+
+/* กดคีย์บอร์ด Tab มาต้องเห็นว่าอยู่ตรงไหน */
+.led-radio:focus-visible,
+.led-check:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+}
+
+/* สถานะกรอกไม่ครบ ให้เป็นสีแดงเหมือนช่องอื่นในฟอร์ม */
+.led-check.is-error { border-color: #ef4444; }
+
+@media (prefers-reduced-motion: reduce) {
+  .led-radio, .led-check, .led-radio::before, .led-check::before { transition: none; }
+}

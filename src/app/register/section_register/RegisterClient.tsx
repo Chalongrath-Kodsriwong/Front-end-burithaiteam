@@ -210,9 +210,15 @@ export default function RegisterPage() {
                   <input
                     type="radio" name="gender" value={g}
                     checked={formData.gender === g} onChange={handleChange}
-                    className="w-4 h-4 accent-[#00CFFF] border border-[rgba(0,207,255,0.3)]"
+                    className="led-radio"
                   />
-                  <span className="text-xs text-[#7A9AB8] capitalize">{g}</span>
+                  <span
+                    className={`text-xs capitalize transition-colors ${
+                      formData.gender === g ? "text-[#00CFFF] font-semibold" : "text-[#7A9AB8]"
+                    }`}
+                  >
+                    {g}
+                  </span>
                 </label>
               ))}
             </div>
@@ -224,7 +230,7 @@ export default function RegisterPage() {
             <input
               id="terms" name="terms" type="checkbox"
               checked={formData.terms} onChange={handleChange}
-              className={`w-4 h-4 mt-0.5 rounded border accent-[#00CFFF] ${errors.terms && submitted ? "border-red-500" : "border-[rgba(0,207,255,0.3)]"}`}
+              className={`led-check mt-0.5 ${errors.terms && submitted ? "is-error" : ""}`}
             />
             <label htmlFor="terms" className="text-xs text-[#5A7A98] leading-relaxed cursor-pointer">
               I agree with the{" "}
