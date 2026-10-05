@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import ProductDetailClient from "./ProductDetailClient";
+import { buildProductJsonLd } from "@/lib/productJsonLd";
 
 export const dynamic = "force-dynamic";
 
@@ -162,5 +163,21 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function ProductDetailPage({ params }: PageProps) {
   const { id } = await params;
-  return <ProductDetailClient id={id} />;
+
+  // ใช้ตัวดึงข้อมูลตัวเดียวกับที่ metadata ใช้ Next จะรวบ request ให้เอง
+  // ไม่ได้ยิง backend เพิ่มอีกรอบ
+  const product = await fetchProductForMetadata(id);
+  const jsonLd = product ? buildProductJsonLd(product, id) : null;
+
+  return (
+    <>
+      {jsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      )}
+      <ProductDetailClient id={id} />
+    </>
+  );
 }

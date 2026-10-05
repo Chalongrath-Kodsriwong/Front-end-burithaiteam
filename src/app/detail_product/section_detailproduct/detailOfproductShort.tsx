@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter, useParams, useSearchParams } from "next/navigation";
+import LineConsultButton from "@/app/components/LineConsultButton";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Heart, Share2, Copy, Check } from "lucide-react";
 import { FaFacebook, FaInstagram, FaWeixin } from "react-icons/fa";
@@ -449,6 +450,10 @@ export default function DetailOfProductShort({ product }: any) {
             </button>
           </div>
         )}
+
+        {/* ช่างมักถามว่าใช้กับงานที่มีอยู่ได้มั้ยก่อนตัดสินใจ วางไว้ใต้ปุ่มซื้อ
+            เพื่อไม่ให้แย่งความสนใจจากการกดซื้อ แต่ยังอยู่ในสายตา */}
+        <LineConsultButton productName={product?.name} />
 
         {/* ของหมดแต่เปิดสั่งจอง และยังไม่ได้เลือกตัวเลือก — ชวนให้เลือกก่อน */}
         {!hasSelection && outOfStock && preorderAvailable && (
