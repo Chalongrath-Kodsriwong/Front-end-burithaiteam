@@ -1,14 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isProtectedPath } from "@/app/utils/protectedRoutes";
 
 export function middleware(req: NextRequest) {
   const token = req.cookies.get("token")?.value;
   const { pathname, search } = req.nextUrl;
 
-  const protectedRoutes = ["/wishlist", "/whishlist", "/shoppingcart"];
-
-  const isProtected = protectedRoutes.some((route) =>
-    pathname.startsWith(route)
-  );
+  const isProtected = isProtectedPath(pathname);
 
   // 🔐 ยังไม่ได้ login แต่พยายามเข้า protected page
   if (isProtected && !token) {
@@ -27,10 +24,25 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
+  // ⚠️ ต้องตรงกับ PROTECTED_ROUTES ใน utils/protectedRoutes.ts
+  // Next.js อ่าน matcher ตอน build จึงใส่ตัวแปรไม่ได้ ต้องเขียนซ้ำเป็นข้อความ
   matcher: [
+    "/wishlist",
     "/wishlist/:path*",
+    "/whishlist",
     "/whishlist/:path*",
+    "/shoppingcart",
     "/shoppingcart/:path*",
+    "/check_order",
+    "/check_order/:path*",
+    "/history_payment",
+    "/history_payment/:path*",
+    "/setting_menu",
+    "/setting_menu/:path*",
+    "/orderbuy",
+    "/orderbuy/:path*",
+    "/payment",
+    "/payment/:path*",
     "/login",
     "/login/:path*",
   ],
