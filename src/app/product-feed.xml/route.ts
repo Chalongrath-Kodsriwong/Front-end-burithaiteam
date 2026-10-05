@@ -4,6 +4,7 @@ import {
   fetchPublishedProducts,
   priceRange,
   productUrl,
+  stockState,
 } from "@/lib/catalog";
 
 /**
@@ -43,11 +44,7 @@ export async function GET() {
       // ปล่อยให้ติดอยู่ในระบบแบบ "ไม่อนุมัติ" จะกลายเป็นขยะที่ไม่มีใครตามเก็บ
       if (!range || !image) return null;
 
-      const available =
-        product.availability?.status === "in_stock" ||
-        product.availability?.canBuyNow === true;
-
-      const preorder = product.availability?.canPreorder === true;
+      const { inStock: available, canPreorder: preorder } = stockState(product);
 
       return `    <item>
       <g:id>BTT-${product.id_products}</g:id>

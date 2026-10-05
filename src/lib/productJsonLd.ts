@@ -1,4 +1,4 @@
-import { SITE_URL, coverImage, priceRange, type CatalogProduct } from "./catalog";
+import { SITE_URL, coverImage, priceRange, stockState, type CatalogProduct } from "./catalog";
 
 /**
  * สร้างข้อมูลสินค้าในรูปแบบที่ Google อ่านได้ (schema.org/Product)
@@ -15,11 +15,7 @@ export function buildProductJsonLd(product: CatalogProduct, id: string | number)
   const image = coverImage(product);
   const url = `${SITE_URL}/detail_product/${id}`;
 
-  const inStock =
-    product.availability?.status === "in_stock" ||
-    product.availability?.canBuyNow === true;
-
-  const canPreorder = product.availability?.canPreorder === true;
+  const { inStock, canPreorder } = stockState(product);
 
   const availability = inStock
     ? "https://schema.org/InStock"
