@@ -1,6 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isProtectedPath } from "@/app/utils/protectedRoutes";
 
+/**
+ * ⚠️ ไฟล์นี้ต้องอยู่ที่ src/middleware.ts เท่านั้น
+ *
+ * โปรเจกต์นี้ใช้โฟลเดอร์ src/ (มี src/app) Next.js จึงมองหา middleware ที่ src/
+ * ถ้าวางไว้ที่รากโปรเจกต์ มันจะ **ไม่ error ไม่เตือน แต่ไม่ทำงานเลย**
+ * build ผ่านปกติ middleware-manifest.json ขึ้นว่า "middleware": {} แล้วเงียบ
+ *
+ * ของเดิมวางผิดที่มาตลอด หน้า wishlist / shoppingcart จึงไม่เคยถูกกันจริง
+ * ทั้งที่โค้ดเขียนไว้ถูกแล้ว (เจอ 5 ต.ค. 2026)
+ */
+
 export function middleware(req: NextRequest) {
   const token = req.cookies.get("token")?.value;
   const { pathname, search } = req.nextUrl;
